@@ -19,7 +19,7 @@
 </head>
 <body>
 
-  <div id="loading">Veriler ve canlı fiyatlar yükleniyor... Lütfen bekleyin.</div>
+  <div id="loading">Veriler yükleniyor... Lütfen bekleyin. (Bot yeni çalıştıysa birkaç saniye sürebilir)</div>
 
   <div class="split-table-container" id="tables-container" style="display: none;">
     <!-- SOL TABLO: AYLIK TEMETTÜ GİRİLECEK -->
@@ -44,12 +44,7 @@
       <thead>
         <tr><th colspan="6" class="table2-header">LOT GİRİLECEK</th></tr>
         <tr>
-          <th class="table2-header">HİSSE</th>
-          <th class="table2-header">FİYAT</th>
-          <th class="table2-header">TEMETTÜ</th>
-          <th class="table2-header">LOT</th>
-          <th class="table2-header">MALİYET</th>
-          <th class="table2-header">AYLIK TEMETTÜ</th>
+          <th class="table2-header">HİSSE</th><th class="table2-header">FİYAT</th><th class="table2-header">TEMETTÜ</th><th class="table2-header">LOT</th><th class="table2-header">MALİYET</th><th class="table2-header">AYLIK TEMETTÜ</th>
         </tr>
       </thead>
       <tbody id="sag-body"></tbody>
@@ -65,81 +60,48 @@
   </div>
 
   <script>
-    let hisseVerileri = {}; // Her hisse için fiyat ve temettü bilgisini tutacak
-    let hisseListesi = []; // Dinamik olarak temettüsü olan hisse kodlarını tutacak
+    let hisseVerileri = {}; 
+    let hisseListesi = []; 
 
-    // Sayfa açıldığında çalışacak ana fonksiyon
     async function baslat() {
       try {
-        // 1. Python botumuzun ürettiği temettü JSON dosyasını okuyoruz
-        const temettuRes = await fetch('temettu_veri.json');
-        const temettuData = temettuRes.ok ? await temettuRes.json() : {};
+        const temettuRes = await fetch('temettu_veri.json?t=' + new Date().getTime());
+        if (!temettuRes.ok) throw new Error("JSON henüz oluşmadı");
+        const temettuData = await temettuRes.json();
 
-        // 2. Anlık (Canlı) hisse fiyatlarını TradingView API'sinden çekiyoruz
-        const tvPayload = {
-          "columns": ["name", "close"],
-          "filter": [{"left": "type", "operation": "in_range", "right": ["stock"]}],
-          "range": [0, 1500]
-        };
-        const tvRes = await fetch('https://scanner.tradingview.com/turkey/scan', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(tvPayload)
-        });
-        const tvData = tvRes.ok ? await tvRes.json() : { data: [] };
-        
-        // Gelen canlı fiyatları bir sözlüğe (map) çeviriyoruz
-        const fiyatMap = {};
-        if (tvData.data) {
-          tvData.data.forEach(item => {
-            const kod = item.d[0].replace('BIST:', ''); // Kod adını temizle (FROTO gibi)
-            const fiyat = parseFloat(item.d[1]) || 0;
-            fiyatMap[kod] = fiyat;
-          });
-        }
-
-        // 3. Temettü verisi olan hisseler ile canlı fiyatları eşleştiriyoruz
         for (const [kod, detay] of Object.entries(temettuData)) {
           if (detay.hisse_basi_tl > 0) {
             hisseVerileri[kod] = {
               temettu: detay.hisse_basi_tl,
-              fiyat: fiyatMap[kod] || 0 // TradingView'de fiyatı yoksa 0 ata
+              fiyat: detay.fiyat || 0 
             };
             hisseListesi.push(kod);
           }
         }
         
-        // Hisseleri A-Z alfabetik sıraya diz
         hisseListesi.sort();
         
-        // Yükleme ekranını gizle ve tabloları çiz
         document.getElementById('loading').style.display = 'none';
         document.getElementById('tables-container').style.display = 'flex';
         
         tablolariCiz();
       } catch (e) {
-        console.error("Veriler yüklenirken hata oluştu:", e);
-        document.getElementById('loading').innerText = "Veriler yüklenirken bir hata oluştu. Lütfen sayfayı yenileyin.";
+        console.error("Hata:", e);
+        document.getElementById('loading').innerText = "GitHub Actions botunun çalışması bekleniyor. Lütfen 'Actions' sekmesinden botu manuel tetikleyip 2-3 dakika sonra sayfayı yenileyin.";
       }
     }
 
-    // Sayıları Türk Lirası formatında gösterme aracı
-    function formatTL(num) {
-      return num.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    }
+    function formatTL(num) { return num.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 
-    // Hisseleri tablolara basan fonksiyon
     function tablolariCiz() {
       const solBody = document.getElementById('sol-body');
       const sagBody = document.getElementById('sag-body');
-      solBody.innerHTML = '';
-      sagBody.innerHTML = '';
+      solBody.innerHTML = ''; sagBody.innerHTML = '';
 
       hisseListesi.forEach((hisse) => {
         const fiyat = hisseVerileri[hisse].fiyat;
         const temettu = hisseVerileri[hisse].temettu;
 
-        // SOL TABLO SATIRI
         const trSol = document.createElement('tr');
         trSol.innerHTML = `
           <td class="text-left">${hisse}</td>
@@ -147,11 +109,10 @@
           <td>${formatTL(temettu)}</td>
           <td id="sol_lot_${hisse}">0,00</td>
           <td id="sol_maliyet_${hisse}">0,00 TL</td>
-          <td><input type="number" class="edit-input" id="sol_aylik_${hisse}" value="1000" oninput="hesaplaSol()"></td>
+          <td><input type="number" class="edit-input" id="sol_aylik_${hisse}" placeholder="0" oninput="hesaplaSol()"></td>
         `;
         solBody.appendChild(trSol);
 
-        // SAĞ TABLO SATIRI
         const trSag = document.createElement('tr');
         trSag.innerHTML = `
           <td class="text-left">${hisse}</td>
@@ -164,72 +125,53 @@
         sagBody.appendChild(trSag);
       });
 
-      hesaplaSol();
-      hesaplaSag();
+      hesaplaSol(); hesaplaSag();
     }
 
-    // SOL Tablo (Aylık hedefe göre lot ve maliyet) hesaplamaları
     function hesaplaSol() {
-      let toplamMaliyet = 0;
-      let toplamAylik = 0;
-
+      let toplamMaliyet = 0, toplamAylik = 0;
       hisseListesi.forEach((hisse) => {
         const fiyat = hisseVerileri[hisse].fiyat;
         const temettu = hisseVerileri[hisse].temettu;
-        const aylikHedefInput = document.getElementById(`sol_aylik_${hisse}`);
-        const aylikHedef = parseFloat(aylikHedefInput.value) || 0;
+        const aylikHedef = parseFloat(document.getElementById(`sol_aylik_${hisse}`).value) || 0;
         
         if (aylikHedef > 0 && temettu > 0 && fiyat > 0) {
-          const yillikHedef = aylikHedef * 12;
-          const lot = yillikHedef / temettu;
+          const lot = (aylikHedef * 12) / temettu;
           const maliyet = lot * fiyat;
-
           document.getElementById(`sol_lot_${hisse}`).innerText = formatTL(lot);
           document.getElementById(`sol_maliyet_${hisse}`).innerText = formatTL(maliyet) + " TL";
-
-          toplamMaliyet += maliyet;
-          toplamAylik += aylikHedef;
+          toplamMaliyet += maliyet; toplamAylik += aylikHedef;
         } else {
           document.getElementById(`sol_lot_${hisse}`).innerText = "0,00";
           document.getElementById(`sol_maliyet_${hisse}`).innerText = "0,00 TL";
         }
       });
-
       document.getElementById('sol-toplam-maliyet').innerText = formatTL(toplamMaliyet) + " TL";
       document.getElementById('sol-toplam-aylik').innerText = formatTL(toplamAylik) + " TL";
     }
 
-    // SAĞ Tablo (Lota göre aylık temettü ve maliyet) hesaplamaları
     function hesaplaSag() {
-      let toplamMaliyet = 0;
-      let toplamAylik = 0;
-
+      let toplamMaliyet = 0, toplamAylik = 0;
       hisseListesi.forEach((hisse) => {
         const fiyat = hisseVerileri[hisse].fiyat;
         const temettu = hisseVerileri[hisse].temettu;
-        const lotInput = document.getElementById(`sag_lot_${hisse}`);
-        const lot = parseFloat(lotInput.value) || 0;
+        const lot = parseFloat(document.getElementById(`sag_lot_${hisse}`).value) || 0;
 
         if (lot > 0 && fiyat > 0) {
           const maliyet = lot * fiyat;
           const aylikTemettu = (lot * temettu) / 12;
-
           document.getElementById(`sag_maliyet_${hisse}`).innerText = formatTL(maliyet) + " TL";
           document.getElementById(`sag_aylik_${hisse}`).innerText = formatTL(aylikTemettu) + " TL";
-
-          toplamMaliyet += maliyet;
-          toplamAylik += aylikTemettu;
+          toplamMaliyet += maliyet; toplamAylik += aylikTemettu;
         } else {
           document.getElementById(`sag_maliyet_${hisse}`).innerText = "0,00 TL";
           document.getElementById(`sag_aylik_${hisse}`).innerText = "0,00 TL";
         }
       });
-
       document.getElementById('sag-toplam-maliyet').innerText = formatTL(toplamMaliyet) + " TL";
       document.getElementById('sag-toplam-aylik').innerText = formatTL(toplamAylik) + " TL";
     }
 
-    // Uygulamayı çalıştır
     baslat();
   </script>
 </body>
