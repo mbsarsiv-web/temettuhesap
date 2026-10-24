@@ -4,35 +4,189 @@
   <meta charset="UTF-8">
   <title>Temettü Hesaplama</title>
   <style>
-    body { font-family: Arial, sans-serif; background-color: #f4f7f5; margin: 20px; }
-    .split-table-container { display: flex; gap: 20px; width: 100%; overflow-x: auto; }
-    .split-table { background-color: white; border-collapse: collapse; flex: 1; min-width: 450px; font-size: 11px; text-align: center; }
-    .split-table th { background-color: #274e37; color: white; padding: 6px; border: 1px solid #ccc; font-weight: bold; }
-    .split-table td { padding: 4px; border: 1px solid #ccc; }
+    body { font-family: Arial, sans-serif; background-color: #f4f7f5; margin: 20px; color: #333; }
+    .split-table-container { display: flex; gap: 20px; width: 100%; overflow-x: auto; margin-bottom: 20px; }
+    .split-table { background-color: white; border-collapse: collapse; flex: 1; min-width: 500px; font-size: 12px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .split-table th { background-color: #274e37; color: white; padding: 8px; border: 1px solid #ccc; font-weight: bold; }
+    .split-table td { padding: 6px; border: 1px solid #ccc; vertical-align: middle; }
     .table2-header { background-color: #2b5797 !important; }
-    .edit-input { width: 70px; text-align: center; border: 1px solid #274e37; background-color: #ffffe0; font-weight: bold; }
+    .edit-input { width: 80px; text-align: center; border: 1px solid #ccc; background-color: #ffffe0; font-weight: bold; padding: 4px; border-radius: 3px; }
+    .edit-input:focus { outline: 2px solid #274e37; }
+    .text-left { text-align: left; padding-left: 10px !important; font-weight: bold; }
+    .summary-row td { font-weight: bold; background-color: #f9f9f9; }
+    .currency-row td { font-weight: bold; }
   </style>
 </head>
 <body>
+
   <div class="split-table-container">
-    <table class="split-table">
+    <!-- SOL TABLO: AYLIK TEMETTÜ GİRİLECEK -->
+    <table class="split-table" id="sol-tablo">
       <thead>
         <tr><th colspan="7">AYLIK TEMETTÜ GİRİLECEK</th></tr>
         <tr><th>HİSSE</th><th>Seç</th><th>FİYAT</th><th>TEMETTÜ</th><th>LOT</th><th>MALİYET</th><th>AYLIK TEMETTÜ</th></tr>
       </thead>
       <tbody id="sol-body"></tbody>
+      <tfoot>
+        <tr class="summary-row">
+          <td colspan="4" class="text-left">TÜRK LİRASI</td>
+          <td id="sol-toplam-lot">-</td>
+          <td id="sol-toplam-maliyet">0 TL</td>
+          <td id="sol-toplam-aylik">0 TL</td>
+        </tr>
+      </tfoot>
     </table>
 
-    <table class="split-table">
+    <!-- SAĞ TABLO: LOT GİRİLECEK -->
+    <table class="split-table" id="sag-tablo">
       <thead>
         <tr><th colspan="6" class="table2-header">LOT GİRİLECEK</th></tr>
-        <tr><th class="table2-header">HİSSE</th><th class="table2-header">FİYAT</th><th class="table2-header">TEMETTÜ</th><th class="table2-header">LOT</th><th class="table2-header">MALİYET</th><th class="table2-header">AYLIK TEMETTÜ</th></tr>
+        <tr>
+          <th class="table2-header">HİSSE</th>
+          <th class="table2-header">FİYAT</th>
+          <th class="table2-header">TEMETTÜ</th>
+          <th class="table2-header">LOT</th>
+          <th class="table2-header">MALİYET</th>
+          <th class="table2-header">AYLIK TEMETTÜ</th>
+        </tr>
       </thead>
       <tbody id="sag-body"></tbody>
+      <tfoot>
+        <tr class="summary-row">
+          <td colspan="3" class="text-left">TOPLAM (TL)</td>
+          <td id="sag-toplam-lot">-</td>
+          <td id="sag-toplam-maliyet">0 TL</td>
+          <td id="sag-toplam-aylik">0 TL</td>
+        </tr>
+      </tfoot>
     </table>
   </div>
+
   <script>
-    // Dinamik hesaplama ve JSON veri okuma fonksiyonları buraya eklenecektir.
+    // Görselinizdeki hisse portföy listesi
+    const hisseler = ["AKSA", "ANHYT", "AKCNS", "AVPGY", "AYGAZ", "BRYAT", "CCOLA", "CLEBI", "DOAS", "ECILC", "ECZYT", "EGPRO", "ENJSA", "ENKAI", "FROTO", "ISDMR", "ISMEN", "KCHOL", "LOGO", "NTGAZ", "NUHCM", "PAGYO", "SAHOL", "TOASO", "TTRAK", "TUPRS", "TRGYO", "VAKKO", "YGGYO"];
+    
+    // JSON verisi çekildiğinde buraya dolacak (Fiyat bilgisi İş Yatırım JSON'da yoksa manuel veya API ile eklenebilir. Şimdilik fiyatı 0, temettüyü JSON'dan alıyoruz)
+    let borsaVerisi = {}; 
+
+    // Sayfa yüklendiğinde verileri çek ve tabloları oluştur
+    async function baslat() {
+      try {
+        const response = await fetch('temettu_veri.json');
+        if (response.ok) borsaVerisi = await response.json();
+      } catch (e) {
+        console.log("JSON verisi henüz oluşturulmamış veya okunamadı.");
+      }
+      tablolariCiz();
+    }
+
+    function formatTL(num) {
+      return num.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function tablolariCiz() {
+      const solBody = document.getElementById('sol-body');
+      const sagBody = document.getElementById('sag-body');
+      solBody.innerHTML = '';
+      sagBody.innerHTML = '';
+
+      hisseler.forEach((hisse, index) => {
+        // İş Yatırım verisinde bu hisse varsa temettü oranını al, yoksa 0
+        const temettu = borsaVerisi[hisse] ? borsaVerisi[hisse].hisse_basi_tl : 0;
+        // Fiyat verisi ayrı bir API'den çekilebilir, şimdilik test amaçlı rastgele veya 100 kabul edilebilir. 
+        // (Not: İş Yatırım'dan güncel fiyat çekme betiğe eklenebilir, şimdilik 100 olarak sabitliyoruz ki matematik çalışsın)
+        const fiyat = 100; 
+
+        // SOL TABLO SATIRI
+        const trSol = document.createElement('tr');
+        trSol.innerHTML = `
+          <td class="text-left">${hisse}</td>
+          <td><input type="checkbox" id="sec_${index}" checked onchange="hesaplaSol()"></td>
+          <td>${formatTL(fiyat)}</td>
+          <td>${formatTL(temettu)}</td>
+          <td id="sol_lot_${index}">0</td>
+          <td id="sol_maliyet_${index}">0 TL</td>
+          <td><input type="number" class="edit-input" id="sol_aylik_${index}" value="1000" oninput="hesaplaSol()"></td>
+        `;
+        solBody.appendChild(trSol);
+
+        // SAĞ TABLO SATIRI
+        const trSag = document.createElement('tr');
+        trSag.innerHTML = `
+          <td class="text-left">${hisse}</td>
+          <td>${formatTL(fiyat)}</td>
+          <td>${formatTL(temettu)}</td>
+          <td><input type="number" class="edit-input" id="sag_lot_${index}" placeholder="0" oninput="hesaplaSag()"></td>
+          <td id="sag_maliyet_${index}">0 TL</td>
+          <td id="sag_aylik_${index}">0 TL</td>
+        `;
+        sagBody.appendChild(trSag);
+      });
+
+      hesaplaSol();
+      hesaplaSag();
+    }
+
+    // Sol Tablo Hesaplama (Aylık hedefe göre Lot ve Maliyet bulma)
+    function hesaplaSol() {
+      let toplamMaliyet = 0;
+      let toplamAylik = 0;
+
+      hisseler.forEach((hisse, index) => {
+        const secili = document.getElementById(`sec_${index}`).checked;
+        const temettu = borsaVerisi[hisse] ? borsaVerisi[hisse].hisse_basi_tl : 0;
+        const fiyat = 100; // API'den gelecek dinamik fiyat
+        const aylikHedefInput = document.getElementById(`sol_aylik_${index}`);
+        
+        aylikHedefInput.disabled = !secili;
+
+        if (secili && temettu > 0) {
+          const aylikHedef = parseFloat(aylikHedefInput.value) || 0;
+          const yillikHedef = aylikHedef * 12;
+          const lot = yillikHedef / temettu;
+          const maliyet = lot * fiyat;
+
+          document.getElementById(`sol_lot_${index}`).innerText = formatTL(lot);
+          document.getElementById(`sol_maliyet_${index}`).innerText = formatTL(maliyet) + " TL";
+
+          toplamMaliyet += maliyet;
+          toplamAylik += aylikHedef;
+        } else {
+          document.getElementById(`sol_lot_${index}`).innerText = "0";
+          document.getElementById(`sol_maliyet_${index}`).innerText = "0 TL";
+        }
+      });
+
+      document.getElementById('sol-toplam-maliyet').innerText = formatTL(toplamMaliyet) + " TL";
+      document.getElementById('sol-toplam-aylik').innerText = formatTL(toplamAylik) + " TL";
+    }
+
+    // Sağ Tablo Hesaplama (Girilen Lota göre Maliyet ve Aylık Temettü bulma)
+    function hesaplaSag() {
+      let toplamMaliyet = 0;
+      let toplamAylik = 0;
+
+      hisseler.forEach((hisse, index) => {
+        const temettu = borsaVerisi[hisse] ? borsaVerisi[hisse].hisse_basi_tl : 0;
+        const fiyat = 100; // API'den gelecek dinamik fiyat
+        const lot = parseFloat(document.getElementById(`sag_lot_${index}`).value) || 0;
+
+        const maliyet = lot * fiyat;
+        const aylikTemettu = (lot * temettu) / 12;
+
+        document.getElementById(`sag_maliyet_${index}`).innerText = formatTL(maliyet) + " TL";
+        document.getElementById(`sag_aylik_${index}`).innerText = formatTL(aylikTemettu) + " TL";
+
+        toplamMaliyet += maliyet;
+        toplamAylik += aylikTemettu;
+      });
+
+      document.getElementById('sag-toplam-maliyet').innerText = formatTL(toplamMaliyet) + " TL";
+      document.getElementById('sag-toplam-aylik').innerText = formatTL(toplamAylik) + " TL";
+    }
+
+    // Uygulamayı başlat
+    baslat();
   </script>
 </body>
 </html>
