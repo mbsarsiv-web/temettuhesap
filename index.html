@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Temettü Hesaplama</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #f4f7f5; margin: 20px; }
+    .split-table-container { display: flex; gap: 20px; width: 100%; overflow-x: auto; }
+    .split-table { background-color: white; border-collapse: collapse; flex: 1; min-width: 450px; font-size: 11px; text-align: center; }
+    .split-table th { background-color: #274e37; color: white; padding: 6px; border: 1px solid #ccc; font-weight: bold; }
+    .split-table td { padding: 4px; border: 1px solid #ccc; }
+    .table2-header { background-color: #2b5797 !important; }
+    .edit-input { width: 70px; text-align: center; border: 1px solid #274e37; background-color: #ffffe0; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="split-table-container">
+    <table class="split-table">
+      <thead>
+        <tr><th colspan="7">AYLIK TEMETTÜ GİRİLECEK</th></tr>
+        <tr><th>HİSSE</th><th>Seç</th><th>FİYAT</th><th>TEMETTÜ</th><th>LOT</th><th>MALİYET</th><th>AYLIK TEMETTÜ</th></tr>
+      </thead>
+      <tbody id="sol-body"></tbody>
+    </table>
+
+    <table class="split-table">
+      <thead>
+        <tr><th colspan="6" class="table2-header">LOT GİRİLECEK</th></tr>
+        <tr><th class="table2-header">HİSSE</th><th class="table2-header">FİYAT</th><th class="table2-header">TEMETTÜ</th><th class="table2-header">LOT</th><th class="table2-header">MALİYET</th><th class="table2-header">AYLIK TEMETTÜ</th></tr>
+      </thead>
+      <tbody id="sag-body"></tbody>
+    </table>
+  </div>
+  <script>
+    // Dinamik hesaplama ve JSON veri okuma fonksiyonları buraya eklenecektir.
+  </script>
+</body>
+</html>
