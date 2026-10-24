@@ -32,6 +32,8 @@ def format_tarih(val):
     s = str(val).strip()
     m = re.search(r'Date\(([-0-9]+)\)', s)
     if m: return time.strftime('%d.%m.%Y', time.gmtime(int(m.group(1))/1000))
+    m_iso = re.search(r'(\d{4})-(\d{2})-(\d{2})', s)
+    if m_iso: return f"{m_iso.group(3)}.{m_iso.group(2)}.{m_iso.group(1)}"
     return s
 
 def main():
@@ -75,17 +77,25 @@ def main():
                 if not kod or not tarih: continue
                 kod = str(kod).strip().upper()
 
-                nakit = 0.0
+                hisse_basi = 0.0
                 for k, v in satir.items():
                     k_upper = str(k).upper()
-                    if ("TEM" in k_upper and "TUTAR" in k_upper) or "NAKIT" in k_upper:
+                    # Oran (yüzdelik) verilerini dahil etme
+                    if "ORAN" in k_upper:
+                        continue
+                        
+                    # Temettü, Kar Payı vb. kelimeler içeren sütunlara bak
+                    if any(x in k_upper for x in ["NAKIT", "PAY", "BRUT", "NET", "TEMETTU", "KAR"]):
                         val = parse_turkce_sayi(v)
-                        if val > nakit: nakit = val
+                        # Toplam dağıtımı elemek için makul hisse başı aralığı (0 - 5000 TL)
+                        if 0 < val < 5000:
+                            if val > hisse_basi: 
+                                hisse_basi = val
                 
-                if nakit > 0:
+                if hisse_basi > 0:
                     if kod not in gecmis_veriler:
                         gecmis_veriler[kod] = []
-                    gecmis_veriler[kod].append({"tarih": tarih, "tutar": nakit})
+                    gecmis_veriler[kod].append({"tarih": tarih, "tutar": hisse_basi})
             
             for kod, liste in gecmis_veriler.items():
                 if kod in fiyatlar:
@@ -107,7 +117,7 @@ def main():
     sha = get_res.json().get('sha', '') if get_res.status_code == 200 else ""
     
     encoded = base64.b64encode(json.dumps(temettu_verileri, indent=4).encode('utf-8')).decode('utf-8')
-    data = {"message": "otomatik güncelleme: isyatirim api bypass", "content": encoded}
+    data = {"message": "otomatik güncelleme: hisse basi duzeltmesi", "content": encoded}
     if sha: data["sha"] = sha
     
     requests.put(api_url_gh, headers=auth_headers, json=data)
