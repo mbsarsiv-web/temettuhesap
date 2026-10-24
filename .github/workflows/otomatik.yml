@@ -2,7 +2,7 @@ name: Temettü Verisi Güncelleme
 
 on:
   schedule:
-    - cron: '0 4 * * *' # Her gün sabah saat 07:00'de (Türkiye saati ile) çalışır
+    - cron: '0 6 * * 0' # Her Pazar sabahı Türkiye saati ile 09:00'da çalışır
   workflow_dispatch: # Actions sekmesinden manuel çalıştırmaya izin verir
 
 permissions:
@@ -31,4 +31,4 @@ jobs:
           git config --global user.name "GitHub Actions Bot"
           git config --global user.email "actions@github.com"
           git add temettu_veri.json
-          git diff --quiet && git diff --staged --quiet || (git commit -m "otomatik güncelleme: temettü verileri" && git push)
+          git diff --quiet && git diff --staged --quiet || (git commit -m "otomatik güncelleme: pazar temettü verileri" && git push)
