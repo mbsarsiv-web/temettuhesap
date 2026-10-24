@@ -1,90 +1,116 @@
 import os
 import requests
 import json
-import time
 import base64
-from bs4 import BeautifulSoup
+import re
+import time
 
-# Şifre artık açıkta değil, GitHub Secrets kasasından çekiliyor
 GITHUB_TOKEN = os.environ.get("GH_TOKEN")
 REPO = "mbsarsiv-web/temettuhesap"
 
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-    "Accept-Language": "tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7",
-    "Cache-Control": "no-cache",
-    "Connection": "keep-alive"
-}
+def parse_turkce_sayi(val):
+    if not val: return 0.0
+    s = str(val).strip()
+    if ',' in s and '.' in s:
+        if s.rfind(',') > s.rfind('.'): s = s.replace('.', '').replace(',', '.')
+        else: s = s.replace(',', '')
+    elif ',' in s: s = s.replace(',', '.')
+    try: return float(s)
+    except ValueError: return 0.0
 
-def get_session():
-    s = requests.Session()
-    s.headers.update(HEADERS)
+def parse_date_score(val):
+    s = str(val).strip()
+    m = re.search(r'Date\(([-0-9]+)\)', s)
+    if m: return int(m.group(1)) // 1000
+    m_iso = re.search(r'(\d{4})-(\d{2})-(\d{2})', s)
+    if m_iso: return int(m_iso.group(1))*10000 + int(m_iso.group(2))*100 + int(m_iso.group(3))
+    m2 = re.search(r'(\d{2})[\./-](\d{2})[\./-](\d{4})', s)
+    if m2: return int(m2.group(3))*10000 + int(m2.group(2))*100 + int(m2.group(1))
+    return 0
+
+def format_tarih(val):
+    s = str(val).strip()
+    m = re.search(r'Date\(([-0-9]+)\)', s)
+    if m: return time.strftime('%d.%m.%Y', time.gmtime(int(m.group(1))/1000))
     return s
 
-def fetch_with_retry(session, url):
-    for attempt in range(1, 6):
-        try:
-            resp = session.get(url, timeout=15)
-            if resp.status_code == 200: return resp.text
-        except Exception: pass
-        time.sleep(2)
-    return None
-
 def main():
-    session = get_session()
-    
-    # 1. TradingView'den canlı fiyatlar
+    session = requests.Session()
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "Accept": "application/json",
+        "X-Requested-With": "XMLHttpRequest",
+        "Content-Type": "application/json; charset=utf-8"
+    }
+    session.headers.update(headers)
+
     tv_url = "https://scanner.tradingview.com/turkey/scan"
-    payload = {"columns": ["name", "close"], "filter": [{"left": "type", "operation": "in_range", "right": ["stock"]}], "range": [0, 1500]}
-    
+    payload_tv = {"columns": ["name", "close"], "filter": [{"left": "type", "operation": "in_range", "right": ["stock"]}], "range": [0, 1500]}
     try:
-        tv_res = requests.post(tv_url, json=payload, timeout=10).json()
+        tv_res = session.post(tv_url, json=payload_tv, timeout=10).json()
         fiyatlar = {item['d'][0].replace("BIST:", ""): item['d'][1] for item in tv_res['data']}
-    except Exception:
+    except:
         fiyatlar = {}
 
-    temettu_verileri = {}
+    api_url = "https://www.isyatirim.com.tr/_layouts/15/IsYatirim.Website/StockInfo/CompanyInfoAjax.aspx/GetSermayeArttirimlari"
+    payload_is = {"hisseKodu": "", "hisseTanimKodu": "04", "yil": 0, "zaman": "HEPSI", "endeksKodu": "09", "sektorKodu": ""}
     
-    # 2. İş Yatırım'dan Session taktiğiyle veri çekimi
-    for kod in fiyatlar.keys():
-        html = fetch_with_retry(session, f"https://www.isyatirim.com.tr/tr-tr/analiz/hisse/Sayfalar/sirket-karti.aspx?hisse={kod}")
-        if html:
-            soup = BeautifulSoup(html, 'html.parser')
-            ths = soup.find_all('th')
-            h_idx, t_idx = -1, -1
-            for i, th in enumerate(ths):
-                if 'Hisse Başı TL' in th.text: h_idx = i
-                if 'Dağ. Tarihi' in th.text: t_idx = i
+    temettu_verileri = {}
+    try:
+        res = session.post(api_url, json=payload_is, timeout=20)
+        if res.status_code == 200:
+            js = res.json()
+            data = js.get("value") or js.get("d") or js
+            if isinstance(data, str): data = json.loads(data)
+            
+            gecmis_veriler = {}
+            for satir in data:
+                kod = satir.get("SHHE_HS_KOD") or satir.get("HISSE_KODU") or ""
+                tarih = satir.get("SHHE_TARIH") or satir.get("TARIH") or ""
+                if not kod or not tarih:
+                    for k, v in satir.items():
+                        if not kod and "KOD" in str(k).upper(): kod = v
+                        if not tarih and "TARIH" in str(k).upper(): tarih = v
                 
-            if h_idx != -1 and t_idx != -1:
-                try:
-                    tr = ths[0].find_parent('table').find('tbody').find('tr')
-                    if tr:
-                        tds = tr.find_all('td')
-                        tarih = tds[t_idx].text.strip()
-                        hisse_basi = tds[h_idx].text.strip().replace(',', '.')
-                        if hisse_basi and hisse_basi != '-':
-                            temettu_verileri[kod] = {"tarih": tarih, "hisse_basi_tl": float(hisse_basi), "fiyat": fiyatlar[kod]}
-                except Exception: pass
-        time.sleep(0.5)
+                if not kod or not tarih: continue
+                kod = str(kod).strip().upper()
 
-    # 3. GitHub API ile doğrudan deponuza yazma
-    if not GITHUB_TOKEN:
-        print("HATA: GH_TOKEN bulunamadı.")
-        return
+                nakit = 0.0
+                for k, v in satir.items():
+                    k_upper = str(k).upper()
+                    if ("TEM" in k_upper and "TUTAR" in k_upper) or "NAKIT" in k_upper:
+                        val = parse_turkce_sayi(v)
+                        if val > nakit: nakit = val
+                
+                if nakit > 0:
+                    if kod not in gecmis_veriler:
+                        gecmis_veriler[kod] = []
+                    gecmis_veriler[kod].append({"tarih": tarih, "tutar": nakit})
+            
+            for kod, liste in gecmis_veriler.items():
+                if kod in fiyatlar:
+                    son_temettu = max(liste, key=lambda x: parse_date_score(x["tarih"]))
+                    temettu_verileri[kod] = {
+                        "tarih": format_tarih(son_temettu["tarih"]),
+                        "hisse_basi_tl": son_temettu["tutar"],
+                        "fiyat": fiyatlar[kod]
+                    }
+    except Exception as e:
+        pass
 
-    api_url = f"https://api.github.com/repos/{REPO}/contents/temettu_veri.json"
+    if not GITHUB_TOKEN: return
+
+    api_url_gh = f"https://api.github.com/repos/{REPO}/contents/temettu_veri.json"
     auth_headers = {"Authorization": f"Bearer {GITHUB_TOKEN}", "Accept": "application/vnd.github.v3+json"}
     
-    get_res = requests.get(api_url, headers=auth_headers)
+    get_res = requests.get(api_url_gh, headers=auth_headers)
     sha = get_res.json().get('sha', '') if get_res.status_code == 200 else ""
     
     encoded = base64.b64encode(json.dumps(temettu_verileri, indent=4).encode('utf-8')).decode('utf-8')
-    data = {"message": "otomatik güncelleme: session bypass", "content": encoded}
+    data = {"message": "otomatik güncelleme: isyatirim api bypass", "content": encoded}
     if sha: data["sha"] = sha
     
-    requests.put(api_url, headers=auth_headers, json=data)
+    requests.put(api_url_gh, headers=auth_headers, json=data)
 
 if __name__ == "__main__":
     main()
