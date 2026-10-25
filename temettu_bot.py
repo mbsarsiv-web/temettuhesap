@@ -1,140 +1,283 @@
 import os
-import requests
-import json
-import base64
+import sys
 import re
+import json
 import time
+import base64
+import requests
 
 GITHUB_TOKEN = os.environ.get("GH_TOKEN")
 REPO = "mbsarsiv-web/temettuhesap"
+DOSYA = "temettu_veri.json"
 
-def parse_turkce_sayi(val):
-    if val is None or str(val).strip() == "": return 0.0
-    if isinstance(val, (int, float)): return float(val)
-    s = str(val).strip()
-    if ',' in s and '.' in s:
-        if s.rfind(',') > s.rfind('.'): s = s.replace('.', '').replace(',', '.')
-        else: s = s.replace(',', '')
-    elif ',' in s: s = s.replace(',', '.')
-    try: return float(s)
-    except ValueError: return 0.0
+IS_URL = "https://www.isyatirim.com.tr/_layouts/15/IsYatirim.Website/StockInfo/CompanyInfoAjax.aspx/GetSermayeArttirimlari"
+IS_SAYFA = "https://www.isyatirim.com.tr/tr-tr/analiz/hisse/Sayfalar/Temettu-Ve-Sermaye-Artirimi-Tarihcesi.aspx"
+TV_URL = "https://scanner.tradingview.com/turkey/scan"
 
-def parse_date_int(val):
-    if not val: return 0
+
+def log(*a):
+    print(*a, flush=True)
+
+
+# ---------------------------------------------------------------- yardimcilar
+def tr_upper(s):
+    return str(s).replace("i", "İ").replace("ı", "I").upper().replace("İ", "I")
+
+
+def parse_sayi(val):
+    """'1,2345' / '1.234,56' / 1.5 / '0.4930' -> float"""
+    if val is None:
+        return 0.0
+    if isinstance(val, bool):
+        return 0.0
+    if isinstance(val, (int, float)):
+        return float(val)
+    s = str(val).strip().replace("%", "").replace("TL", "").replace(" ", "")
+    if s == "":
+        return 0.0
+    if "," in s and "." in s:
+        if s.rfind(",") > s.rfind("."):
+            s = s.replace(".", "").replace(",", ".")
+        else:
+            s = s.replace(",", "")
+    elif "," in s:
+        s = s.replace(",", ".")
+    try:
+        return float(s)
+    except ValueError:
+        return 0.0
+
+
+def parse_tarih(val):
+    """Her tur tarih bicimini (YYYYMMDD int, 'dd.mm.yyyy' str) dondurur. Bulamazsa (0, '')."""
+    if val is None:
+        return 0, ""
     s = str(val).strip()
-    m = re.search(r'Date\(([-0-9]+)\)', s)
-    if m: 
+    if not s:
+        return 0, ""
+
+    m = re.search(r"Date\((-?\d+)\)", s)
+    if m:
         t = time.gmtime(int(m.group(1)) // 1000)
-        return t.tm_year * 10000 + t.tm_mon * 100 + t.tm_mday
-    m_iso = re.search(r'(\d{4})-(\d{2})-(\d{2})', s)
-    if m_iso: return int(m_iso.group(1))*10000 + int(m_iso.group(2))*100 + int(m_iso.group(3))
-    m2 = re.search(r'(\d{2})[\./-](\d{2})[\./-](\d{4})', s)
-    if m2: return int(m2.group(3))*10000 + int(m2.group(2))*100 + int(m2.group(1))
-    return 0
+        return (t.tm_year * 10000 + t.tm_mon * 100 + t.tm_mday,
+                "%02d.%02d.%04d" % (t.tm_mday, t.tm_mon, t.tm_year))
 
-def format_tarih(val):
-    s = str(val).strip()
-    m = re.search(r'Date\(([-0-9]+)\)', s)
-    if m: return time.strftime('%d.%m.%Y', time.gmtime(int(m.group(1))/1000))
-    m_iso = re.search(r'(\d{4})-(\d{2})-(\d{2})', s)
-    if m_iso: return f"{m_iso.group(3)}.{m_iso.group(2)}.{m_iso.group(1)}"
-    return s
+    m = re.search(r"(\d{4})-(\d{2})-(\d{2})", s)
+    if m:
+        y, mo, d = int(m.group(1)), int(m.group(2)), int(m.group(3))
+        return y * 10000 + mo * 100 + d, "%02d.%02d.%04d" % (d, mo, y)
 
-def main():
-    session = requests.Session()
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-        "Accept": "application/json",
-        "X-Requested-With": "XMLHttpRequest",
-        "Content-Type": "application/json; charset=utf-8"
+    m = re.search(r"(\d{1,2})[./-](\d{1,2})[./-](\d{4})", s)
+    if m:
+        d, mo, y = int(m.group(1)), int(m.group(2)), int(m.group(3))
+        return y * 10000 + mo * 100 + d, "%02d.%02d.%04d" % (d, mo, y)
+
+    if re.fullmatch(r"\d{8}", s):
+        y, mo, d = int(s[:4]), int(s[4:6]), int(s[6:])
+        return y * 10000 + mo * 100 + d, "%02d.%02d.%04d" % (d, mo, y)
+
+    return 0, ""
+
+
+# ---------------------------------------------------------------- fiyatlar
+def fiyatlari_cek(session):
+    payload = {
+        "columns": ["name", "close"],
+        "filter": [{"left": "type", "operation": "in_range", "right": ["stock"]}],
+        "range": [0, 1500],
     }
-    session.headers.update(headers)
-
-    # 1. TradingView Fiyat Çekimi
-    tv_url = "https://scanner.tradingview.com/turkey/scan"
-    payload_tv = {"columns": ["name", "close"], "filter": [{"left": "type", "operation": "in_range", "right": ["stock"]}], "range": [0, 1500]}
     fiyatlar = {}
     try:
-        tv_res = session.post(tv_url, json=payload_tv, timeout=10).json()
-        if 'data' in tv_res:
-            fiyatlar = {item['d'][0].replace("BIST:", ""): item['d'][1] for item in tv_res['data']}
-    except Exception:
-        pass 
+        r = session.post(TV_URL, json=payload, timeout=20)
+        js = r.json()
+        for item in js.get("data", []):
+            kod = str(item["d"][0]).replace("BIST:", "").strip().upper()
+            fiyat = item["d"][1]
+            if fiyat:
+                fiyatlar[kod] = float(fiyat)
+        log("TradingView fiyat sayisi:", len(fiyatlar))
+    except Exception as e:
+        log("TradingView HATA:", repr(e))
+    return fiyatlar
 
-    # 2. İş Yatırım Veri Çekimi (endeksKodu: 09 zorunluluğu eklendi)
-    api_url = "https://www.isyatirim.com.tr/_layouts/15/IsYatirim.Website/StockInfo/CompanyInfoAjax.aspx/GetSermayeArttirimlari"
-    payload_is = {"hisseKodu": "", "hisseTanimKodu": "04", "yil": 0, "zaman": "HEPSI", "endeksKodu": "09", "sektorKodu": ""}
-    
-    temettu_verileri = {}
+
+# ---------------------------------------------------------------- is yatirim
+def is_yatirim_satirlari(session):
+    session.headers.update({
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                      "(KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+        "Accept": "application/json, text/javascript, */*; q=0.01",
+        "Accept-Language": "tr-TR,tr;q=0.9,en;q=0.8",
+        "Content-Type": "application/json; charset=UTF-8",
+        "X-Requested-With": "XMLHttpRequest",
+        "Origin": "https://www.isyatirim.com.tr",
+        "Referer": IS_SAYFA,
+    })
+
+    # Once sayfaya girip cerez al (bazi sunucular bunu ister)
     try:
-        res = session.post(api_url, json=payload_is, timeout=20)
-        if res.status_code == 200:
-            js = res.json()
-            data = js.get("value") or js.get("d") or js
-            if isinstance(data, str): data = json.loads(data)
-            
-            gecmis_veriler = {}
-            for satir in data:
-                kod = ""
-                tarih = ""
-                raw_hb = 0.0
-                raw_oran = 0.0
-                
-                # Arama ve eşleştirme motoru tamamen "Bitiş Kelimesine" (endswith) sabitlendi
-                for k, v in satir.items():
-                    ku = str(k).upper().replace('İ', 'I')
-                    if ku.endswith("HS_KOD") or ku.endswith("HISSE_KODU") or ku == "KOD":
-                        if not kod: kod = str(v)
-                    elif ku.endswith("TARIH"):
-                        if not tarih: tarih = str(v)
-                    elif ku.endswith("PAY_BASINA_BRUT_TEMETTU") or ku.endswith("HISSE_BASI_TL"):
-                        if raw_hb == 0.0: raw_hb = parse_turkce_sayi(v)
-                    elif ku.endswith("NAKIT_TEMETTU_ORANI") and not ku.endswith("NET_TEMETTU_ORANI"):
-                        if raw_oran == 0.0: raw_oran = parse_turkce_sayi(v)
-                
-                if not kod or not tarih: continue
-                kod = kod.strip().upper()
+        session.get(IS_SAYFA, timeout=20)
+    except Exception as e:
+        log("Sayfa on-yukleme uyarisi:", repr(e))
 
-                hb = raw_hb
-                # Eğer Hisse Başı Brüt boş gelirse, sadece Nakit Oranı 100'e bölerek yansıt (Tam İsabet)
-                if hb == 0.0 and raw_oran > 0:
-                    hb = raw_oran / 100.0
-                
-                if hb > 0:
-                    date_val = parse_date_int(tarih)
-                    if date_val > 0:
-                        if kod not in gecmis_veriler:
-                            gecmis_veriler[kod] = []
-                        gecmis_veriler[kod].append({"tarih": tarih, "date_val": date_val, "tutar": hb})
-            
-            for kod, liste in gecmis_veriler.items():
-                if len(fiyatlar) > 0 and kod not in fiyatlar: continue
-                
-                # Tarihe göre en güncel (En yüksek Date Int) veriyi al
-                son_temettu = max(liste, key=lambda x: x["date_val"])
-                
-                temettu_verileri[kod] = {
-                    "tarih": format_tarih(son_temettu["tarih"]),
-                    "hisse_basi_tl": round(son_temettu["tutar"], 4),
-                    "fiyat": fiyatlar.get(kod, 0.0)
-                }
-    except Exception:
-        pass
+    payload = {
+        "hisseKodu": "",
+        "hisseTanimKodu": "04",
+        "yil": 0,
+        "zaman": "HEPSI",
+        "endeksKodu": "09",
+        "sektorKodu": "",
+    }
 
-    # 3. GitHub Veri Gönderimi
-    if not GITHUB_TOKEN: return
+    r = session.post(IS_URL, json=payload, timeout=60)
+    log("Is Yatirim HTTP durum:", r.status_code)
+    if r.status_code != 200:
+        log("Yanit govdesi (ilk 500):", r.text[:500])
+        return []
 
-    api_url_gh = f"https://api.github.com/repos/{REPO}/contents/temettu_veri.json"
-    auth_headers = {"Authorization": f"Bearer {GITHUB_TOKEN}", "Accept": "application/vnd.github.v3+json"}
-    
-    get_res = requests.get(api_url_gh, headers=auth_headers)
-    sha = get_res.json().get('sha', '') if get_res.status_code == 200 else ""
-    
-    encoded = base64.b64encode(json.dumps(temettu_verileri, indent=4).encode('utf-8')).decode('utf-8')
-    data = {"message": "otomatik güncelleme: endeksKodu:09 zorunlulugu ve kesin sutun eslestirme", "content": encoded}
-    if sha: data["sha"] = sha
-    
-    requests.put(api_url_gh, headers=auth_headers, json=data)
+    js = r.json()
+    data = js
+    if isinstance(js, dict):
+        data = js.get("value") or js.get("d") or js
+    if isinstance(data, str):
+        data = json.loads(data)
+    if isinstance(data, dict):
+        # {"d": {"results": [...]}} gibi durumlar
+        for v in data.values():
+            if isinstance(v, list):
+                data = v
+                break
+    if not isinstance(data, list):
+        log("Beklenmeyen veri yapisi:", str(data)[:300])
+        return []
+
+    log("Is Yatirim ham satir sayisi:", len(data))
+    if data:
+        log("Ornek satir anahtarlari:", list(data[0].keys()))
+        log("Ornek satir:", json.dumps(data[0], ensure_ascii=False)[:600])
+    return data
+
+
+def satiri_coz(satir):
+    """Bir satirdan (kod, tarih_int, tarih_str, hisse_basi_brut_tl) cikarir."""
+    kod = ""
+    tarihler = []      # (anahtar, deger)
+    hb = 0.0           # hisse basi brut TL
+    oran = 0.0         # nakit temettu orani (% nominal)
+
+    for k, v in satir.items():
+        ku = tr_upper(k)
+
+        if not kod and (ku.endswith("HS_KOD") or ku.endswith("HISSE_KODU")
+                        or ku.endswith("HISSE_KOD") or ku == "KOD" or ku.endswith("_KOD")):
+            if isinstance(v, str) and v.strip():
+                kod = v.strip().upper()
+            continue
+
+        if "TARIH" in ku:
+            tarihler.append((ku, v))
+            continue
+
+        if hb == 0.0 and ("PAY_BASINA_BRUT_TEMETTU" in ku or ku.endswith("HISSE_BASI_TL")
+                          or ("BRUT" in ku and "TEMETTU" in ku and "ORAN" not in ku
+                              and "NET" not in ku and "TOPLAM" not in ku)):
+            hb = parse_sayi(v)
+            continue
+
+        if oran == 0.0 and ku.endswith("NAKIT_TEMETTU_ORANI") and "NET" not in ku:
+            oran = parse_sayi(v)
+
+    # Oncelik: key'i TARIH ile biten, sonra icinde TARIH gecen ilk gecerli tarih
+    tarihler.sort(key=lambda kv: (0 if kv[0].endswith("TARIH") else 1))
+    t_int, t_str = 0, ""
+    for _, v in tarihler:
+        ti, ts = parse_tarih(v)
+        if ti > 0:
+            t_int, t_str = ti, ts
+            break
+
+    if hb <= 0 and oran > 0:
+        hb = oran / 100.0      # nominal 1 TL uzerinden oran -> hisse basi TL
+
+    return kod, t_int, t_str, hb
+
+
+def temettuleri_hazirla(satirlar, fiyatlar):
+    gecmis = {}
+    for satir in satirlar:
+        if not isinstance(satir, dict):
+            continue
+        kod, t_int, t_str, hb = satiri_coz(satir)
+        if not kod or hb <= 0 or t_int <= 0:
+            continue
+        gecmis.setdefault(kod, []).append({"date_val": t_int, "tarih": t_str, "tutar": hb})
+
+    sonuc = {}
+    for kod, liste in gecmis.items():
+        if fiyatlar and kod not in fiyatlar:
+            continue
+        son = max(liste, key=lambda x: x["date_val"])
+        sonuc[kod] = {
+            "tarih": son["tarih"],
+            "hisse_basi_tl": round(son["tutar"], 4),
+            "fiyat": round(fiyatlar.get(kod, 0.0), 4),
+        }
+    return sonuc
+
+
+# ---------------------------------------------------------------- github
+def github_a_yaz(veri):
+    if not GITHUB_TOKEN:
+        log("GH_TOKEN yok, GitHub'a yazilamadi.")
+        return False
+
+    url = "https://api.github.com/repos/%s/contents/%s" % (REPO, DOSYA)
+    h = {"Authorization": "Bearer " + GITHUB_TOKEN, "Accept": "application/vnd.github+json"}
+
+    sha = ""
+    g = requests.get(url, headers=h, timeout=30)
+    if g.status_code == 200:
+        sha = g.json().get("sha", "")
+
+    icerik = json.dumps(veri, indent=2, ensure_ascii=False, sort_keys=True)
+    govde = {
+        "message": "otomatik guncelleme: %d hisse temettu verisi" % len(veri),
+        "content": base64.b64encode(icerik.encode("utf-8")).decode("utf-8"),
+    }
+    if sha:
+        govde["sha"] = sha
+
+    p = requests.put(url, headers=h, json=govde, timeout=30)
+    log("GitHub yazma durumu:", p.status_code)
+    if p.status_code not in (200, 201):
+        log(p.text[:500])
+        return False
+    return True
+
+
+# ---------------------------------------------------------------- ana akis
+def main():
+    session = requests.Session()
+    fiyatlar = fiyatlari_cek(session)
+
+    try:
+        satirlar = is_yatirim_satirlari(session)
+    except Exception as e:
+        log("Is Yatirim HATA:", repr(e))
+        satirlar = []
+
+    veri = temettuleri_hazirla(satirlar, fiyatlar)
+    log("Hazirlanan hisse sayisi:", len(veri))
+
+    if not veri:
+        # Bos veriyle mevcut dosyanin uzerine YAZMIYORUZ.
+        log("HATA: Hic temettu verisi uretilemedi. Mevcut JSON korunuyor.")
+        sys.exit(1)
+
+    if not github_a_yaz(veri):
+        sys.exit(1)
+    log("Tamamlandi.")
+
 
 if __name__ == "__main__":
     main()
