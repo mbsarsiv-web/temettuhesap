@@ -10,6 +10,7 @@ REPO = "mbsarsiv-web/temettuhesap"
 
 def parse_turkce_sayi(val):
     if not val: return 0.0
+    if isinstance(val, (int, float)): return float(val)
     s = str(val).strip()
     if ',' in s and '.' in s:
         if s.rfind(',') > s.rfind('.'): s = s.replace('.', '').replace(',', '.')
@@ -80,17 +81,25 @@ def main():
                 hisse_basi = 0.0
                 for k, v in satir.items():
                     k_upper = str(k).upper()
-                    # Oran (yüzdelik) verilerini dahil etme
-                    if "ORAN" in k_upper:
+                    
+                    # Bedelsiz veya bedelli oranlarını tamamen atla
+                    if "BEDELSIZ" in k_upper or "BEDELLI" in k_upper or "RUCHAN" in k_upper:
                         continue
                         
-                    # Temettü, Kar Payı vb. kelimeler içeren sütunlara bak
-                    if any(x in k_upper for x in ["NAKIT", "PAY", "BRUT", "NET", "TEMETTU", "KAR"]):
-                        val = parse_turkce_sayi(v)
-                        # Toplam dağıtımı elemek için makul hisse başı aralığı (0 - 5000 TL)
-                        if 0 < val < 5000:
-                            if val > hisse_basi: 
-                                hisse_basi = val
+                    val = parse_turkce_sayi(v)
+                    if val <= 0: continue
+
+                    # Eğer API doğrudan Pay/Hisse Başına değeri veriyorsa (örn: PAY_BASINA_BRUT_TEMETTU)
+                    if ("PAY" in k_upper or "HISSE" in k_upper) and ("TEMETTU" in k_upper or "NAKIT" in k_upper):
+                        if val > hisse_basi:
+                            hisse_basi = val
+                            
+                    # Eğer sadece Dağıtım Oranı veriliyorsa (örn: NAKIT_TEMETTU_ORANI)
+                    # BİST'te nominal 1 TL olduğu için Oran / 100 = Hisse Başı TL'dir.
+                    elif "ORAN" in k_upper and ("TEMETTU" in k_upper or "NAKIT" in k_upper):
+                        hb = val / 100.0
+                        if hb > hisse_basi:
+                            hisse_basi = hb
                 
                 if hisse_basi > 0:
                     if kod not in gecmis_veriler:
@@ -102,7 +111,7 @@ def main():
                     son_temettu = max(liste, key=lambda x: parse_date_score(x["tarih"]))
                     temettu_verileri[kod] = {
                         "tarih": format_tarih(son_temettu["tarih"]),
-                        "hisse_basi_tl": son_temettu["tutar"],
+                        "hisse_basi_tl": round(son_temettu["tutar"], 4),
                         "fiyat": fiyatlar[kod]
                     }
     except Exception as e:
@@ -117,7 +126,7 @@ def main():
     sha = get_res.json().get('sha', '') if get_res.status_code == 200 else ""
     
     encoded = base64.b64encode(json.dumps(temettu_verileri, indent=4).encode('utf-8')).decode('utf-8')
-    data = {"message": "otomatik güncelleme: hisse basi duzeltmesi", "content": encoded}
+    data = {"message": "otomatik güncelleme: hisse basi tam isabet", "content": encoded}
     if sha: data["sha"] = sha
     
     requests.put(api_url_gh, headers=auth_headers, json=data)
