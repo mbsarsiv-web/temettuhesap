@@ -16,6 +16,8 @@ YOGUNLUK_ESIGI = 0.7      # temettu yogunlugu bunun altindaysa hisse elenir (7/1
 MIN_DEGERLENDIRME_YILI = 1  # halka arzdan bu yana en az kac tamamlanmis yil gecmis olmali
 FIYAT_GECMISI_URL = ("https://www.isyatirim.com.tr/_layouts/15/Isyatirim.Website/Common/Data.aspx/HisseTekil"
                      "?hisse=%s&startdate=%s&enddate=%s")
+OTOMATIK_ZAMAN_ASIMI = 8     # sn: tek bir fiyat gecmisi istegi icin
+OTOMATIK_BUTCE_SN = 240      # sn: otomatik halka arz aramasi icin toplam ust sinir
 HALKA_ARZ_DOSYA = "halka_arz.json"  # {"KOD": halka_arz_yili} - yalnizca son 10 yildaki arzlar yeterli
 
 IS_URL = "https://www.isyatirim.com.tr/_layouts/15/IsYatirim.Website/StockInfo/CompanyInfoAjax.aspx/GetSermayeArttirimlari"
@@ -202,12 +204,27 @@ def satiri_coz(satir):
     return kod, t_int, t_str, hb
 
 
+_OTO = {"ardisik_hata": 0, "devre_disi": False, "baslangic": None}
+
+
 def ilk_islem_yili_bul(kod, baslangic_yili):
     """
     Is Yatirim gunluk fiyat gecmisinden hissenin ilk islem yilini bulur.
     baslangic_yili'ndan itibaren veri ister; ilk kayit o yildaysa hisse eskidir -> None.
     Ilk kayit daha sonraki bir yildaysa (halka arz) o yili dondurur. Veri alinamazsa None.
+
+    Koruma: kisa zaman asimi, ust uste hata olursa otomatik arama kapatilir,
+    toplam sure butcesi asilirsa da kapatilir (bot asla takilip kalmaz).
     """
+    if _OTO["devre_disi"]:
+        return None
+    if _OTO["baslangic"] is None:
+        _OTO["baslangic"] = time.time()
+    if time.time() - _OTO["baslangic"] > OTOMATIK_BUTCE_SN:
+        _OTO["devre_disi"] = True
+        log("Otomatik halka arz aramasi sure butcesi (%d sn) dolunca durduruldu." % OTOMATIK_BUTCE_SN)
+        return None
+
     bas = "01-01-%d" % baslangic_yili
     bit = time.strftime("%d-%m-%Y", time.gmtime())
     hdr = {
@@ -215,34 +232,49 @@ def ilk_islem_yili_bul(kod, baslangic_yili):
         "Accept": "application/json, text/plain, */*",
         "Referer": IS_SAYFA,
     }
+
+    def hata(mesaj):
+        _OTO["ardisik_hata"] += 1
+        if _OTO["ardisik_hata"] == 1:
+            log("Fiyat gecmisi uyarisi (%s): %s" % (kod, mesaj))
+        if _OTO["ardisik_hata"] >= 5:
+            _OTO["devre_disi"] = True
+            log("Ust uste %d hata: otomatik halka arz aramasi KAPATILDI. "
+                "Yeni arzlari halka_arz.json'a elle ekleyin." % _OTO["ardisik_hata"])
+
     for sembol in (kod + ".E", kod):
         try:
-            r = requests.get(FIYAT_GECMISI_URL % (sembol, bas, bit), headers=hdr, timeout=30)
-            if r.status_code != 200:
-                if not getattr(ilk_islem_yili_bul, "_uyardi", False):
-                    log("Fiyat gecmisi HTTP", r.status_code, r.text[:200])
-                    ilk_islem_yili_bul._uyardi = True
-                continue
-            js = r.json()
-            rows = js.get("value") if isinstance(js, dict) else js
-            if not rows:
-                continue
-            en_kucuk = 0
-            for row in rows:
-                for k, v in row.items():
-                    if "TARIH" in str(k).upper():
-                        ti, _ = parse_tarih(v)
-                        if ti > 0 and (en_kucuk == 0 or ti < en_kucuk):
-                            en_kucuk = ti
-                        break
-            if en_kucuk == 0:
-                continue
-            yil = en_kucuk // 10000
-            return yil if yil > baslangic_yili else None
+            r = requests.get(FIYAT_GECMISI_URL % (sembol, bas, bit), headers=hdr,
+                             timeout=OTOMATIK_ZAMAN_ASIMI)
         except Exception as e:
-            if not getattr(ilk_islem_yili_bul, "_uyardi", False):
-                log("Fiyat gecmisi HATA:", repr(e))
-                ilk_islem_yili_bul._uyardi = True
+            hata(repr(e))
+            return None
+        if r.status_code != 200:
+            hata("HTTP %s %s" % (r.status_code, r.text[:120]))
+            return None
+        try:
+            js = r.json()
+        except Exception as e:
+            hata("JSON okunamadi: " + repr(e))
+            return None
+
+        _OTO["ardisik_hata"] = 0
+        rows = js.get("value") if isinstance(js, dict) else js
+        if not rows:
+            continue   # diger sembol bicimini dene
+
+        en_kucuk = 0
+        for row in rows:
+            for k, v in row.items():
+                if "TARIH" in str(k).upper():
+                    ti, _ = parse_tarih(v)
+                    if ti > 0 and (en_kucuk == 0 or ti < en_kucuk):
+                        en_kucuk = ti
+                    break
+        if en_kucuk == 0:
+            continue
+        yil = en_kucuk // 10000
+        return yil if yil > baslangic_yili else None
     return None
 
 
