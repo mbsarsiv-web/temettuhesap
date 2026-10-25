@@ -175,39 +175,46 @@ def is_yatirim_satirlari(session):
         "Referer": IS_SAYFA,
     })
 
-    try:
-        session.get(IS_SAYFA, timeout=20)
-    except Exception:
-        pass
+    for deneme in range(3):
+        try:
+            session.get(IS_SAYFA, timeout=30)
+        except Exception:
+            pass
 
-    payload = {
-        "hisseKodu": "",
-        "hisseTanimKodu": "04",
-        "yil": 0,
-        "zaman": "HEPSI",
-        "endeksKodu": "09",
-        "sektorKodu": "",
-    }
+        payload = {
+            "hisseKodu": "",
+            "hisseTanimKodu": "04",
+            "yil": 0,
+            "zaman": "HEPSI",
+            "endeksKodu": "09",
+            "sektorKodu": "",
+        }
 
-    r = session.post(IS_URL, json=payload, timeout=60)
-    if r.status_code != 200:
-        return []
+        try:
+            log(f"Is Yatirim'dan veri cekiliyor (Deneme {deneme + 1}/3)...")
+            r = session.post(IS_URL, json=payload, timeout=120)
+            if r.status_code == 200:
+                js = r.json()
+                data = js
+                if isinstance(js, dict):
+                    data = js.get("value") or js.get("d") or js
+                if isinstance(data, str):
+                    data = json.loads(data)
+                if isinstance(data, dict):
+                    for v in data.values():
+                        if isinstance(v, list):
+                            data = v
+                            break
+                if isinstance(data, list) and len(data) > 0:
+                    return data
+            else:
+                log(f"Is Yatirim HTTP Hata: {r.status_code}")
+        except requests.exceptions.RequestException as e:
+            log(f"Is Yatirim HATA: {repr(e)}")
+        
+        time.sleep(5)
 
-    js = r.json()
-    data = js
-    if isinstance(js, dict):
-        data = js.get("value") or js.get("d") or js
-    if isinstance(data, str):
-        data = json.loads(data)
-    if isinstance(data, dict):
-        for v in data.values():
-            if isinstance(v, list):
-                data = v
-                break
-    if not isinstance(data, list):
-        return []
-
-    return data
+    return []
 
 def satiri_coz(satir):
     kod = str(satir.get("SHHE_HS_KODU") or satir.get("HISSE_KODU") or "").strip().upper()
@@ -428,11 +435,12 @@ def github_a_yaz(veri):
 def main():
     session = requests.Session()
     fiyatlar = fiyatlari_cek(session)
-    try:
-        satirlar = is_yatirim_satirlari(session)
-    except Exception as e:
-        log("Is Yatirim HATA:", repr(e))
-        satirlar = []
+    
+    satirlar = is_yatirim_satirlari(session)
+
+    if not satirlar:
+        log("HATA: Is Yatirim'dan gecerli satir alinamadi.")
+        sys.exit(1)
 
     tv_arz = tv_arz_yillari(session)
     veri = temettuleri_hazirla(satirlar, fiyatlar, halka_arz_yillarini_yukle(), ilk_islem_yili_bul, tv_arz)
