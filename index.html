@@ -111,18 +111,20 @@
   tbody tr:nth-child(even) { background: #f8faf9; }
   tbody tr.dolu { background: #e9f4ec; }
   .p-sag tbody tr.dolu { background: #e8eff8; }
-  td.hisse { font-weight: 800; font-size: 16px; text-align: left; padding-left: 8px; line-height: 1.1; }
-  td.hisse small { display: block; font-weight: 500; font-size: 11px; color: var(--soluk); margin-top: 1px; }
+  td.hisse { font-weight: 800; font-size: 16px; text-align: left; padding-left: 6px; line-height: 1.1; }
+  td[data-c=tarih] { font-size: 13px; font-weight: 600; color: var(--soluk); }
   td small.brut { display: block; font-size: 10.5px; color: var(--soluk); font-weight: 400; margin-top: 0; text-decoration: line-through; }
   td::before { content: none; }
 
   @media (min-width: 641px) {
-    th:nth-child(1), td:nth-child(1) { width: 19%; }
-    th:nth-child(2), td:nth-child(2) { width: 13%; }
-    th:nth-child(3), td:nth-child(3) { width: 15%; }
+    th:nth-child(1), td:nth-child(1) { width: 12%; }
+    th:nth-child(2), td:nth-child(2) { width: 12%; }
+    th:nth-child(3), td:nth-child(3) { width: 14%; }
     th:nth-child(4), td:nth-child(4) { width: 15%; }
-    th:nth-child(5), td:nth-child(5) { width: 18%; }
-    th:nth-child(6), td:nth-child(6) { width: 20%; }
+    th:nth-child(5), td:nth-child(5) { width: 14%; }
+    th:nth-child(6), td:nth-child(6) { width: 18%; }
+    th:nth-child(7), td:nth-child(7) { width: 15%; }
+    thead th { white-space: normal; line-height: 1.15; }
   }
 
   input.girdi {
@@ -132,6 +134,8 @@
     border-radius: 6px;
   }
   input.girdi:focus { outline: 2px solid var(--yazi); outline-offset: 0; }
+  input.girdi { scroll-margin-top: calc(var(--ust-yuk, 96px) + 14px); scroll-margin-bottom: 96px; }
+  button, input, .sekme { touch-action: manipulation; }
   .bos-sonuc { padding: 18px; color: var(--soluk); font-size: 15px; display: none; }
 
   /* ---------- Alt toplam çubuğu ---------- */
@@ -171,8 +175,8 @@
     thead { display: none; }
 
     tbody tr {
-      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3px 10px; align-items: end;
-      margin: 0 0 5px; padding: 5px 10px;
+      display: grid; grid-template-columns: 1fr 1fr 1.05fr 1.15fr; gap: 3px 8px; align-items: end;
+      margin: 0 0 6px; padding: 6px 10px;
       background: #fff; border: 1px solid var(--cizgi); border-radius: 10px;
     }
     tbody tr:nth-child(even) { background: #fff; }
@@ -189,16 +193,18 @@
     }
     td.hisse { font-size: 18px; padding-left: 0; }
     td.hisse::before { content: none; }
-    td.hisse small { font-size: 11px; margin-top: 0; }
     td small.brut { font-size: 10px; }
-    td.c-in { grid-column: 1; grid-row: 2; }
-    input.girdi { height: 36px; font-size: 19px; }
+    td.c-in { grid-column: 1 / span 2; grid-row: 2; }
+    td[data-c=tarih] { font-size: 13px; }
+    input.girdi { height: 40px; font-size: 20px; }
 
     .toplam .kalem b { font-size: 14.5px; }
   }
   @media (max-width: 360px) {
-    tbody td { font-size: 14px; }
-    td.hisse { font-size: 17px; }
+    tbody tr { gap: 3px 5px; padding: 6px 8px; }
+    tbody td { font-size: 13.5px; }
+    td[data-c=tarih] { font-size: 12px; }
+    td.hisse { font-size: 16px; }
     .toplam .kalem b { font-size: 13.5px; }
   }
 </style>
@@ -233,7 +239,7 @@
     <table>
       <caption>AYLIK TEMETTÜ GİRİLECEK</caption>
       <thead>
-        <tr><th>HİSSE</th><th>FİYAT</th><th>TEMETTÜ</th><th>LOT</th><th>MALİYET</th><th>AYLIK TEMETTÜ</th></tr>
+        <tr><th>HİSSE</th><th>FİYAT</th><th>TEMETTÜ</th><th>SON TEMETTÜ TARİHİ</th><th>LOT</th><th>MALİYET</th><th>AYLIK TEMETTÜ</th></tr>
       </thead>
       <tbody id="sol-body"></tbody>
     </table>
@@ -244,7 +250,7 @@
     <table>
       <caption>LOT GİRİLECEK</caption>
       <thead>
-        <tr><th>HİSSE</th><th>FİYAT</th><th>TEMETTÜ</th><th>LOT</th><th>MALİYET</th><th>AYLIK TEMETTÜ</th></tr>
+        <tr><th>HİSSE</th><th>FİYAT</th><th>TEMETTÜ</th><th>SON TEMETTÜ TARİHİ</th><th>LOT</th><th>MALİYET</th><th>AYLIK TEMETTÜ</th></tr>
       </thead>
       <tbody id="sag-body"></tbody>
     </table>
@@ -788,19 +794,19 @@
     var sol = [], sag = [];
     liste.forEach(function (k) {
       var d = veri[k];
-      var tarihHtml = d.tarih ? "<small>" + d.tarih + "</small>" : "";
       var fiyatMetni = d.fiyat > 0 ? fmtFiyat(d.fiyat) : "-";
-      var ortak = "<td class='hisse'>" + k + tarihHtml + "</td>" +
+      var ortak = "<td class='hisse'>" + k + "</td>" +
                   "<td data-c='fiyat' data-l='FİYAT'>" + fiyatMetni + "</td>" +
-                  "<td data-c='temettu' data-l='TEMETTÜ'>" + temettuHucre(d) + "</td>";
+                  "<td data-c='temettu' data-l='TEMETTÜ'>" + temettuHucre(d) + "</td>" +
+                  "<td data-c='tarih' data-l='SON TEMETTÜ'>" + (d.tarih || "-") + "</td>";
 
       sol.push("<tr data-kod='" + k + "'>" + ortak +
         "<td data-c='lot' data-l='LOT'>0</td>" +
         "<td data-c='maliyet' data-l='MALİYET'>0 TL</td>" +
-        "<td class='c-in' data-l='AYLIK TEMETTÜ (TL)'><input class='girdi' inputmode='decimal' autocomplete='off' placeholder='0' data-t='sol' data-kod='" + k + "' value='" + (giris.sol[k] || "") + "'></td></tr>");
+        "<td class='c-in' data-l='AYLIK TEMETTÜ (TL)'><input class='girdi' inputmode='decimal' autocomplete='off' placeholder='0' enterkeyhint='next' data-t='sol' data-kod='" + k + "' value='" + (giris.sol[k] || "") + "'></td></tr>");
 
       sag.push("<tr data-kod='" + k + "'>" + ortak +
-        "<td class='c-in' data-l='LOT'><input class='girdi' inputmode='decimal' autocomplete='off' placeholder='0' data-t='sag' data-kod='" + k + "' value='" + (giris.sag[k] || "") + "'></td>" +
+        "<td class='c-in' data-l='LOT'><input class='girdi' inputmode='decimal' autocomplete='off' placeholder='0' enterkeyhint='next' data-t='sag' data-kod='" + k + "' value='" + (giris.sag[k] || "") + "'></td>" +
         "<td data-c='maliyet' data-l='MALİYET'>0 TL</td>" +
         "<td data-c='aylik' data-l='AYLIK TEMETTÜ'>0 TL</td></tr>");
     });
@@ -888,6 +894,25 @@
   }
   $("sol-body").addEventListener("focusin", girdiOdak);
   $("sag-body").addEventListener("focusin", girdiOdak);
+
+  // Enter / "İleri" tuşu: bir sonraki görünen kutuya geç (mobilde hızlı giriş)
+  function girdiEnter(e) {
+    if (e.key !== "Enter") return;
+    var el = e.target;
+    if (!el.classList || !el.classList.contains("girdi")) return;
+    e.preventDefault();
+    var tr = el.closest("tr");
+    var sonraki = tr ? tr.nextElementSibling : null;
+    while (sonraki && sonraki.style.display === "none") sonraki = sonraki.nextElementSibling;
+    if (sonraki) {
+      var kutu = sonraki.querySelector("input.girdi");
+      if (kutu) kutu.focus();
+    } else {
+      el.blur();
+    }
+  }
+  $("sol-body").addEventListener("keydown", girdiEnter);
+  $("sag-body").addEventListener("keydown", girdiEnter);
 
   $("stopaj").addEventListener("input", function () {
     var t = this.value.replace(/[^0-9.,]/g, "");
