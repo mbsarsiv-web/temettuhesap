@@ -25,7 +25,7 @@
     background: var(--zemin);
     color: var(--yazi);
     -webkit-text-size-adjust: 100%;
-    padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
   }
 
   /* ---------- Ust cubuk ---------- */
@@ -42,12 +42,16 @@
     border: 1px solid var(--cizgi); border-radius: 8px;
     font-size: 16px; background: #fff; color: var(--yazi);
   }
+  .ust-kur { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+  .ust-kur .kur { flex: 1; min-width: 0; font-size: 11.5px; line-height: 1.3; color: var(--yazi); font-variant-numeric: tabular-nums; }
+  .ust-kur .kur b { font-weight: 700; }
+  .ust-kur .kur .soluk { color: var(--soluk); }
   .stopaj {
     display: flex; align-items: center; gap: 4px; flex: none;
     font-size: 12px; font-weight: 600; color: var(--soluk);
   }
   .stopaj input {
-    width: 52px; height: 40px; padding: 0 4px; text-align: center;
+    width: 52px; height: 36px; padding: 0 4px; text-align: center;
     border: 1px solid var(--girdi-kenar); background: var(--girdi); color: var(--yazi);
     border-radius: 8px; font-size: 16px; font-weight: 700;
   }
@@ -107,22 +111,21 @@
   input.girdi:focus { outline: 2px solid var(--yazi); outline-offset: 0; }
   .bos-sonuc { padding: 18px; color: var(--soluk); font-size: 14px; display: none; }
 
-  /* ---------- Alt toplam cubugu ---------- */
+  /* ---------- Alt toplam cubugu (kompakt) ---------- */
   .toplam {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
-    padding: 6px 10px calc(8px + env(safe-area-inset-bottom, 0px));
+    padding: 3px 8px calc(3px + env(safe-area-inset-bottom, 0px));
     background: var(--yazi); color: #fff;
-    font-variant-numeric: tabular-nums;
+    font-variant-numeric: tabular-nums; line-height: 1.1;
   }
-  .toplam .kur { text-align: center; font-size: 10.5px; opacity: .75; padding-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,.15); margin-bottom: 5px; }
-  .toplam .bloklar { display: flex; gap: 14px; justify-content: space-around; align-items: center; }
-  .toplam .blok { display: none; flex: 1; gap: 10px; justify-content: space-between; }
+  .toplam .bloklar { display: flex; gap: 12px; justify-content: space-around; align-items: center; }
+  .toplam .blok { display: none; flex: 1; gap: 6px; justify-content: space-between; }
   .toplam .blok.aktif { display: flex; }
   .toplam .kalem { text-align: center; flex: 1; min-width: 0; }
-  .toplam .kalem span { display: block; font-size: 10px; opacity: .7; }
-  .toplam .kalem b { font-size: 15px; white-space: nowrap; }
-  .toplam .kalem small { display: block; font-size: 10px; color: #e8c866; white-space: nowrap; margin-top: 1px; min-height: 12px; }
-  .toplam .etiket { font-size: 11px; font-weight: 700; align-self: center; flex: .7; text-align: left; }
+  .toplam .kalem span { display: block; font-size: 9px; opacity: .65; }
+  .toplam .kalem b { display: block; font-size: 13px; white-space: nowrap; }
+  .toplam .kalem small { display: block; font-size: 10.5px; font-weight: 800; color: #f0cc5a; white-space: nowrap; min-height: 12px; }
+  .toplam .etiket { font-size: 10px; font-weight: 700; align-self: center; flex: .7; text-align: left; }
   .toplam .sol-r { color: #7fd69f; }
   .toplam .sag-r { color: #8db8f2; }
 
@@ -145,8 +148,9 @@
     .panel.aktif { display: block; }
     table { font-size: 12px; }
     td.hisse small { font-size: 9px; }
-    .toplam .kalem b { font-size: 14px; }
-    .toplam .kalem small { font-size: 9.5px; }
+    .toplam .etiket { display: none; }
+    .toplam .kalem b { font-size: 12.5px; }
+    .toplam .kalem small { font-size: 10px; font-weight: 800; }
   }
   @media (max-width: 380px) {
     table { font-size: 11px; }
@@ -160,10 +164,13 @@
 <div class="ust" id="ust">
   <div class="ust-satir">
     <input class="ara" id="ara" type="search" placeholder="Hisse ara (örn. AKSA)" autocomplete="off" autocapitalize="characters">
+    <button class="temizle" id="temizle" type="button">Temizle</button>
+  </div>
+  <div class="ust-kur">
     <label class="stopaj" title="Temettüden kesilen stopaj oranı">Stopaj %
       <input id="stopaj" type="text" inputmode="decimal" autocomplete="off" value="15">
     </label>
-    <button class="temizle" id="temizle" type="button">Temizle</button>
+    <div class="kur" id="kur">Kurlar yükleniyor…</div>
   </div>
   <div class="sekmeler" id="sekmeler">
     <button class="sekme sol aktif" data-hedef="sol" type="button">Aylık temettü</button>
@@ -203,7 +210,6 @@
 
 <!-- Alt toplam çubuğu -->
 <div class="toplam" id="toplam">
-  <div class="kur" id="kur">Kurlar yükleniyor…</div>
   <div class="bloklar">
     <div class="blok aktif" id="blok-sol">
       <div class="etiket sol-r">TÜRK LİRASI</div>
@@ -356,11 +362,16 @@
       $(t + "-alt-aylik").textContent = esdegerMetin(toplamlar[t].aylik);
     });
     var k = $("kur");
-    if (!kurHazir()) { k.textContent = "Kur alınamadı: dolar ve altın karşılığı gösterilemiyor"; return; }
-    var d = new Date(kur.zaman);
-    var saat = d.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
-    k.textContent = "1 $ = " + fmt(kur.usdTry, 2) + " TL · 1 gr altın = " + fmt(gramAltinTL(), 2) + " TL (" +
-      fmt(gramAltinTL() / kur.usdTry, 2) + " $) · " + saat + (kur.onbellek ? " (son kayıtlı kur)" : "");
+    if (!kurHazir()) {
+      k.textContent = "Kur alınamadı: dolar ve altın karşılığı gösterilemiyor";
+    } else {
+      var d = new Date(kur.zaman);
+      var saat = d.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
+      k.innerHTML = "1 $ = <b>" + fmt(kur.usdTry, 2) + " TL</b> · 1 gr altın = <b>" + fmt(gramAltinTL(), 2) + " TL</b>" +
+        " <span class='soluk'>(" + fmt(gramAltinTL() / kur.usdTry, 2) + " $) · " + saat +
+        (kur.onbellek ? " · son kayıtlı kur" : "") + "</span>";
+    }
+    ustYukseklik();
   }
 
   function depoOku() {
