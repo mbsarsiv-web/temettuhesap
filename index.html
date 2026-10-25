@@ -78,6 +78,9 @@
   .sekme.sol { background: var(--yesil); }
   .sekme.sag { background: var(--mavi); }
   .sekme.aktif { opacity: 1; box-shadow: 0 0 0 2px var(--yazi) inset; }
+  .durum { max-width: var(--genislik); margin: 5px auto 0; font-size: 11px; line-height: 1.3; color: var(--soluk); }
+  .durum:empty { display: none; }
+  .durum.uyari { color: #9b2c2c; font-weight: 700; }
 
   #yukleniyor, #hata {
     margin: 24px 12px; padding: 16px; text-align: center;
@@ -223,6 +226,7 @@
     <button class="sekme sol aktif" data-hedef="sol" type="button">AYLIK TEMETTÜYE GÖRE</button>
     <button class="sekme sag" data-hedef="sag" type="button">LOT SAYISINA GÖRE</button>
   </div>
+  <div class="durum" id="durum"></div>
 </div>
 
 <div id="yukleniyor">Veriler yükleniyor…</div>
@@ -287,6 +291,16 @@
   var FILTRE_VERIM = 3;          // Ortalama verim >= %3
 
   var DEPO_ANAHTAR = "temettuhesap_v2";
+
+  // Canlı fiyat kaynakları (tarayıcıdan, botu beklemeden)
+  var TV_URL = "https://scanner.tradingview.com/turkey/scan";
+  var FIYAT_ANAHTAR = "temettuhesap_fiyat_v1";
+  var PROXYLER = [
+    function (u) { return "https://api.allorigins.win/raw?url=" + encodeURIComponent(u); },
+    function (u) { return "https://corsproxy.io/?url=" + encodeURIComponent(u); }
+  ];
+  var fiyatOnbellek = {};
+  var canliZaman = 0;
 
   var veri = {};
   var liste = [];
@@ -601,8 +615,6 @@
 
   function veriyiIsle(bot, gas) {
     veri = {}; liste = [];
-    var fiyatsiz = [];
-
     gas.liste.forEach(function (g) {
       var kod = g.kod;
       var b = bot[kod] || {};
@@ -612,8 +624,7 @@
         t = g.hbToplam;
         tarih = String(g.hbYil);
       }
-      var fiyat = Number(b.fiyat) || 0;
-      if (!(fiyat > 0)) fiyatsiz.push(kod);
+      var fiyat = Number(b.fiyat) || (fiyatOnbellek[kod] || 0);
 
       veri[kod] = {
         temettu: t,
@@ -630,8 +641,125 @@
 
     veriKaynakNotu = "Filtre: Yoğunluk ≥ 0,50 · Son 10 Yıl · Ort. verim ≥ %3 (Temettü Analiz kaynağı, " +
       gas.toplamHisse + " hisse içinden)" +
-      (gas.onbellek ? " — son kayıtlı liste kullanılıyor" : "") +
-      (fiyatsiz.length > 0 ? " — fiyatı bulunamayan: " + fiyatsiz.join(", ") : "");
+      (gas.onbellek ? " — son kayıtlı liste kullanılıyor" : "");
+  }
+
+  // ------------------------------------------------------------------
+  // Canlı fiyatlar: sayfa açılınca tarayıcıdan çekilir (bot fiyatı yedek)
+  // ------------------------------------------------------------------
+  function fiyatOnbellekOku() {
+    try {
+      var o = JSON.parse(localStorage.getItem(FIYAT_ANAHTAR));
+      if (o && o.f) { fiyatOnbellek = o.f; canliZaman = o.zaman || 0; }
+    } catch (e) {}
+  }
+  function fiyatOnbellekYaz() {
+    var f = {};
+    liste.forEach(function (k) { if (veri[k].canli && veri[k].fiyat > 0) f[k] = veri[k].fiyat; });
+    // Daha önce kayıtlı olup bu sefer alınamayanları da koru
+    Object.keys(fiyatOnbellek).forEach(function (k) { if (!(k in f)) f[k] = fiyatOnbellek[k]; });
+    fiyatOnbellek = f;
+    try { localStorage.setItem(FIYAT_ANAHTAR, JSON.stringify({ zaman: canliZaman, f: f })); } catch (e) {}
+  }
+
+  function tvFiyatlar(kodlar) {
+    var govde = JSON.stringify({
+      symbols: { tickers: kodlar.map(function (k) { return "BIST:" + k; }), query: { types: [] } },
+      columns: ["name", "close"]
+    });
+    function dene(tip) {
+      var ctrl = (typeof AbortController !== "undefined") ? new AbortController() : null;
+      var z = setTimeout(function () { if (ctrl) ctrl.abort(); }, 15000);
+      return fetch(TV_URL, { method: "POST", headers: { "Content-Type": tip }, body: govde, signal: ctrl ? ctrl.signal : undefined })
+        .then(function (r) { clearTimeout(z); if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+        .catch(function (e) { clearTimeout(z); throw e; });
+    }
+    return dene("text/plain;charset=UTF-8")
+      .catch(function () { return dene("application/json"); })
+      .then(function (js) {
+        var o = {};
+        (js.data || []).forEach(function (it) {
+          var kod = String(it.d[0]).replace("BIST:", "").trim().toUpperCase();
+          var f = Number(it.d[1]);
+          if (f > 0) o[kod] = f;
+        });
+        return o;
+      });
+  }
+
+  function yahooFiyat(kod) {
+    var hedef = "https://query1.finance.yahoo.com/v8/finance/chart/" + kod + ".IS?interval=1d&range=5d";
+    var i = 0;
+    function dene() {
+      if (i >= PROXYLER.length) return Promise.resolve(0);
+      var url = PROXYLER[i++](hedef);
+      return jsonAl(url, 15000).then(function (js) {
+        var p = Number(js.chart.result[0].meta.regularMarketPrice);
+        if (!(p > 0)) throw new Error("fiyat yok");
+        return p;
+      }).catch(dene);
+    }
+    return dene();
+  }
+
+  function fiyatUygula(kod, fiyat) {
+    var d = veri[kod];
+    if (!d) return;
+    d.fiyat = fiyat;
+    d.canli = true;
+    var hucreler = document.querySelectorAll("tr[data-kod='" + kod + "'] [data-c=fiyat]");
+    for (var i = 0; i < hucreler.length; i++) hucreler[i].textContent = fmtFiyat(fiyat);
+  }
+
+  function durumYaz() {
+    var el = $("durum");
+    if (!el) return;
+    var n = liste.length, canli = 0, eksik = [];
+    liste.forEach(function (k) {
+      if (veri[k].canli) canli++;
+      if (!(veri[k].fiyat > 0)) eksik.push(k);
+    });
+    var metin = "Fiyat: " + canli + "/" + n + " hisse canlı";
+    if (canliZaman && canli > 0) {
+      metin += " (" + new Date(canliZaman).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" }) + ")";
+    }
+    if (eksik.length > 0) {
+      el.className = "durum uyari";
+      el.textContent = "⚠ " + eksik.length + " hissenin fiyatı alınamadı: " + eksik.join(", ");
+    } else {
+      el.className = "durum";
+      el.textContent = metin;
+    }
+  }
+
+  function canliFiyatlariYukle() {
+    if (liste.length === 0) return;
+    tvFiyatlar(liste).catch(function () { return {}; }).then(function (o) {
+      var bulunan = 0;
+      Object.keys(o).forEach(function (k) { if (veri[k]) { fiyatUygula(k, o[k]); bulunan++; } });
+      if (bulunan > 0) canliZaman = Date.now();
+      hesaplaHepsi();
+      durumYaz();
+
+      // Hâlâ fiyatı olmayanlar için yedek kaynak
+      var eksik = liste.filter(function (k) { return !(veri[k].fiyat > 0); });
+      if (eksik.length === 0) return;
+      var sira = 0;
+      function isci() {
+        if (sira >= eksik.length) return Promise.resolve();
+        var k = eksik[sira++];
+        return yahooFiyat(k).then(function (p) {
+          if (p > 0) { fiyatUygula(k, p); canliZaman = canliZaman || Date.now(); }
+        }).then(function () { hesaplaHepsi(); durumYaz(); }).then(isci);
+      }
+      var iscler = [];
+      for (var w = 0; w < 6; w++) iscler.push(isci());
+      return Promise.all(iscler);
+    }).then(function () {
+      fiyatOnbellekYaz();
+      hesaplaHepsi();
+      durumYaz();
+    }).catch(function () { durumYaz(); });
   }
 
   function hataGoster(mesaj) {
@@ -644,6 +772,7 @@
 
   function baslat() {
     depoOku();
+    fiyatOnbellekOku();
     Promise.all([botVerisiGetir(), gasGetir()])
       .then(function (sonuc) {
         var bot = sonuc[0], gas = sonuc[1];
@@ -658,6 +787,8 @@
         bilgiYaz();
         ustYukseklik();
         sekmeAyarla(aktifSekme);
+        durumYaz();
+        canliFiyatlariYukle();
       })
       .catch(function (e) {
         hataGoster("Hisse listesi alınamadı (Temettü Analiz kaynağına ulaşılamadı).<br>İnternet bağlantınızı kontrol edip tekrar deneyin.");
@@ -671,7 +802,7 @@
       var tarihHtml = d.tarih ? "<small>" + d.tarih + "</small>" : "";
       var fiyatMetni = d.fiyat > 0 ? fmtFiyat(d.fiyat) : "-";
       var ortak = "<td class='hisse'>" + k + tarihHtml + "</td>" +
-                  "<td data-l='FİYAT'>" + fiyatMetni + "</td>" +
+                  "<td data-c='fiyat' data-l='FİYAT'>" + fiyatMetni + "</td>" +
                   "<td data-c='temettu' data-l='TEMETTÜ'>" + temettuHucre(d) + "</td>";
 
       sol.push("<tr data-kod='" + k + "'>" + ortak +
