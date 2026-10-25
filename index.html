@@ -67,7 +67,7 @@
     border: 1px solid var(--cizgi); background: #fff; color: #9b2c2c;
     font-size: 13px; font-weight: 600; white-space: nowrap;
   }
-  
+
   .sekmeler { display: flex; margin-top: 8px; gap: 6px; }
   .sekme {
     flex: 1; height: 42px; border: 0; border-radius: 8px;
@@ -83,7 +83,12 @@
     font-weight: 600; color: var(--yesil);
   }
   #hata { color: #9b2c2c; display: none; line-height: 1.5; }
-  
+  #hata button {
+    margin-top: 10px; height: 38px; padding: 0 16px; border-radius: 8px;
+    border: 1px solid var(--cizgi); background: #fff; color: var(--yazi);
+    font-size: 14px; font-weight: 700; cursor: pointer;
+  }
+
   #alan { display: none; padding: 10px; }
   #alan.goster { display: block; }
   .panel { display: none; background: var(--kart); border: 1px solid var(--cizgi); border-radius: 8px; overflow: clip; }
@@ -227,14 +232,26 @@
 (function () {
   "use strict";
 
+  // Fiyat ve hisse başı temettü verisi (bot): temettu_veri.json
   var JSON_YEREL = "temettu_veri.json";
   var JSON_RAW   = "https://raw.githubusercontent.com/mbsarsiv-web/temettu-bot/main/temettu_veri.json";
+
+  // Hisse LİSTESİ ve filtreler: "TEMETTÜ ANALİZ" uygulamasının kullandığı kaynak (aynı adres)
+  var GAS_URL = "https://script.google.com/macros/s/AKfycbxo9u41oj1aXxgkuE7gTnHdeG_mzT41o3WmaYhhqNNUJi_NTDzLOmSBSnHAhfsvhOiK/exec";
+  var GAS_ANAHTAR = "temettuhesap_gas_v1";
+
+  // Diğer uygulamadaki 3 filtre (sabit):
+  var FILTRE_DONEM = 10;         // Dönem: Son 10 Yıl
+  var FILTRE_YOGUNLUK = 0.5;     // Yoğunluk >= 0,50
+  var FILTRE_VERIM = 3;          // Ortalama verim >= %3
+
   var DEPO_ANAHTAR = "temettuhesap_v2";
 
-  var veri = {};          
-  var liste = [];         
-  var giris = { sol: {}, sag: {}, stopaj: "15" };   
+  var veri = {};
+  var liste = [];
+  var giris = { sol: {}, sag: {}, stopaj: "15" };
   var aktifSekme = "sol";
+  var veriKaynakNotu = "";
 
   function $(id) { return document.getElementById(id); }
 
@@ -264,18 +281,19 @@
     if (n > 100) n = 100;
     return n;
   }
-  
+
   function stopajUygulanir(kod) { return String(kod).toUpperCase().indexOf("GY") === -1; }
   function net(d) { return d.temettu * (1 - (d.stopajsiz ? 0 : stopajOrani()) / 100); }
 
   function temettuHucre(d) {
     var n = d.stopajsiz ? 0 : stopajOrani();
-    var brut = n > 0 ? "<small class='brut'>" + fmtFiyat(d.temettu) + "</small>" : "";
+    var brut = (n > 0 && d.temettu > 0) ? "<small class='brut'>" + fmtFiyat(d.temettu) + "</small>" : "";
     return fmtFiyat(net(d)) + brut;
   }
 
   function bilgiYaz() {
     $("sayi").innerHTML = "<b>" + liste.length + "</b>Hisse";
+    $("sayi").title = veriKaynakNotu;
   }
 
   var KUR_ANAHTAR = "temettuhesap_kur_v1";
@@ -283,9 +301,9 @@
   var kur = { usdTry: 0, xauUsd: 0, zaman: 0, onbellek: false };
   var toplamlar = { sol: { maliyet: 0, aylik: 0 }, sag: { maliyet: 0, aylik: 0 } };
 
-  function jsonAl(url) {
+  function jsonAl(url, zamanAsimiMs) {
     var ctrl = (typeof AbortController !== "undefined") ? new AbortController() : null;
-    var zamanlayici = setTimeout(function () { if (ctrl) ctrl.abort(); }, 7000);
+    var zamanlayici = setTimeout(function () { if (ctrl) ctrl.abort(); }, zamanAsimiMs || 7000);
     return fetch(url, { cache: "no-store", signal: ctrl ? ctrl.signal : undefined })
       .then(function (r) { clearTimeout(zamanlayici); if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
       .catch(function (e) { clearTimeout(zamanlayici); throw e; });
@@ -395,41 +413,211 @@
     });
   }
 
-  function veriyiIsle(ham) {
-    veri = {}; liste = [];
-    Object.keys(ham || {}).forEach(function (kod) {
-      var d = ham[kod] || {};
-      var t = Number(d.hisse_basi_tl) || 0;
-      if (t > 0) {
-        veri[kod] = {
-          temettu: t, 
-          fiyat: Number(d.fiyat) || 0, 
-          tarih: d.tarih || "", 
-          stopajsiz: !stopajUygulanir(kod),
-          ortalama_verim: Number(d.ortalama_verim) || 0
-        };
-        liste.push(kod);
+  // ------------------------------------------------------------------
+  // "TEMETTÜ ANALİZ" uygulamasındaki hesabın birebir kopyası
+  // ------------------------------------------------------------------
+  function verimSayisiCoz(ham) {
+    if (ham === undefined || ham === null || ham === "") return NaN;
+    if (typeof ham === "number") return ham;
+    var s = ham.toString().trim().replace(/%/g, "");
+    if (s === "") return NaN;
+    if (s.indexOf(",") > -1 && s.indexOf(".") > -1) {
+      if (s.lastIndexOf(",") > s.lastIndexOf(".")) {
+        s = s.replace(/\./g, "").replace(",", ".");
+      } else {
+        s = s.replace(/,/g, "");
       }
-    });
-    
-    // Hisseleri Görseldeki Gibi "Ortalama Verim" Sütununa Göre Yüksekten Düşüğe Sıralama
-    liste.sort(function (a, b) {
-      return veri[b].ortalama_verim - veri[a].ortalama_verim;
+    } else if (s.indexOf(",") > -1) {
+      s = s.replace(",", ".");
+    }
+    var n = parseFloat(s);
+    return isNaN(n) ? NaN : n;
+  }
+
+  // GAS verisinden: filtreyi geçen hisseler + yedek hisse başı temettü bilgisi
+  function gasIsle(payload) {
+    if (!payload || !payload.anaTablo || payload.anaTablo.length <= 1) {
+      throw new Error("gas-bos");
+    }
+    var anaTablo = payload.anaTablo;
+    var verimVerisi = payload.verimTablo;
+
+    var verimMap = {};   // KOD_YIL -> toplam verim %
+    var hbMap = {};      // KOD_YIL -> toplam hisse başı TL (yedek)
+
+    if (verimVerisi && verimVerisi.length > 1) {
+      var bas = verimVerisi[0];
+      var kodI = 0, yilI = 1, verimI = -1, hbI = -1;
+      for (var c = 0; c < bas.length; c++) {
+        var b = bas[c].toString().toUpperCase().trim();
+        if (b === "KOD" && kodI === 0) kodI = c;
+        else if ((b === "YIL" || b === "TARIH" || b === "TARİH") && yilI === 1) yilI = c;
+        else if (verimI === -1 && (b.indexOf("VERIM") > -1 || b.indexOf("VERİM") > -1) && bas[c].toString().trim() !== "") verimI = c;
+        else if (hbI === -1 && (b.indexOf("HISSE") > -1 || b.indexOf("HİSSE") > -1)) hbI = c;
+      }
+      if (verimI === -1) verimI = 4;
+      if (hbI === -1 && bas.length >= 6) hbI = 5;
+
+      for (var v = 1; v < verimVerisi.length; v++) {
+        var satir = verimVerisi[v];
+        var kod = satir[kodI];
+        var tarih = satir[yilI];
+        if (!kod || !tarih) continue;
+
+        var yMatch = tarih.toString().trim().match(/(20\d\d|19\d\d)/);
+        if (!yMatch) continue;
+        var yil = yMatch[1];
+        var tKod = kod.toString().trim().toUpperCase();
+        var anahtar = tKod + "_" + yil;
+
+        var sv = verimSayisiCoz(satir[verimI]);
+        if (!isNaN(sv)) {
+          if (verimMap[anahtar] !== undefined) verimMap[anahtar] += sv;
+          else verimMap[anahtar] = sv;
+        }
+
+        if (hbI > -1) {
+          var hb = verimSayisiCoz(satir[hbI]);
+          if (!isNaN(hb) && hb > 0) hbMap[anahtar] = (hbMap[anahtar] || 0) + hb;
+        }
+      }
+    }
+
+    var orj = anaTablo[0];
+    var idxYog = orj.indexOf("YOĞUNLUK");
+    if (idxYog === -1) idxYog = orj.length > 2 ? orj.length - 2 : 18;
+
+    var yillar = [];
+    for (var idx = 2; idx < idxYog; idx++) {
+      var yn = parseInt(orj[idx]);
+      if (!isNaN(yn)) yillar.push(yn);
+    }
+    var guncelYil = yillar.length > 0 ? Math.max.apply(null, yillar) : new Date().getFullYear();
+    var minYil = guncelYil - (FILTRE_DONEM - 1);
+
+    var goruldu = {};
+    var tumu = [];
+    var gecen = [];
+
+    for (var i = 1; i < anaTablo.length; i++) {
+      var raw = anaTablo[i][0];
+      if (raw === undefined || raw === null || raw.toString().trim() === "") continue;
+      var hKod = raw.toString().trim().toUpperCase();
+      if (goruldu[hKod]) continue;
+      goruldu[hKod] = true;
+
+      var odemeYil = 0, toplamVerim = 0;
+      for (var y = 1990; y <= guncelYil; y++) {
+        var vVal = verimMap[hKod + "_" + y];
+        if (vVal !== undefined && !isNaN(vVal) && vVal > 0 && y >= minYil) {
+          odemeYil++;
+          toplamVerim += vVal;
+        }
+      }
+      var ortVerim = odemeYil > 0 ? (toplamVerim / odemeYil) : 0;
+      var yogunluk = odemeYil / FILTRE_DONEM;
+
+      // Yedek: en son temettü verilen yılın hisse başı toplamı
+      var sonYil = 0, sonToplam = 0;
+      for (var y2 = guncelYil; y2 >= 1990; y2--) {
+        var h = hbMap[hKod + "_" + y2];
+        if (h && h > 0) { sonYil = y2; sonToplam = h; break; }
+      }
+
+      var kayit = { kod: hKod, ort: ortVerim, adet: odemeYil, yog: yogunluk, hbYil: sonYil, hbToplam: sonToplam };
+      tumu.push(kayit);
+
+      if (yogunluk >= FILTRE_YOGUNLUK && ortVerim >= FILTRE_VERIM) gecen.push(kayit);
+    }
+
+    return { guncelYil: guncelYil, toplamHisse: tumu.length, liste: gecen, zaman: Date.now() };
+  }
+
+  function gasGetir() {
+    return jsonAl(GAS_URL + "?t=" + Date.now(), 60000).then(function (payload) {
+      if (payload && payload.hata) throw new Error(String(payload.hata));
+      var sonuc = gasIsle(payload);
+      sonuc.onbellek = false;
+      try { localStorage.setItem(GAS_ANAHTAR, JSON.stringify(sonuc)); } catch (e) {}
+      return sonuc;
+    }).catch(function (hata) {
+      var o = null;
+      try { o = JSON.parse(localStorage.getItem(GAS_ANAHTAR)); } catch (e) {}
+      if (o && o.liste && o.liste.length > 0) { o.onbellek = true; return o; }
+      throw hata;
     });
   }
 
-  function baslat() {
-    depoOku();
-    jsonGetir(JSON_YEREL)
+  function botVerisiGetir() {
+    return jsonGetir(JSON_YEREL)
       .then(function (d) {
         if (!d || Object.keys(d).length === 0) throw new Error("bos");
         return d;
       })
       .catch(function () { return jsonGetir(JSON_RAW); })
-      .then(function (d) {
-        veriyiIsle(d);
+      .catch(function () { return {}; });
+  }
+
+  function veriyiIsle(bot, gas) {
+    veri = {}; liste = [];
+    var fiyatsiz = 0;
+
+    gas.liste.forEach(function (g) {
+      var kod = g.kod;
+      var b = bot[kod] || {};
+      var t = Number(b.hisse_basi_tl) || 0;
+      var tarih = b.tarih || "";
+      if (!(t > 0) && g.hbToplam > 0) {
+        t = g.hbToplam;
+        tarih = String(g.hbYil);
+      }
+      var fiyat = Number(b.fiyat) || 0;
+      if (!(fiyat > 0)) fiyatsiz++;
+
+      veri[kod] = {
+        temettu: t,
+        fiyat: fiyat,
+        tarih: tarih,
+        stopajsiz: !stopajUygulanir(kod),
+        ortalama_verim: g.ort,
+        adet: g.adet,
+        yogunluk: g.yog
+      };
+      liste.push(kod);
+    });
+
+    // Diğer uygulamadaki "Ortalama Verim (Yüksek → Düşük)" sıralaması
+    liste.sort(function (a, b) {
+      var A = veri[a], B = veri[b];
+      if (Math.abs(B.ortalama_verim - A.ortalama_verim) > 0.0001) return B.ortalama_verim - A.ortalama_verim;
+      if (B.adet !== A.adet) return B.adet - A.adet;
+      if (Math.abs(B.yogunluk - A.yogunluk) > 0.0001) return B.yogunluk - A.yogunluk;
+      return a.localeCompare(b);
+    });
+
+    veriKaynakNotu = "Filtre: Yoğunluk ≥ 0,50 · Son 10 Yıl · Ort. verim ≥ %3 (Temettü Analiz kaynağı, " +
+      gas.toplamHisse + " hisse içinden)" +
+      (gas.onbellek ? " — son kayıtlı liste kullanılıyor" : "") +
+      (fiyatsiz > 0 ? " — " + fiyatsiz + " hissede fiyat bulunamadı" : "");
+  }
+
+  function hataGoster(mesaj) {
+    $("yukleniyor").style.display = "none";
+    var h = $("hata");
+    h.style.display = "block";
+    h.innerHTML = mesaj + "<br><button type='button' id='tekrar'>Tekrar dene</button>";
+    $("tekrar").addEventListener("click", function () { window.location.reload(); });
+  }
+
+  function baslat() {
+    depoOku();
+    Promise.all([botVerisiGetir(), gasGetir()])
+      .then(function (sonuc) {
+        var bot = sonuc[0], gas = sonuc[1];
+        veriyiIsle(bot, gas);
         if (liste.length === 0) throw new Error("bos");
         $("yukleniyor").style.display = "none";
+        $("hata").style.display = "none";
         $("alan").style.display = "block";
         $("alan").className = "goster";
         tablolariCiz();
@@ -439,10 +627,7 @@
         sekmeAyarla(aktifSekme);
       })
       .catch(function (e) {
-        $("yukleniyor").style.display = "none";
-        var h = $("hata");
-        h.style.display = "block";
-        h.innerHTML = "Temettü verisi bulunamadı.<br>GitHub → Actions → “Temettu Otomasyonu” → Run workflow ile botu çalıştırın.";
+        hataGoster("Hisse listesi alınamadı (Temettü Analiz kaynağına ulaşılamadı).<br>İnternet bağlantınızı kontrol edip tekrar deneyin.");
       });
   }
 
@@ -451,8 +636,9 @@
     liste.forEach(function (k) {
       var d = veri[k];
       var tarihHtml = d.tarih ? "<small>" + d.tarih + "</small>" : "";
+      var fiyatMetni = d.fiyat > 0 ? fmtFiyat(d.fiyat) : "-";
       var ortak = "<td class='hisse'>" + k + tarihHtml + "</td>" +
-                  "<td>" + fmtFiyat(d.fiyat) + "</td>" +
+                  "<td>" + fiyatMetni + "</td>" +
                   "<td data-c='temettu'>" + temettuHucre(d) + "</td>";
 
       sol.push("<tr data-kod='" + k + "'>" + ortak +
@@ -473,10 +659,10 @@
   function satirSol(tr, kod) {
     var d = veri[kod];
     var aylik = sayi(giris.sol[kod]);
-    var nt = net(d);                             
+    var nt = net(d);
     var lot = 0, maliyet = 0;
     if (aylik > 0 && nt > 0) {
-      lot = (aylik * 12) / nt;                 
+      lot = (aylik * 12) / nt;
       maliyet = lot * d.fiyat;
     }
     tr.querySelector("[data-c=lot]").textContent = fmtLot(lot);
@@ -489,7 +675,7 @@
     var d = veri[kod];
     var lot = sayi(giris.sag[kod]);
     var maliyet = lot * d.fiyat;
-    var aylik = (lot * net(d)) / 12;           
+    var aylik = (lot * net(d)) / 12;
     tr.querySelector("[data-c=maliyet]").textContent = fmtTL(maliyet);
     tr.querySelector("[data-c=aylik]").textContent = fmtTL(aylik);
     tr.className = lot > 0 ? "dolu" : "";
@@ -595,7 +781,7 @@
     }
     ustYukseklik();
   }
-  
+
   $("sekmeler").addEventListener("click", function (e) {
     var h = e.target.getAttribute && e.target.getAttribute("data-hedef");
     if (h) sekmeAyarla(h);
