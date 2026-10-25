@@ -19,8 +19,8 @@ def parse_turkce_sayi(val):
     try: return float(s)
     except ValueError: return 0.0
 
-def parse_date_score(val):
-    # Tüm tarihleri karşılaştırılabilir YYYYMMDD tamsayısına (Örn: 20260316) çevirir. 4.01 hatasını bitirir.
+def parse_date_int(val):
+    if not val: return 0
     s = str(val).strip()
     m = re.search(r'Date\(([-0-9]+)\)', s)
     if m: 
@@ -78,48 +78,55 @@ def main():
                 
                 if not kod or not tarih:
                     for k, v in satir.items():
-                        ku = str(k).upper().replace('İ', 'I')
+                        ku = str(k).upper()
                         if not kod and "KOD" in ku: kod = v
                         if not tarih and "TARIH" in ku: tarih = v
                 
                 if not kod or not tarih: continue
                 kod = str(kod).strip().upper()
 
+                # DİNAMİK ARAMA İPTAL EDİLDİ - DOĞRUDAN İŞ YATIRIM DEĞİŞKENLERİ KULLANILIYOR
                 hb = 0.0
-                for k, v in satir.items():
-                    ku = str(k).upper().replace('İ', 'I').replace('Ü', 'U')
-                    val = parse_turkce_sayi(v)
-                    if val <= 0: continue
-                    
-                    # İlgisiz oran ve Milyonluk TOPLAM TUTARLARI kesinlikle dışla
-                    if any(x in ku for x in ["BEDEL", "VERIM", "DAGITMA", "SERMAYE", "RUCHAN", "TUTAR"]):
-                        continue
-                    
-                    # Saf Oranları (Yüzdelik) Hisse Başı TL'ye Çevir
-                    if "ORAN" in ku and ("TEMETTU" in ku or "NAKIT" in ku):
-                        if (val / 100.0) > hb:
-                            hb = val / 100.0
-                            
-                    # Saf Pay Başı / Hisse Başı verisi geldiyse direkt al
-                    elif ("PAY" in ku or "HISSE" in ku) and ("TEMETTU" in ku or "NAKIT" in ku):
-                        if val > hb:
-                            hb = val
+                if "NAKIT_TEMETTU_ORANI" in satir and satir["NAKIT_TEMETTU_ORANI"]:
+                    hb = parse_turkce_sayi(satir["NAKIT_TEMETTU_ORANI"]) / 100.0
+                elif "PAY_BASINA_BRUT_TEMETTU" in satir and satir["PAY_BASINA_BRUT_TEMETTU"]:
+                    hb = parse_turkce_sayi(satir["PAY_BASINA_BRUT_TEMETTU"])
+                else:
+                    for k, v in satir.items():
+                        ku = str(k).upper().replace('İ', 'I').replace('Ü', 'U')
+                        if ku == "NAKIT_TEMETTU_ORANI":
+                            hb = parse_turkce_sayi(v) / 100.0
+                            break
+                        elif ku == "PAY_BASINA_BRUT_TEMETTU" or ku == "HISSE_BASI_TL":
+                            hb = parse_turkce_sayi(v)
+                            break
                 
                 if hb > 0:
-                    if kod not in gecmis_veriler:
-                        gecmis_veriler[kod] = []
-                    gecmis_veriler[kod].append({"tarih": tarih, "tutar": hb})
+                    date_val = parse_date_int(tarih)
+                    if date_val > 0:
+                        if kod not in gecmis_veriler:
+                            gecmis_veriler[kod] = []
+                        gecmis_veriler[kod].append({"tarih": tarih, "date_val": date_val, "tutar": hb})
+            
+            # Gelecek uçuk tahminleri engellemek için sınır
+            current_date_int = time.gmtime().tm_year * 10000 + time.gmtime().tm_mon * 100 + time.gmtime().tm_mday
             
             for kod, liste in gecmis_veriler.items():
-                # Matematiksel olarak YYYYMMDD kıyaslamasıyla EN GÜNCEL tarihi %100 doğrulukla bulur
-                son_temettu = max(liste, key=lambda x: parse_date_score(x["tarih"]))
+                if len(fiyatlar) > 0 and kod not in fiyatlar: continue
+                
+                gecerli_liste = [x for x in liste if x["date_val"] <= (current_date_int + 200)]
+                if not gecerli_liste:
+                    gecerli_liste = liste
+                
+                # Sadece tarihi baz alarak en güncel olanı çeker
+                son_temettu = max(gecerli_liste, key=lambda x: x["date_val"])
                 
                 temettu_verileri[kod] = {
                     "tarih": format_tarih(son_temettu["tarih"]),
                     "hisse_basi_tl": round(son_temettu["tutar"], 4),
                     "fiyat": fiyatlar.get(kod, 0.0)
                 }
-    except Exception:
+    except Exception as e:
         pass
 
     if not GITHUB_TOKEN: return
@@ -131,7 +138,7 @@ def main():
     sha = get_res.json().get('sha', '') if get_res.status_code == 200 else ""
     
     encoded = base64.b64encode(json.dumps(temettu_verileri, indent=4).encode('utf-8')).decode('utf-8')
-    data = {"message": "otomatik güncelleme: kesin yyyymmdd matematiksel siralama", "content": encoded}
+    data = {"message": "otomatik güncelleme: kesin veritabani eşlestirmesi", "content": encoded}
     if sha: data["sha"] = sha
     
     requests.put(api_url_gh, headers=auth_headers, json=data)
