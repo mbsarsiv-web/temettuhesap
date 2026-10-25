@@ -10,6 +10,10 @@ GITHUB_TOKEN = os.environ.get("GH_TOKEN")
 REPO = "mbsarsiv-web/temettuhesap"
 DOSYA = "temettu_veri.json"
 
+# --- Filtre ayarlari ---
+YIL_PENCERESI = 10   # son kac takvim yili incelenecek (icinde bulunulan yil dahil)
+MIN_TEMETTU_YILI = 7 # pencere icinde en az kac farkli yilda temettu verilmis olmali
+
 IS_URL = "https://www.isyatirim.com.tr/_layouts/15/IsYatirim.Website/StockInfo/CompanyInfoAjax.aspx/GetSermayeArttirimlari"
 IS_SAYFA = "https://www.isyatirim.com.tr/tr-tr/analiz/hisse/Sayfalar/Temettu-Ve-Sermaye-Artirimi-Tarihcesi.aspx"
 TV_URL = "https://scanner.tradingview.com/turkey/scan"
@@ -195,25 +199,59 @@ def satiri_coz(satir):
 
 
 def temettuleri_hazirla(satirlar, fiyatlar):
-    gecmis = {}
+    """
+    1) Ayni hisse + ayni tarih + ayni oran tekrar eden satirlar teke indirilir.
+    2) Ayni takvim yilindaki tum temettuler TOPLANIR.
+    3) Gosterilen tutar = hissenin en guncel temettu yilindaki toplam (hisse basi brut TL).
+    4) Son YIL_PENCERESI yilda, en az MIN_TEMETTU_YILI farkli yilda temettu vermeyenler elenir.
+    """
+    bu_yil = time.gmtime().tm_year
+    ilk_yil = bu_yil - YIL_PENCERESI + 1
+
+    # kod -> { (date_val, tutar) ...}  (tekrarlari set ile eler)
+    ham = {}
     for satir in satirlar:
         if not isinstance(satir, dict):
             continue
         kod, t_int, t_str, hb = satiri_coz(satir)
         if not kod or hb <= 0 or t_int <= 0:
             continue
-        gecmis.setdefault(kod, []).append({"date_val": t_int, "tarih": t_str, "tutar": hb})
+        ham.setdefault(kod, {})[(t_int, round(hb, 6))] = t_str
 
     sonuc = {}
-    for kod, liste in gecmis.items():
+    elenen_az = 0
+    for kod, kayitlar in ham.items():
         if fiyatlar and kod not in fiyatlar:
             continue
-        son = max(liste, key=lambda x: x["date_val"])
+
+        # yil -> [(date_val, tutar, tarih_str)]
+        yillik = {}
+        for (t_int, hb), t_str in kayitlar.items():
+            yillik.setdefault(t_int // 10000, []).append((t_int, hb, t_str))
+
+        # Filtre: pencere icindeki farkli temettu yili sayisi
+        pencere_yil_sayisi = len([y for y in yillik if ilk_yil <= y <= bu_yil])
+        if pencere_yil_sayisi < MIN_TEMETTU_YILI:
+            elenen_az += 1
+            continue
+
+        son_yil = max(yillik.keys())
+        odemeler = sorted(yillik[son_yil])
+        toplam = sum(o[1] for o in odemeler)
+        son_odeme = odemeler[-1]
+
         sonuc[kod] = {
-            "tarih": son["tarih"],
-            "hisse_basi_tl": round(son["tutar"], 4),
+            "tarih": son_odeme[2],                       # en son temettu tarihi
+            "hisse_basi_tl": round(toplam, 4),           # o yilin toplami
             "fiyat": round(fiyatlar.get(kod, 0.0), 4),
+            "yil": son_yil,
+            "odeme_sayisi": len(odemeler),               # o yil kac kez dagitilmis
+            "tarihler": [o[2] for o in odemeler],
+            "son_%d_yilda_temettu_yili" % YIL_PENCERESI: pencere_yil_sayisi,
         }
+
+    log("Filtre (>= %d yil / son %d yil) nedeniyle elenen hisse: %d"
+        % (MIN_TEMETTU_YILI, YIL_PENCERESI, elenen_az))
     return sonuc
 
 
