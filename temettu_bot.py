@@ -47,6 +47,7 @@ def main():
     }
     session.headers.update(headers)
 
+    # 1. TradingView Fiyatları
     tv_url = "https://scanner.tradingview.com/turkey/scan"
     payload_tv = {"columns": ["name", "close"], "filter": [{"left": "type", "operation": "in_range", "right": ["stock"]}], "range": [0, 1500]}
     try:
@@ -55,6 +56,7 @@ def main():
     except:
         fiyatlar = {}
 
+    # 2. İş Yatırım Temettü Verileri
     api_url = "https://www.isyatirim.com.tr/_layouts/15/IsYatirim.Website/StockInfo/CompanyInfoAjax.aspx/GetSermayeArttirimlari"
     payload_is = {"hisseKodu": "", "hisseTanimKodu": "04", "yil": 0, "zaman": "HEPSI", "endeksKodu": "09", "sektorKodu": ""}
     
@@ -70,42 +72,41 @@ def main():
             for satir in data:
                 kod = satir.get("SHHE_HS_KOD") or satir.get("HISSE_KODU") or ""
                 tarih = satir.get("SHHE_TARIH") or satir.get("TARIH") or ""
+                
                 if not kod or not tarih:
                     for k, v in satir.items():
-                        if not kod and "KOD" in str(k).upper(): kod = v
-                        if not tarih and "TARIH" in str(k).upper(): tarih = v
+                        k_upper = str(k).upper().replace('İ', 'I')
+                        if not kod and "KOD" in k_upper: kod = v
+                        if not tarih and "TARIH" in k_upper: tarih = v
                 
                 if not kod or not tarih: continue
                 kod = str(kod).strip().upper()
 
-                hisse_basi = 0.0
-                for k, v in satir.items():
-                    k_upper = str(k).upper()
-                    
-                    # Bedelsiz veya bedelli oranlarını tamamen atla
-                    if "BEDELSIZ" in k_upper or "BEDELLI" in k_upper or "RUCHAN" in k_upper:
-                        continue
-                        
-                    val = parse_turkce_sayi(v)
-                    if val <= 0: continue
-
-                    # Eğer API doğrudan Pay/Hisse Başına değeri veriyorsa (örn: PAY_BASINA_BRUT_TEMETTU)
-                    if ("PAY" in k_upper or "HISSE" in k_upper) and ("TEMETTU" in k_upper or "NAKIT" in k_upper):
-                        if val > hisse_basi:
-                            hisse_basi = val
-                            
-                    # Eğer sadece Dağıtım Oranı veriliyorsa (örn: NAKIT_TEMETTU_ORANI)
-                    # BİST'te nominal 1 TL olduğu için Oran / 100 = Hisse Başı TL'dir.
-                    elif "ORAN" in k_upper and ("TEMETTU" in k_upper or "NAKIT" in k_upper):
-                        hb = val / 100.0
-                        if hb > hisse_basi:
-                            hisse_basi = hb
+                oran_brut = 0.0
+                oran_net = 0.0
                 
-                if hisse_basi > 0:
+                for k, v in satir.items():
+                    k_upper = str(k).upper().replace('İ', 'I').replace('Ü', 'U')
+                    
+                    # Yalnızca tam isabet "Nakit Temettü Oranı" içeren API başlıklarını hedefle
+                    if "NAKIT" in k_upper and "ORAN" in k_upper and "TEMETTU" in k_upper:
+                        val = parse_turkce_sayi(v)
+                        if "NET" in k_upper:
+                            if val > oran_net: oran_net = val
+                        else:
+                            if val > oran_brut: oran_brut = val
+                
+                # Brüt oran varsa (Örn: 364.0) onu kullan, yoksa neti kullan
+                secilen_oran = oran_brut if oran_brut > 0 else oran_net
+                
+                if secilen_oran > 0:
+                    # İş Yatırım Hisse Başı TL = Oran / 100 mantığı (Örn: 364.0 / 100 = 3.64 TL)
+                    hisse_basi = secilen_oran / 100.0
                     if kod not in gecmis_veriler:
                         gecmis_veriler[kod] = []
                     gecmis_veriler[kod].append({"tarih": tarih, "tutar": hisse_basi})
             
+            # Her hisse için en güncel tarihli olanı seç
             for kod, liste in gecmis_veriler.items():
                 if kod in fiyatlar:
                     son_temettu = max(liste, key=lambda x: parse_date_score(x["tarih"]))
@@ -114,9 +115,10 @@ def main():
                         "hisse_basi_tl": round(son_temettu["tutar"], 4),
                         "fiyat": fiyatlar[kod]
                     }
-    except Exception as e:
+    except Exception:
         pass
 
+    # 3. GitHub'a Gönderim
     if not GITHUB_TOKEN: return
 
     api_url_gh = f"https://api.github.com/repos/{REPO}/contents/temettu_veri.json"
