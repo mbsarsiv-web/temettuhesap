@@ -16,6 +16,10 @@ YOGUNLUK_ESIGI = 0.7      # temettu yogunlugu bunun altindaysa hisse elenir (7/1
 MIN_DEGERLENDIRME_YILI = 1  # halka arzdan bu yana en az kac tamamlanmis yil gecmis olmali
 FIYAT_GECMISI_URL = ("https://www.isyatirim.com.tr/_layouts/15/Isyatirim.Website/Common/Data.aspx/HisseTekil"
                      "?hisse=%s&startdate=%s&enddate=%s")
+TV_ARZ_ALAN_ADAYLARI = ["ipo_offer_date_first", "ipo_offer_date_last", "ipo_date",
+                        "listing_date", "first_trading_date"]  # TradingView'de denenecek sutunlar
+TAHMINI_ARZ_YILI_KULLAN = True  # arz yili hicbir kaynaktan bulunamazsa: ilk temettu yilini arz yili say
+IZLE = ["MACKO"]                # bu hisselerin degerlendirme ayrintisi log'a yazilir
 OTOMATIK_ZAMAN_ASIMI = 8     # sn: tek bir fiyat gecmisi istegi icin
 OTOMATIK_BUTCE_SN = 240      # sn: otomatik halka arz aramasi icin toplam ust sinir
 HALKA_ARZ_DOSYA = "halka_arz.json"  # {"KOD": halka_arz_yili} - yalnizca son 10 yildaki arzlar yeterli
@@ -122,6 +126,65 @@ def fiyatlari_cek(session):
     except Exception as e:
         log("TradingView HATA:", repr(e))
     return fiyatlar
+
+
+def _tv_yil(v):
+    """TradingView tarih degerini (saniye/milisaniye epoch veya metin) takvim yilina cevirir."""
+    if v is None or isinstance(v, bool):
+        return None
+    bu_yil = time.gmtime().tm_year
+    if isinstance(v, (int, float)):
+        x = float(v)
+        if x > 1e11:
+            x /= 1000.0
+        if x <= 0:
+            return None
+        y = time.gmtime(x).tm_year
+    else:
+        ti, _ = parse_tarih(v)
+        y = ti // 10000 if ti else 0
+    return y if 1980 <= y <= bu_yil else None
+
+
+def tv_arz_yillari(session):
+    """
+    TradingView tarayicisindan halka arz tarihlerini almaya calisir.
+    Aday sutunlar tek tek denenir; calisanlar log'a yazilir. {KOD: arz_yili} dondurur.
+    """
+    url = TV_URL
+    taban = [{"left": "type", "operation": "in_range", "right": ["stock"]}]
+    calisan = []
+    for kolon in TV_ARZ_ALAN_ADAYLARI:
+        try:
+            r = session.post(url, json={"columns": ["name", kolon], "filter": taban, "range": [0, 5]},
+                             timeout=20)
+            if r.status_code == 200 and r.json().get("data") is not None:
+                calisan.append(kolon)
+            else:
+                log("TradingView sutunu yok/reddedildi: %s (HTTP %s)" % (kolon, r.status_code))
+        except Exception as e:
+            log("TradingView sutun denemesi HATA (%s): %s" % (kolon, repr(e)))
+
+    if not calisan:
+        log("TradingView'de kullanilabilir halka arz sutunu bulunamadi.")
+        return {}
+    log("TradingView halka arz sutunlari calisiyor:", calisan)
+
+    sonuc = {}
+    try:
+        r = session.post(url, json={"columns": ["name"] + calisan, "filter": taban, "range": [0, 1500]},
+                         timeout=30)
+        for item in r.json().get("data", []):
+            kod = str(item["d"][0]).replace("BIST:", "").strip().upper()
+            yillar = [y for y in (_tv_yil(v) for v in item["d"][1:]) if y]
+            if yillar:
+                sonuc[kod] = min(yillar)
+    except Exception as e:
+        log("TradingView halka arz verisi HATA:", repr(e))
+    log("TradingView'den halka arz yili bulunan hisse sayisi:", len(sonuc))
+    if "MACKO" in sonuc:
+        log("TradingView MACKO halka arz yili:", sonuc["MACKO"])
+    return sonuc
 
 
 # ---------------------------------------------------------------- is yatirim
@@ -304,7 +367,7 @@ def halka_arz_yillarini_yukle():
     return sonuc
 
 
-def temettuleri_hazirla(satirlar, fiyatlar, halka_arz=None, arz_bulucu=None):
+def temettuleri_hazirla(satirlar, fiyatlar, halka_arz=None, arz_bulucu=None, tv_arz=None):
     """
     1) Ayni hisse + ayni tarih + ayni oran tekrar eden satirlar teke indirilir.
     2) Ayni takvim yilindaki tum temettuler TOPLANIR.
@@ -318,6 +381,7 @@ def temettuleri_hazirla(satirlar, fiyatlar, halka_arz=None, arz_bulucu=None):
        eski sayilir (aralik = son 10 yil).
     """
     halka_arz = halka_arz or {}
+    tv_arz = tv_arz or {}
     bu_yil = time.gmtime().tm_year
     son_tam_yil = bu_yil - 1
     pencere_basi = bu_yil - YIL_PENCERESI
@@ -335,6 +399,7 @@ def temettuleri_hazirla(satirlar, fiyatlar, halka_arz=None, arz_bulucu=None):
     elenen = 0
     kontrol = []   # halka arz yili bulunamayan, yeni arz olabilecek, elenen hisseler
     otomatik_bulunan = {}
+    tahmin_edilen = {}
     for kod, kayitlar in ham.items():
         if fiyatlar and kod not in fiyatlar:
             continue
@@ -345,6 +410,9 @@ def temettuleri_hazirla(satirlar, fiyatlar, halka_arz=None, arz_bulucu=None):
 
         arz_yili = halka_arz.get(kod)
         arz_kaynagi = "dosya" if arz_yili else None
+        if arz_yili is None and kod in tv_arz:
+            arz_yili = tv_arz[kod]
+            arz_kaynagi = "tradingview"
 
         def degerlendir(arz):
             bas = max(arz or 0, pencere_basi)
@@ -366,8 +434,22 @@ def temettuleri_hazirla(satirlar, fiyatlar, halka_arz=None, arz_bulucu=None):
                 bas, degerlendirilen, temettu_yili, yogunluk = degerlendir(arz_yili)
                 gecti = (degerlendirilen >= MIN_DEGERLENDIRME_YILI
                          and round(yogunluk, 4) >= YOGUNLUK_ESIGI)
+            elif TAHMINI_ARZ_YILI_KULLAN:
+                # Hicbir kaynak arz yilini vermedi: ilk temettu yilini arz yili kabul et
+                arz_yili = min(yillik)
+                arz_kaynagi = "tahmin"
+                tahmin_edilen[kod] = arz_yili
+                bas, degerlendirilen, temettu_yili, yogunluk = degerlendir(arz_yili)
+                gecti = (degerlendirilen >= MIN_DEGERLENDIRME_YILI
+                         and round(yogunluk, 4) >= YOGUNLUK_ESIGI)
             else:
                 kontrol.append(kod)
+
+        if kod in IZLE:
+            log("IZLE %s: temettu yillari=%s | arz=%s (%s) | degerlendirilen=%s | temettu_yili=%s | "
+                "yogunluk=%.2f | sonuc=%s" % (kod, sorted(yillik), arz_yili, arz_kaynagi,
+                                             degerlendirilen, temettu_yili, yogunluk,
+                                             "GIRDI" if gecti else "ELENDI"))
 
         if not gecti:
             elenen += 1
@@ -391,6 +473,14 @@ def temettuleri_hazirla(satirlar, fiyatlar, halka_arz=None, arz_bulucu=None):
             "yogunluk": round(yogunluk, 2),
         }
 
+    for k in IZLE:
+        if k not in ham:
+            log("IZLE %s: Is Yatirim verisinde gecerli temettu kaydi YOK (kod/alan eslesmesi kontrol edilmeli)." % k)
+        elif fiyatlar and k not in fiyatlar:
+            log("IZLE %s: TradingView fiyat listesinde YOK." % k)
+    if tahmin_edilen:
+        log("UYARI - halka arz yili bulunamadi, ilk temettu yili arz yili sayildi (tahmin): %s"
+            % ", ".join("%s:%d" % (k, v) for k, v in sorted(tahmin_edilen.items())))
     if otomatik_bulunan:
         log("Fiyat gecmisinden bulunan halka arz yillari:",
             ", ".join("%s:%d" % (k, v) for k, v in sorted(otomatik_bulunan.items())))
@@ -442,8 +532,9 @@ def main():
         log("Is Yatirim HATA:", repr(e))
         satirlar = []
 
+    tv_arz = tv_arz_yillari(session)
     veri = temettuleri_hazirla(
-        satirlar, fiyatlar, halka_arz_yillarini_yukle(), ilk_islem_yili_bul)
+        satirlar, fiyatlar, halka_arz_yillarini_yukle(), ilk_islem_yili_bul, tv_arz)
     log("Hazirlanan hisse sayisi:", len(veri))
 
     if not veri:
