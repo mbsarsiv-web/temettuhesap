@@ -52,6 +52,17 @@ def parse_tarih(val):
     """Her tur tarih bicimini (YYYYMMDD int, 'dd.mm.yyyy' str) dondurur. Bulamazsa (0, '')."""
     if val is None:
         return 0, ""
+
+    # Sayisal epoch (milisaniye): -62135596800000 = 0001-01-01 = bos tarih
+    if isinstance(val, (int, float)) and not isinstance(val, bool):
+        if abs(val) > 1e11:
+            t = time.gmtime(val / 1000.0)
+            if t.tm_year < 1990:
+                return 0, ""
+            return (t.tm_year * 10000 + t.tm_mon * 100 + t.tm_mday,
+                    "%02d.%02d.%04d" % (t.tm_mday, t.tm_mon, t.tm_year))
+        return 0, ""
+
     s = str(val).strip()
     if not s:
         return 0, ""
@@ -59,6 +70,8 @@ def parse_tarih(val):
     m = re.search(r"Date\((-?\d+)\)", s)
     if m:
         t = time.gmtime(int(m.group(1)) // 1000)
+        if t.tm_year < 1990:
+            return 0, ""
         return (t.tm_year * 10000 + t.tm_mon * 100 + t.tm_mday,
                 "%02d.%02d.%04d" % (t.tm_mday, t.tm_mon, t.tm_year))
 
@@ -159,45 +172,24 @@ def is_yatirim_satirlari(session):
 
 
 def satiri_coz(satir):
-    """Bir satirdan (kod, tarih_int, tarih_str, hisse_basi_brut_tl) cikarir."""
-    kod = ""
-    tarihler = []      # (anahtar, deger)
-    hb = 0.0           # hisse basi brut TL
-    oran = 0.0         # nakit temettu orani (% nominal)
+    """Bir satirdan (kod, tarih_int, tarih_str, hisse_basi_brut_tl) cikarir.
 
-    for k, v in satir.items():
-        ku = tr_upper(k)
+    Is Yatirim alanlari:
+      SHHE_HS_KODU / HISSE_KODU    -> hisse kodu
+      SHHE_TARIH                   -> temettu tarihi (TARIH yedek)
+      SHHE_NAKIT_TM_ORAN           -> brut nakit temettu orani (% , 1 TL nominal uzerinden)
+      SHHE_NAKIT_TM_ORAN_NET       -> net oran (KULLANILMAZ)
+      SHHE_NAKIT_TM_TUTAR          -> toplam dagitilan tutar (hisse basi DEGIL)
+    Hisse basi brut TL = SHHE_NAKIT_TM_ORAN / 100
+    """
+    kod = str(satir.get("SHHE_HS_KODU") or satir.get("HISSE_KODU") or "").strip().upper()
 
-        if not kod and (ku.endswith("HS_KOD") or ku.endswith("HISSE_KODU")
-                        or ku.endswith("HISSE_KOD") or ku == "KOD" or ku.endswith("_KOD")):
-            if isinstance(v, str) and v.strip():
-                kod = v.strip().upper()
-            continue
+    t_int, t_str = parse_tarih(satir.get("SHHE_TARIH"))
+    if t_int <= 0:
+        t_int, t_str = parse_tarih(satir.get("TARIH"))
 
-        if "TARIH" in ku:
-            tarihler.append((ku, v))
-            continue
-
-        if hb == 0.0 and ("PAY_BASINA_BRUT_TEMETTU" in ku or ku.endswith("HISSE_BASI_TL")
-                          or ("BRUT" in ku and "TEMETTU" in ku and "ORAN" not in ku
-                              and "NET" not in ku and "TOPLAM" not in ku)):
-            hb = parse_sayi(v)
-            continue
-
-        if oran == 0.0 and ku.endswith("NAKIT_TEMETTU_ORANI") and "NET" not in ku:
-            oran = parse_sayi(v)
-
-    # Oncelik: key'i TARIH ile biten, sonra icinde TARIH gecen ilk gecerli tarih
-    tarihler.sort(key=lambda kv: (0 if kv[0].endswith("TARIH") else 1))
-    t_int, t_str = 0, ""
-    for _, v in tarihler:
-        ti, ts = parse_tarih(v)
-        if ti > 0:
-            t_int, t_str = ti, ts
-            break
-
-    if hb <= 0 and oran > 0:
-        hb = oran / 100.0      # nominal 1 TL uzerinden oran -> hisse basi TL
+    oran = parse_sayi(satir.get("SHHE_NAKIT_TM_ORAN"))
+    hb = oran / 100.0 if oran > 0 else 0.0
 
     return kod, t_int, t_str, hb
 
