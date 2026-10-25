@@ -60,8 +60,9 @@ def main():
     except Exception:
         pass 
 
+    # endeksKodu kısıtlaması kaldırılarak BIST'teki TÜM hisseler hedeflendi
     api_url = "https://www.isyatirim.com.tr/_layouts/15/IsYatirim.Website/StockInfo/CompanyInfoAjax.aspx/GetSermayeArttirimlari"
-    payload_is = {"hisseKodu": "", "hisseTanimKodu": "04", "yil": 0, "zaman": "HEPSI", "endeksKodu": "09", "sektorKodu": ""}
+    payload_is = {"hisseKodu": "", "hisseTanimKodu": "04", "yil": 0, "zaman": "HEPSI", "endeksKodu": "", "sektorKodu": ""}
     
     temettu_verileri = {}
     try:
@@ -85,21 +86,18 @@ def main():
                 if not kod or not tarih: continue
                 kod = str(kod).strip().upper()
 
-                # DİNAMİK ARAMA İPTAL EDİLDİ - DOĞRUDAN İŞ YATIRIM DEĞİŞKENLERİ KULLANILIYOR
                 hb = 0.0
-                if "NAKIT_TEMETTU_ORANI" in satir and satir["NAKIT_TEMETTU_ORANI"]:
-                    hb = parse_turkce_sayi(satir["NAKIT_TEMETTU_ORANI"]) / 100.0
-                elif "PAY_BASINA_BRUT_TEMETTU" in satir and satir["PAY_BASINA_BRUT_TEMETTU"]:
-                    hb = parse_turkce_sayi(satir["PAY_BASINA_BRUT_TEMETTU"])
-                else:
-                    for k, v in satir.items():
-                        ku = str(k).upper().replace('İ', 'I').replace('Ü', 'U')
-                        if ku == "NAKIT_TEMETTU_ORANI":
-                            hb = parse_turkce_sayi(v) / 100.0
-                            break
-                        elif ku == "PAY_BASINA_BRUT_TEMETTU" or ku == "HISSE_BASI_TL":
-                            hb = parse_turkce_sayi(v)
-                            break
+                for k, v in satir.items():
+                    ku = str(k).upper().replace('İ', 'I').replace('Ü', 'U')
+                    
+                    # Exact Substring Match: Sütun ön eklerini (SHHE_) umursamadan doğrudan veriyi çeker
+                    if "PAY_BASINA_BRUT_TEMETTU" in ku or "HISSE_BASI" in ku:
+                        val = parse_turkce_sayi(v)
+                        if val > hb: hb = val
+                        
+                    elif "NAKIT_TEMETTU_ORANI" in ku and "NET" not in ku:
+                        val = parse_turkce_sayi(v) / 100.0
+                        if val > hb: hb = val
                 
                 if hb > 0:
                     date_val = parse_date_int(tarih)
@@ -108,17 +106,16 @@ def main():
                             gecmis_veriler[kod] = []
                         gecmis_veriler[kod].append({"tarih": tarih, "date_val": date_val, "tutar": hb})
             
-            # Gelecek uçuk tahminleri engellemek için sınır
             current_date_int = time.gmtime().tm_year * 10000 + time.gmtime().tm_mon * 100 + time.gmtime().tm_mday
             
             for kod, liste in gecmis_veriler.items():
                 if len(fiyatlar) > 0 and kod not in fiyatlar: continue
                 
+                # Sadece mevcut yıl ve geçmiş tarihlere izin ver
                 gecerli_liste = [x for x in liste if x["date_val"] <= (current_date_int + 200)]
                 if not gecerli_liste:
                     gecerli_liste = liste
                 
-                # Sadece tarihi baz alarak en güncel olanı çeker
                 son_temettu = max(gecerli_liste, key=lambda x: x["date_val"])
                 
                 temettu_verileri[kod] = {
@@ -126,7 +123,7 @@ def main():
                     "hisse_basi_tl": round(son_temettu["tutar"], 4),
                     "fiyat": fiyatlar.get(kod, 0.0)
                 }
-    except Exception as e:
+    except Exception:
         pass
 
     if not GITHUB_TOKEN: return
@@ -138,7 +135,7 @@ def main():
     sha = get_res.json().get('sha', '') if get_res.status_code == 200 else ""
     
     encoded = base64.b64encode(json.dumps(temettu_verileri, indent=4).encode('utf-8')).decode('utf-8')
-    data = {"message": "otomatik güncelleme: kesin veritabani eşlestirmesi", "content": encoded}
+    data = {"message": "otomatik güncelleme: endekskodu sifirlandi, sutun aramasi genisletildi", "content": encoded}
     if sha: data["sha"] = sha
     
     requests.put(api_url_gh, headers=auth_headers, json=data)
