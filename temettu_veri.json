@@ -1,4 +1,1331 @@
 {
-  "_aciklama": "Yalnizca son 10 yil icinde halka arz olan hisseleri ekleyin: \"KOD\": arz_yili. Eski hisseleri yazmaniz gerekmez.",
-  "_ornek": 2020
+  "ACSEL": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 74.5,
+    "hisse_basi_tl": 0.2,
+    "odeme_sayisi": 1,
+    "tarih": "12.11.2024",
+    "tarihler": [
+      "12.11.2024"
+    ],
+    "temettu_yili_sayisi": 8,
+    "yil": 2024,
+    "yogunluk": 0.8
+  },
+  "ADEL": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 22.9,
+    "hisse_basi_tl": 0.5773,
+    "odeme_sayisi": 1,
+    "tarih": "26.09.2025",
+    "tarihler": [
+      "26.09.2025"
+    ],
+    "temettu_yili_sayisi": 9,
+    "yil": 2025,
+    "yogunluk": 0.9
+  },
+  "AEFES": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 16.22,
+    "hisse_basi_tl": 0.3395,
+    "odeme_sayisi": 2,
+    "tarih": "05.10.2026",
+    "tarihler": [
+      "13.05.2026",
+      "05.10.2026"
+    ],
+    "temettu_yili_sayisi": 10,
+    "yil": 2026,
+    "yogunluk": 1.0
+  },
+  "AGESA": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 195.2,
+    "hisse_basi_tl": 6.9444,
+    "odeme_sayisi": 1,
+    "tarih": "25.03.2026",
+    "tarihler": [
+      "25.03.2026"
+    ],
+    "temettu_yili_sayisi": 9,
+    "yil": 2026,
+    "yogunluk": 0.9
+  },
+  "AGHOL": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 28.82,
+    "hisse_basi_tl": 0.6981,
+    "odeme_sayisi": 1,
+    "tarih": "20.05.2026",
+    "tarihler": [
+      "20.05.2026"
+    ],
+    "temettu_yili_sayisi": 9,
+    "yil": 2026,
+    "yogunluk": 0.9
+  },
+  "AKBNK": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 63.35,
+    "hisse_basi_tl": 2.2018,
+    "odeme_sayisi": 1,
+    "tarih": "26.03.2026",
+    "tarihler": [
+      "26.03.2026"
+    ],
+    "temettu_yili_sayisi": 8,
+    "yil": 2026,
+    "yogunluk": 0.8
+  },
+  "AKCNS": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 180.5,
+    "hisse_basi_tl": 1.8804,
+    "odeme_sayisi": 1,
+    "tarih": "01.06.2026",
+    "tarihler": [
+      "01.06.2026"
+    ],
+    "temettu_yili_sayisi": 10,
+    "yil": 2026,
+    "yogunluk": 1.0
+  },
+  "AKMGY": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 176.5,
+    "hisse_basi_tl": 16.06,
+    "odeme_sayisi": 2,
+    "tarih": "11.08.2026",
+    "tarihler": [
+      "15.04.2026",
+      "11.08.2026"
+    ],
+    "temettu_yili_sayisi": 10,
+    "yil": 2026,
+    "yogunluk": 1.0
+  },
+  "AKSA": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 10.3,
+    "hisse_basi_tl": 0.58,
+    "odeme_sayisi": 1,
+    "tarih": "03.04.2026",
+    "tarihler": [
+      "03.04.2026"
+    ],
+    "temettu_yili_sayisi": 10,
+    "yil": 2026,
+    "yogunluk": 1.0
+  },
+  "ALARK": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 101.3,
+    "hisse_basi_tl": 3.185,
+    "odeme_sayisi": 1,
+    "tarih": "04.05.2026",
+    "tarihler": [
+      "04.05.2026"
+    ],
+    "temettu_yili_sayisi": 10,
+    "yil": 2026,
+    "yogunluk": 1.0
+  },
+  "ALCAR": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 574.5,
+    "hisse_basi_tl": 63.2175,
+    "odeme_sayisi": 1,
+    "tarih": "10.04.2025",
+    "tarihler": [
+      "10.04.2025"
+    ],
+    "temettu_yili_sayisi": 7,
+    "yil": 2025,
+    "yogunluk": 0.7
+  },
+  "ALGYO": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 2.52,
+    "hisse_basi_tl": 0.05,
+    "odeme_sayisi": 1,
+    "tarih": "12.05.2026",
+    "tarihler": [
+      "12.05.2026"
+    ],
+    "temettu_yili_sayisi": 9,
+    "yil": 2026,
+    "yogunluk": 0.9
+  },
+  "ALKA": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 4.81,
+    "hisse_basi_tl": 0.5328,
+    "odeme_sayisi": 1,
+    "tarih": "10.04.2023",
+    "tarihler": [
+      "10.04.2023"
+    ],
+    "temettu_yili_sayisi": 7,
+    "yil": 2023,
+    "yogunluk": 0.7
+  },
+  "ALKIM": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 9.5,
+    "hisse_basi_tl": 0.9259,
+    "odeme_sayisi": 1,
+    "tarih": "12.04.2023",
+    "tarihler": [
+      "12.04.2023"
+    ],
+    "temettu_yili_sayisi": 8,
+    "yil": 2023,
+    "yogunluk": 0.8
+  },
+  "ANHYT": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 93.2,
+    "hisse_basi_tl": 8.1395,
+    "odeme_sayisi": 1,
+    "tarih": "26.03.2026",
+    "tarihler": [
+      "26.03.2026"
+    ],
+    "temettu_yili_sayisi": 10,
+    "yil": 2026,
+    "yogunluk": 1.0
+  },
+  "ASELS": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 338.0,
+    "hisse_basi_tl": 0.4276,
+    "odeme_sayisi": 1,
+    "tarih": "24.11.2026",
+    "tarihler": [
+      "24.11.2026"
+    ],
+    "temettu_yili_sayisi": 10,
+    "yil": 2026,
+    "yogunluk": 1.0
+  },
+  "AYES": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 5.7,
+    "hisse_basi_tl": 0.3529,
+    "odeme_sayisi": 1,
+    "tarih": "01.06.2026",
+    "tarihler": [
+      "01.06.2026"
+    ],
+    "temettu_yili_sayisi": 8,
+    "yil": 2026,
+    "yogunluk": 0.8
+  },
+  "AYGAZ": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 269.0,
+    "hisse_basi_tl": 12.55,
+    "odeme_sayisi": 1,
+    "tarih": "16.03.2026",
+    "tarihler": [
+      "16.03.2026"
+    ],
+    "temettu_yili_sayisi": 10,
+    "yil": 2026,
+    "yogunluk": 1.0
+  },
+  "BFREN": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 88.8,
+    "hisse_basi_tl": 24.3093,
+    "odeme_sayisi": 1,
+    "tarih": "26.09.2023",
+    "tarihler": [
+      "26.09.2023"
+    ],
+    "temettu_yili_sayisi": 8,
+    "yil": 2023,
+    "yogunluk": 0.8
+  },
+  "BIMAS": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 373.0,
+    "hisse_basi_tl": 7.0,
+    "odeme_sayisi": 3,
+    "tarih": "16.12.2026",
+    "tarihler": [
+      "17.06.2026",
+      "16.09.2026",
+      "16.12.2026"
+    ],
+    "temettu_yili_sayisi": 10,
+    "yil": 2026,
+    "yogunluk": 1.0
+  },
+  "BRISA": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 66.5,
+    "hisse_basi_tl": 2.1296,
+    "odeme_sayisi": 1,
+    "tarih": "28.03.2025",
+    "tarihler": [
+      "28.03.2025"
+    ],
+    "temettu_yili_sayisi": 7,
+    "yil": 2025,
+    "yogunluk": 0.7
+  },
+  "BRYAT": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 1181.0,
+    "hisse_basi_tl": 166.1458,
+    "odeme_sayisi": 1,
+    "tarih": "08.04.2026",
+    "tarihler": [
+      "08.04.2026"
+    ],
+    "temettu_yili_sayisi": 10,
+    "yil": 2026,
+    "yogunluk": 1.0
+  },
+  "CCOLA": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 74.75,
+    "hisse_basi_tl": 1.43,
+    "odeme_sayisi": 1,
+    "tarih": "12.05.2026",
+    "tarihler": [
+      "12.05.2026"
+    ],
+    "temettu_yili_sayisi": 10,
+    "yil": 2026,
+    "yogunluk": 1.0
+  },
+  "CEMTS": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 6.47,
+    "hisse_basi_tl": 0.3,
+    "odeme_sayisi": 1,
+    "tarih": "24.06.2026",
+    "tarihler": [
+      "24.06.2026"
+    ],
+    "temettu_yili_sayisi": 10,
+    "yil": 2026,
+    "yogunluk": 1.0
+  },
+  "CIMSA": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 37.44,
+    "hisse_basi_tl": 0.7403,
+    "odeme_sayisi": 1,
+    "tarih": "01.04.2026",
+    "tarihler": [
+      "01.04.2026"
+    ],
+    "temettu_yili_sayisi": 7,
+    "yil": 2026,
+    "yogunluk": 0.7
+  },
+  "CLEBI": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 1223.0,
+    "hisse_basi_tl": 103.0,
+    "odeme_sayisi": 1,
+    "tarih": "24.04.2026",
+    "tarihler": [
+      "24.04.2026"
+    ],
+    "temettu_yili_sayisi": 10,
+    "yil": 2026,
+    "yogunluk": 1.0
+  },
+  "DOAS": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 130.6,
+    "hisse_basi_tl": 30.0,
+    "odeme_sayisi": 2,
+    "tarih": "13.08.2026",
+    "tarihler": [
+      "13.04.2026",
+      "13.08.2026"
+    ],
+    "temettu_yili_sayisi": 8,
+    "yil": 2026,
+    "yogunluk": 0.8
+  },
+  "DOHOL": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 16.38,
+    "hisse_basi_tl": 0.3057,
+    "odeme_sayisi": 1,
+    "tarih": "01.09.2025",
+    "tarihler": [
+      "01.09.2025"
+    ],
+    "temettu_yili_sayisi": 7,
+    "yil": 2025,
+    "yogunluk": 0.7
+  },
+  "ECILC": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 49.62,
+    "hisse_basi_tl": 1.7512,
+    "odeme_sayisi": 1,
+    "tarih": "06.05.2026",
+    "tarihler": [
+      "06.05.2026"
+    ],
+    "temettu_yili_sayisi": 10,
+    "yil": 2026,
+    "yogunluk": 1.0
+  },
+  "ECZYT": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 168.7,
+    "hisse_basi_tl": 5.7143,
+    "odeme_sayisi": 1,
+    "tarih": "06.05.2026",
+    "tarihler": [
+      "06.05.2026"
+    ],
+    "temettu_yili_sayisi": 10,
+    "yil": 2026,
+    "yogunluk": 1.0
+  },
+  "EGEEN": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 3895.0,
+    "hisse_basi_tl": 53.0,
+    "odeme_sayisi": 1,
+    "tarih": "28.03.2025",
+    "tarihler": [
+      "28.03.2025"
+    ],
+    "temettu_yili_sayisi": 10,
+    "yil": 2025,
+    "yogunluk": 1.0
+  },
+  "EGGUB": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 76.75,
+    "hisse_basi_tl": 2.5,
+    "odeme_sayisi": 1,
+    "tarih": "04.05.2026",
+    "tarihler": [
+      "04.05.2026"
+    ],
+    "temettu_yili_sayisi": 10,
+    "yil": 2026,
+    "yogunluk": 1.0
+  },
+  "EGPRO": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 26.52,
+    "hisse_basi_tl": 1.2844,
+    "odeme_sayisi": 2,
+    "tarih": "16.07.2026",
+    "tarihler": [
+      "14.05.2026",
+      "16.07.2026"
+    ],
+    "temettu_yili_sayisi": 8,
+    "yil": 2026,
+    "yogunluk": 0.8
+  },
+  "EKGYO": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 17.02,
+    "hisse_basi_tl": 0.6,
+    "odeme_sayisi": 1,
+    "tarih": "24.06.2026",
+    "tarihler": [
+      "24.06.2026"
+    ],
+    "temettu_yili_sayisi": 8,
+    "yil": 2026,
+    "yogunluk": 0.8
+  },
+  "ENJSA": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 112.9,
+    "hisse_basi_tl": 5.08,
+    "odeme_sayisi": 1,
+    "tarih": "13.04.2026",
+    "tarihler": [
+      "13.04.2026"
+    ],
+    "temettu_yili_sayisi": 8,
+    "yil": 2026,
+    "yogunluk": 0.8
+  },
+  "ENKAI": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 74.5,
+    "hisse_basi_tl": 2.9333,
+    "odeme_sayisi": 2,
+    "tarih": "08.04.2026",
+    "tarihler": [
+      "14.01.2026",
+      "08.04.2026"
+    ],
+    "temettu_yili_sayisi": 10,
+    "yil": 2026,
+    "yogunluk": 1.0
+  },
+  "ERBOS": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 93.75,
+    "hisse_basi_tl": 2.7,
+    "odeme_sayisi": 1,
+    "tarih": "20.05.2026",
+    "tarihler": [
+      "20.05.2026"
+    ],
+    "temettu_yili_sayisi": 9,
+    "yil": 2026,
+    "yogunluk": 0.9
+  },
+  "EREGL": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 31.6,
+    "hisse_basi_tl": 0.55,
+    "odeme_sayisi": 1,
+    "tarih": "03.06.2026",
+    "tarihler": [
+      "03.06.2026"
+    ],
+    "temettu_yili_sayisi": 9,
+    "yil": 2026,
+    "yogunluk": 0.9
+  },
+  "ETYAT": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 9.99,
+    "hisse_basi_tl": 0.055,
+    "odeme_sayisi": 1,
+    "tarih": "08.08.2023",
+    "tarihler": [
+      "08.08.2023"
+    ],
+    "temettu_yili_sayisi": 8,
+    "yil": 2023,
+    "yogunluk": 0.8
+  },
+  "EUKYO": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 9.0,
+    "hisse_basi_tl": 0.06,
+    "odeme_sayisi": 1,
+    "tarih": "08.08.2023",
+    "tarihler": [
+      "08.08.2023"
+    ],
+    "temettu_yili_sayisi": 8,
+    "yil": 2023,
+    "yogunluk": 0.8
+  },
+  "EUYO": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 3.02,
+    "hisse_basi_tl": 0.065,
+    "odeme_sayisi": 1,
+    "tarih": "08.08.2023",
+    "tarihler": [
+      "08.08.2023"
+    ],
+    "temettu_yili_sayisi": 8,
+    "yil": 2023,
+    "yogunluk": 0.8
+  },
+  "FMIZP": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 197.0,
+    "hisse_basi_tl": 4.756,
+    "odeme_sayisi": 1,
+    "tarih": "27.03.2026",
+    "tarihler": [
+      "27.03.2026"
+    ],
+    "temettu_yili_sayisi": 9,
+    "yil": 2026,
+    "yogunluk": 0.9
+  },
+  "FROTO": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 65.05,
+    "hisse_basi_tl": 3.64,
+    "odeme_sayisi": 1,
+    "tarih": "16.03.2026",
+    "tarihler": [
+      "16.03.2026"
+    ],
+    "temettu_yili_sayisi": 10,
+    "yil": 2026,
+    "yogunluk": 1.0
+  },
+  "GARAN": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 126.5,
+    "hisse_basi_tl": 5.2669,
+    "odeme_sayisi": 1,
+    "tarih": "07.04.2026",
+    "tarihler": [
+      "07.04.2026"
+    ],
+    "temettu_yili_sayisi": 8,
+    "yil": 2026,
+    "yogunluk": 0.8
+  },
+  "GEDIK": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 4.66,
+    "hisse_basi_tl": 0.375,
+    "odeme_sayisi": 1,
+    "tarih": "16.03.2026",
+    "tarihler": [
+      "16.03.2026"
+    ],
+    "temettu_yili_sayisi": 7,
+    "yil": 2026,
+    "yogunluk": 0.7
+  },
+  "GENTS": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 3.3,
+    "hisse_basi_tl": 0.1569,
+    "odeme_sayisi": 1,
+    "tarih": "20.05.2026",
+    "tarihler": [
+      "20.05.2026"
+    ],
+    "temettu_yili_sayisi": 9,
+    "yil": 2026,
+    "yogunluk": 0.9
+  },
+  "GOLTS": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 219.2,
+    "hisse_basi_tl": 4.1667,
+    "odeme_sayisi": 1,
+    "tarih": "17.07.2026",
+    "tarihler": [
+      "17.07.2026"
+    ],
+    "temettu_yili_sayisi": 9,
+    "yil": 2026,
+    "yogunluk": 0.9
+  },
+  "GRNYO": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 6.79,
+    "hisse_basi_tl": 0.056,
+    "odeme_sayisi": 1,
+    "tarih": "08.06.2023",
+    "tarihler": [
+      "08.06.2023"
+    ],
+    "temettu_yili_sayisi": 8,
+    "yil": 2023,
+    "yogunluk": 0.8
+  },
+  "HLGYO": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 3.61,
+    "hisse_basi_tl": 0.5755,
+    "odeme_sayisi": 1,
+    "tarih": "26.06.2026",
+    "tarihler": [
+      "26.06.2026"
+    ],
+    "temettu_yili_sayisi": 10,
+    "yil": 2026,
+    "yogunluk": 1.0
+  },
+  "INDES": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 10.97,
+    "hisse_basi_tl": 0.2173,
+    "odeme_sayisi": 1,
+    "tarih": "01.07.2026",
+    "tarihler": [
+      "01.07.2026"
+    ],
+    "temettu_yili_sayisi": 9,
+    "yil": 2026,
+    "yogunluk": 0.9
+  },
+  "ISBIR": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 49.5,
+    "hisse_basi_tl": 1.0,
+    "odeme_sayisi": 1,
+    "tarih": "13.07.2026",
+    "tarihler": [
+      "13.07.2026"
+    ],
+    "temettu_yili_sayisi": 9,
+    "yil": 2026,
+    "yogunluk": 0.9
+  },
+  "ISBTR": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 390000.0,
+    "hisse_basi_tl": 2.0371,
+    "odeme_sayisi": 1,
+    "tarih": "01.04.2026",
+    "tarihler": [
+      "01.04.2026"
+    ],
+    "temettu_yili_sayisi": 8,
+    "yil": 2026,
+    "yogunluk": 0.8
+  },
+  "ISCTR": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 12.17,
+    "hisse_basi_tl": 0.5395,
+    "odeme_sayisi": 1,
+    "tarih": "01.04.2026",
+    "tarihler": [
+      "01.04.2026"
+    ],
+    "temettu_yili_sayisi": 8,
+    "yil": 2026,
+    "yogunluk": 0.8
+  },
+  "ISDMR": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 52.25,
+    "hisse_basi_tl": 4.5,
+    "odeme_sayisi": 1,
+    "tarih": "03.06.2026",
+    "tarihler": [
+      "03.06.2026"
+    ],
+    "temettu_yili_sayisi": 9,
+    "yil": 2026,
+    "yogunluk": 0.9
+  },
+  "ISMEN": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 26.24,
+    "hisse_basi_tl": 3.1667,
+    "odeme_sayisi": 1,
+    "tarih": "01.04.2026",
+    "tarihler": [
+      "01.04.2026"
+    ],
+    "temettu_yili_sayisi": 10,
+    "yil": 2026,
+    "yogunluk": 1.0
+  },
+  "JANTS": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 10.7,
+    "hisse_basi_tl": 0.0307,
+    "odeme_sayisi": 1,
+    "tarih": "06.05.2025",
+    "tarihler": [
+      "06.05.2025"
+    ],
+    "temettu_yili_sayisi": 10,
+    "yil": 2025,
+    "yogunluk": 1.0
+  },
+  "KARTN": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 84.5,
+    "hisse_basi_tl": 1.8372,
+    "odeme_sayisi": 1,
+    "tarih": "05.04.2023",
+    "tarihler": [
+      "05.04.2023"
+    ],
+    "temettu_yili_sayisi": 7,
+    "yil": 2023,
+    "yogunluk": 0.7
+  },
+  "KCHOL": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 197.5,
+    "hisse_basi_tl": 6.83,
+    "odeme_sayisi": 1,
+    "tarih": "25.03.2026",
+    "tarihler": [
+      "25.03.2026"
+    ],
+    "temettu_yili_sayisi": 10,
+    "yil": 2026,
+    "yogunluk": 1.0
+  },
+  "KFEIN": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 4.79,
+    "hisse_basi_tl": 0.0203,
+    "odeme_sayisi": 1,
+    "tarih": "04.05.2026",
+    "tarihler": [
+      "04.05.2026"
+    ],
+    "temettu_yili_sayisi": 7,
+    "yil": 2026,
+    "yogunluk": 0.7
+  },
+  "KORDS": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 2.55,
+    "hisse_basi_tl": 0.293,
+    "odeme_sayisi": 1,
+    "tarih": "29.03.2023",
+    "tarihler": [
+      "29.03.2023"
+    ],
+    "temettu_yili_sayisi": 7,
+    "yil": 2023,
+    "yogunluk": 0.7
+  },
+  "KSTUR": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 1455.0,
+    "hisse_basi_tl": 16.0,
+    "odeme_sayisi": 1,
+    "tarih": "20.04.2026",
+    "tarihler": [
+      "20.04.2026"
+    ],
+    "temettu_yili_sayisi": 9,
+    "yil": 2026,
+    "yogunluk": 0.9
+  },
+  "LKMNH": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 10.97,
+    "hisse_basi_tl": 0.463,
+    "odeme_sayisi": 2,
+    "tarih": "28.09.2026",
+    "tarihler": [
+      "20.05.2026",
+      "28.09.2026"
+    ],
+    "temettu_yili_sayisi": 10,
+    "yil": 2026,
+    "yogunluk": 1.0
+  },
+  "MSGYO": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 4.01,
+    "hisse_basi_tl": 0.4257,
+    "odeme_sayisi": 1,
+    "tarih": "28.04.2026",
+    "tarihler": [
+      "28.04.2026"
+    ],
+    "temettu_yili_sayisi": 7,
+    "yil": 2026,
+    "yogunluk": 0.7
+  },
+  "MTRYO": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 6.93,
+    "hisse_basi_tl": 0.0518,
+    "odeme_sayisi": 1,
+    "tarih": "08.12.2025",
+    "tarihler": [
+      "08.12.2025"
+    ],
+    "temettu_yili_sayisi": 7,
+    "yil": 2025,
+    "yogunluk": 0.7
+  },
+  "NUHCM": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 204.9,
+    "hisse_basi_tl": 22.5,
+    "odeme_sayisi": 1,
+    "tarih": "17.03.2026",
+    "tarihler": [
+      "17.03.2026"
+    ],
+    "temettu_yili_sayisi": 10,
+    "yil": 2026,
+    "yogunluk": 1.0
+  },
+  "OSMEN": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 4.8,
+    "hisse_basi_tl": 0.1745,
+    "odeme_sayisi": 4,
+    "tarih": "26.10.2026",
+    "tarihler": [
+      "28.01.2026",
+      "28.04.2026",
+      "29.07.2026",
+      "26.10.2026"
+    ],
+    "temettu_yili_sayisi": 7,
+    "yil": 2026,
+    "yogunluk": 0.7
+  },
+  "OTKAR": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 304.75,
+    "hisse_basi_tl": 6.0,
+    "odeme_sayisi": 1,
+    "tarih": "03.04.2024",
+    "tarihler": [
+      "03.04.2024"
+    ],
+    "temettu_yili_sayisi": 8,
+    "yil": 2024,
+    "yogunluk": 0.8
+  },
+  "PAGYO": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 109.1,
+    "hisse_basi_tl": 5.7545,
+    "odeme_sayisi": 1,
+    "tarih": "11.05.2026",
+    "tarihler": [
+      "11.05.2026"
+    ],
+    "temettu_yili_sayisi": 10,
+    "yil": 2026,
+    "yogunluk": 1.0
+  },
+  "PETUN": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 8.45,
+    "hisse_basi_tl": 0.49,
+    "odeme_sayisi": 2,
+    "tarih": "21.09.2026",
+    "tarihler": [
+      "20.05.2026",
+      "21.09.2026"
+    ],
+    "temettu_yili_sayisi": 9,
+    "yil": 2026,
+    "yogunluk": 0.9
+  },
+  "PNSUT": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 8.72,
+    "hisse_basi_tl": 3.87,
+    "odeme_sayisi": 1,
+    "tarih": "03.04.2023",
+    "tarihler": [
+      "03.04.2023"
+    ],
+    "temettu_yili_sayisi": 8,
+    "yil": 2023,
+    "yogunluk": 0.8
+  },
+  "POLHO": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 13.05,
+    "hisse_basi_tl": 0.1187,
+    "odeme_sayisi": 1,
+    "tarih": "30.04.2024",
+    "tarihler": [
+      "30.04.2024"
+    ],
+    "temettu_yili_sayisi": 9,
+    "yil": 2024,
+    "yogunluk": 0.9
+  },
+  "POLTK": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 2795.0,
+    "hisse_basi_tl": 0.8,
+    "odeme_sayisi": 1,
+    "tarih": "23.08.2023",
+    "tarihler": [
+      "23.08.2023"
+    ],
+    "temettu_yili_sayisi": 7,
+    "yil": 2023,
+    "yogunluk": 0.7
+  },
+  "PRKAB": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 17.26,
+    "hisse_basi_tl": 0.0763,
+    "odeme_sayisi": 1,
+    "tarih": "25.05.2023",
+    "tarihler": [
+      "25.05.2023"
+    ],
+    "temettu_yili_sayisi": 8,
+    "yil": 2023,
+    "yogunluk": 0.8
+  },
+  "PSDTC": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 61.65,
+    "hisse_basi_tl": 1.7127,
+    "odeme_sayisi": 1,
+    "tarih": "22.12.2025",
+    "tarihler": [
+      "22.12.2025"
+    ],
+    "temettu_yili_sayisi": 8,
+    "yil": 2025,
+    "yogunluk": 0.8
+  },
+  "SAHOL": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 87.0,
+    "hisse_basi_tl": 1.4136,
+    "odeme_sayisi": 1,
+    "tarih": "01.04.2026",
+    "tarihler": [
+      "01.04.2026"
+    ],
+    "temettu_yili_sayisi": 10,
+    "yil": 2026,
+    "yogunluk": 1.0
+  },
+  "SANKO": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 21.3,
+    "hisse_basi_tl": 1.0,
+    "odeme_sayisi": 1,
+    "tarih": "28.07.2023",
+    "tarihler": [
+      "28.07.2023"
+    ],
+    "temettu_yili_sayisi": 8,
+    "yil": 2023,
+    "yogunluk": 0.8
+  },
+  "SARKY": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 16.0,
+    "hisse_basi_tl": 0.3529,
+    "odeme_sayisi": 1,
+    "tarih": "18.05.2026",
+    "tarihler": [
+      "18.05.2026"
+    ],
+    "temettu_yili_sayisi": 10,
+    "yil": 2026,
+    "yogunluk": 1.0
+  },
+  "SELEC": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 72.9,
+    "hisse_basi_tl": 0.44,
+    "odeme_sayisi": 1,
+    "tarih": "17.04.2026",
+    "tarihler": [
+      "17.04.2026"
+    ],
+    "temettu_yili_sayisi": 10,
+    "yil": 2026,
+    "yogunluk": 1.0
+  },
+  "SISE": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 33.88,
+    "hisse_basi_tl": 0.5876,
+    "odeme_sayisi": 1,
+    "tarih": "01.06.2026",
+    "tarihler": [
+      "01.06.2026"
+    ],
+    "temettu_yili_sayisi": 10,
+    "yil": 2026,
+    "yogunluk": 1.0
+  },
+  "SODSN": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 5.07,
+    "hisse_basi_tl": 0.9276,
+    "odeme_sayisi": 1,
+    "tarih": "12.04.2023",
+    "tarihler": [
+      "12.04.2023"
+    ],
+    "temettu_yili_sayisi": 8,
+    "yil": 2023,
+    "yogunluk": 0.8
+  },
+  "SUMAS": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 156.7,
+    "hisse_basi_tl": 2.1689,
+    "odeme_sayisi": 1,
+    "tarih": "07.12.2026",
+    "tarihler": [
+      "07.12.2026"
+    ],
+    "temettu_yili_sayisi": 7,
+    "yil": 2026,
+    "yogunluk": 0.7
+  },
+  "TBORG": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 111.3,
+    "hisse_basi_tl": 9.5209,
+    "odeme_sayisi": 1,
+    "tarih": "02.09.2026",
+    "tarihler": [
+      "02.09.2026"
+    ],
+    "temettu_yili_sayisi": 7,
+    "yil": 2026,
+    "yogunluk": 0.7
+  },
+  "TCELL": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 90.1,
+    "hisse_basi_tl": 4.0,
+    "odeme_sayisi": 1,
+    "tarih": "09.12.2026",
+    "tarihler": [
+      "09.12.2026"
+    ],
+    "temettu_yili_sayisi": 9,
+    "yil": 2026,
+    "yogunluk": 0.9
+  },
+  "TKFEN": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 174.8,
+    "hisse_basi_tl": 0.3319,
+    "odeme_sayisi": 1,
+    "tarih": "31.12.2025",
+    "tarihler": [
+      "31.12.2025"
+    ],
+    "temettu_yili_sayisi": 9,
+    "yil": 2025,
+    "yogunluk": 0.9
+  },
+  "TOASO": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 222.6,
+    "hisse_basi_tl": 20.0,
+    "odeme_sayisi": 1,
+    "tarih": "23.03.2026",
+    "tarihler": [
+      "23.03.2026"
+    ],
+    "temettu_yili_sayisi": 10,
+    "yil": 2026,
+    "yogunluk": 1.0
+  },
+  "TTRAK": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 353.0,
+    "hisse_basi_tl": 48.4676,
+    "odeme_sayisi": 1,
+    "tarih": "02.04.2025",
+    "tarihler": [
+      "02.04.2025"
+    ],
+    "temettu_yili_sayisi": 9,
+    "yil": 2025,
+    "yogunluk": 0.9
+  },
+  "TUPRS": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 360.75,
+    "hisse_basi_tl": 17.1269,
+    "odeme_sayisi": 2,
+    "tarih": "30.09.2026",
+    "tarihler": [
+      "16.03.2026",
+      "30.09.2026"
+    ],
+    "temettu_yili_sayisi": 7,
+    "yil": 2026,
+    "yogunluk": 0.7
+  },
+  "VAKKO": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 46.62,
+    "hisse_basi_tl": 6.25,
+    "odeme_sayisi": 1,
+    "tarih": "14.04.2026",
+    "tarihler": [
+      "14.04.2026"
+    ],
+    "temettu_yili_sayisi": 7,
+    "yil": 2026,
+    "yogunluk": 0.7
+  },
+  "VERUS": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 485.5,
+    "hisse_basi_tl": 0.25,
+    "odeme_sayisi": 1,
+    "tarih": "20.11.2024",
+    "tarihler": [
+      "20.11.2024"
+    ],
+    "temettu_yili_sayisi": 9,
+    "yil": 2024,
+    "yogunluk": 0.9
+  },
+  "VESBE": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 3.23,
+    "hisse_basi_tl": 0.0439,
+    "odeme_sayisi": 1,
+    "tarih": "24.07.2025",
+    "tarihler": [
+      "24.07.2025"
+    ],
+    "temettu_yili_sayisi": 10,
+    "yil": 2025,
+    "yogunluk": 1.0
+  },
+  "YAPRK": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 6.39,
+    "hisse_basi_tl": 0.025,
+    "odeme_sayisi": 1,
+    "tarih": "10.06.2026",
+    "tarihler": [
+      "10.06.2026"
+    ],
+    "temettu_yili_sayisi": 7,
+    "yil": 2026,
+    "yogunluk": 0.7
+  },
+  "YGGYO": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 176.6,
+    "hisse_basi_tl": 10.55,
+    "odeme_sayisi": 1,
+    "tarih": "07.04.2026",
+    "tarihler": [
+      "07.04.2026"
+    ],
+    "temettu_yili_sayisi": 10,
+    "yil": 2026,
+    "yogunluk": 1.0
+  },
+  "YONGA": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 25.7,
+    "hisse_basi_tl": 0.2556,
+    "odeme_sayisi": 1,
+    "tarih": "25.08.2023",
+    "tarihler": [
+      "25.08.2023"
+    ],
+    "temettu_yili_sayisi": 7,
+    "yil": 2023,
+    "yogunluk": 0.7
+  },
+  "YUNSA": {
+    "arz_yili": null,
+    "degerlendirilen_yil": 10,
+    "fiyat": 5.14,
+    "hisse_basi_tl": 0.3655,
+    "odeme_sayisi": 1,
+    "tarih": "27.04.2026",
+    "tarihler": [
+      "27.04.2026"
+    ],
+    "temettu_yili_sayisi": 8,
+    "yil": 2026,
+    "yogunluk": 0.8
+  }
 }
