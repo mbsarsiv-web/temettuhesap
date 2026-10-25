@@ -19,22 +19,24 @@ def parse_turkce_sayi(val):
     try: return float(s)
     except ValueError: return 0.0
 
-def parse_date_score(val):
+def parse_date_ts(val):
     s = str(val).strip()
     m = re.search(r'Date\(([-0-9]+)\)', s)
-    if m: 
-        t = time.gmtime(int(m.group(1)) // 1000)
-        return t.tm_year * 10000 + t.tm_mon * 100 + t.tm_mday
+    if m: return int(m.group(1)) // 1000
     m_iso = re.search(r'(\d{4})-(\d{2})-(\d{2})', s)
-    if m_iso: return int(m_iso.group(1))*10000 + int(m_iso.group(2))*100 + int(m_iso.group(3))
+    if m_iso:
+        try: return time.mktime((int(m_iso.group(1)), int(m_iso.group(2)), int(m_iso.group(3)), 0, 0, 0, 0, 0, -1))
+        except: pass
     m2 = re.search(r'(\d{2})[\./-](\d{2})[\./-](\d{4})', s)
-    if m2: return int(m2.group(3))*10000 + int(m2.group(2))*100 + int(m2.group(1))
+    if m2:
+        try: return time.mktime((int(m2.group(3)), int(m2.group(2)), int(m2.group(1)), 0, 0, 0, 0, 0, -1))
+        except: pass
     return 0
 
 def format_tarih(val):
     s = str(val).strip()
     m = re.search(r'Date\(([-0-9]+)\)', s)
-    if m: return time.strftime('%d.%m.%Y', time.gmtime(int(m.group(1))/1000))
+    if m: return time.strftime('%d.%m.%Y', time.gmtime(int(m.group(1))//1000))
     m_iso = re.search(r'(\d{4})-(\d{2})-(\d{2})', s)
     if m_iso: return f"{m_iso.group(3)}.{m_iso.group(2)}.{m_iso.group(1)}"
     return s
@@ -60,7 +62,6 @@ def main():
         pass 
 
     api_url = "https://www.isyatirim.com.tr/_layouts/15/IsYatirim.Website/StockInfo/CompanyInfoAjax.aspx/GetSermayeArttirimlari"
-    # Eksik olan endeksKodu parametresi eklendi
     payload_is = {"hisseKodu": "", "hisseTanimKodu": "04", "yil": 0, "zaman": "HEPSI", "endeksKodu": "09", "sektorKodu": ""}
     
     temettu_verileri = {}
@@ -88,14 +89,27 @@ def main():
                 hb_brut = 0.0
                 hb_net = 0.0
                 
+                # Aşama 1: Doğrudan Hisse Başı TL sütununu ara
                 for k, v in satir.items():
                     ku = str(k).upper().replace('İ', 'I').replace('Ü', 'U')
                     val = parse_turkce_sayi(v)
                     if val <= 0: continue
                     
-                    if "ORAN" in ku and "NAKIT" in ku:
-                        if "NET" in ku: hb_net = max(hb_net, val / 100.0)
-                        else: hb_brut = max(hb_brut, val / 100.0)
+                    if ku == "PAY_BASINA_BRUT_TEMETTU" or ku == "HISSE_BASI_TL":
+                        hb_brut = max(hb_brut, val)
+                    elif ku == "PAY_BASINA_NET_TEMETTU":
+                        hb_net = max(hb_net, val)
+                
+                # Aşama 2: Eğer doğrudan bulamazsa, Nakit Temettü Oranı üzerinden 100'e bölerek hesapla
+                if hb_brut == 0 and hb_net == 0:
+                    for k, v in satir.items():
+                        ku = str(k).upper().replace('İ', 'I').replace('Ü', 'U')
+                        val = parse_turkce_sayi(v)
+                        if val <= 0: continue
+                        
+                        if "NAKIT" in ku and "ORAN" in ku and "TEMETTU" in ku:
+                            if "NET" in ku: hb_net = max(hb_net, val / 100.0)
+                            else: hb_brut = max(hb_brut, val / 100.0)
                 
                 secilen_hb = hb_brut if hb_brut > 0 else hb_net
                 
@@ -104,8 +118,16 @@ def main():
                         gecmis_veriler[kod] = []
                     gecmis_veriler[kod].append({"tarih": tarih, "tutar": secilen_hb})
             
+            current_ts = time.time()
+            limit_ts = current_ts + (60 * 86400) # Bugünden itibaren en fazla 60 gün sonrasını kabul et
+            
             for kod, liste in gecmis_veriler.items():
-                son_temettu = max(liste, key=lambda x: parse_date_score(x["tarih"]))
+                # Uzak gelecekteki tahminleri filtrele
+                gecerli_tarihler = [x for x in liste if parse_date_ts(x["tarih"]) <= limit_ts]
+                if not gecerli_tarihler:
+                    gecerli_tarihler = liste
+                    
+                son_temettu = max(gecerli_tarihler, key=lambda x: parse_date_ts(x["tarih"]))
                 
                 temettu_verileri[kod] = {
                     "tarih": format_tarih(son_temettu["tarih"]),
@@ -124,7 +146,7 @@ def main():
     sha = get_res.json().get('sha', '') if get_res.status_code == 200 else ""
     
     encoded = base64.b64encode(json.dumps(temettu_verileri, indent=4).encode('utf-8')).decode('utf-8')
-    data = {"message": "otomatik güncelleme: endeksKodu duzeltildi", "content": encoded}
+    data = {"message": "otomatik güncelleme: uzak gelecek tahminleri ve oran filtresi", "content": encoded}
     if sha: data["sha"] = sha
     
     requests.put(api_url_gh, headers=auth_headers, json=data)
