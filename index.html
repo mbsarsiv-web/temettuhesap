@@ -37,11 +37,14 @@
   }
   .ust-satir { display: flex; gap: 8px; align-items: center; }
   .ara {
-    flex: 1 1 90px; min-width: 90px;
-    height: 40px; padding: 0 10px;
-    border: 1px solid var(--cizgi); border-radius: 8px;
-    font-size: 16px; background: #fff; color: var(--yazi);
+    flex: 1 1 200px; min-width: 120px;
+    height: 46px; padding: 0 14px;
+    border: 1px solid var(--cizgi); border-radius: 10px;
+    font-size: 18px; background: #fff; color: var(--yazi);
   }
+  .sag-grup { display: flex; align-items: center; gap: 8px; flex: none; margin-left: auto; }
+  .sayi { flex: none; text-align: center; font-size: 10px; line-height: 1.15; color: var(--soluk); font-weight: 600; }
+  .sayi b { display: block; font-size: 15px; color: var(--yazi); font-weight: 800; }
   .stopaj {
     display: flex; flex-direction: column; align-items: center; gap: 1px; flex: none;
     font-size: 9.5px; font-weight: 700; color: var(--soluk); line-height: 1;
@@ -73,7 +76,6 @@
   .sekme.sol { background: var(--yesil); }
   .sekme.sag { background: var(--mavi); }
   .sekme.aktif { opacity: 1; box-shadow: 0 0 0 2px var(--yazi) inset; }
-  .bilgi { font-size: 12px; color: var(--soluk); margin: 6px 2px 0; }
 
   /* ---------- Yerlesim ---------- */
   #yukleniyor, #hata {
@@ -139,7 +141,7 @@
     .sekmeler { display: none !important; }
     .kur { font-size: 12.5px; }
     .kur .ek { display: inline; }
-    .ara { flex: 0 1 240px; }
+    .ara { flex: 1 1 300px; }
     .toplam .bloklar { justify-content: center; gap: 40px; }
     .toplam .blok { display: flex !important; max-width: 660px; }
     table { font-size: 14px; }
@@ -149,6 +151,8 @@
   /* ---------- Mobil: tek tablo, sekmeli ---------- */
   @media (max-width: 899px) {
     .sekmeler { display: flex; }
+    .ust-satir { flex-wrap: wrap; }
+    .ara { flex: 1 1 100%; }
     #alan { padding: 8px 6px; }
     .panel { display: none; }
     .panel.aktif { display: block; }
@@ -170,18 +174,20 @@
 <div class="ust" id="ust">
   <div class="ust-satir">
     <input class="ara" id="ara" type="search" placeholder="Hisse ara (örn. AKSA)" autocomplete="off" autocapitalize="characters">
-    <label class="stopaj" title="Temettüden kesilen stopaj oranı">
-      <span>Stopaj %</span>
-      <input id="stopaj" type="text" inputmode="decimal" autocomplete="off" value="15">
-    </label>
-    <div class="kur" id="kur">Kurlar yükleniyor…</div>
-    <button class="temizle" id="temizle" type="button">Temizle</button>
+    <div class="sag-grup">
+      <label class="stopaj" title="Temettüden kesilen stopaj oranı (GYO ile biten hisselerde uygulanmaz)">
+        <span>Stopaj %</span>
+        <input id="stopaj" type="text" inputmode="decimal" autocomplete="off" value="15">
+      </label>
+      <div class="kur" id="kur">Kurlar yükleniyor…</div>
+      <div class="sayi" id="sayi"><b>0</b>Hisse</div>
+      <button class="temizle" id="temizle" type="button">Temizle</button>
+    </div>
   </div>
   <div class="sekmeler" id="sekmeler">
     <button class="sekme sol aktif" data-hedef="sol" type="button">Aylık temettü</button>
     <button class="sekme sag" data-hedef="sag" type="button">Lot</button>
   </div>
-  <div class="bilgi" id="bilgi"></div>
 </div>
 
 <div id="yukleniyor">Veriler yükleniyor…</div>
@@ -274,17 +280,18 @@
     if (n > 100) n = 100;
     return n;
   }
-  function net(d) { return d.temettu * (1 - stopajOrani() / 100); }
+  // GYO ile biten hisselerde stopaj uygulanmaz
+  function stopajUygulanir(kod) { return !/GYO$/.test(String(kod).toUpperCase()); }
+  function net(d) { return d.temettu * (1 - (d.stopajsiz ? 0 : stopajOrani()) / 100); }
 
   function temettuHucre(d) {
-    var n = stopajOrani();
+    var n = d.stopajsiz ? 0 : stopajOrani();
     var brut = n > 0 ? "<small class='brut'>" + fmtFiyat(d.temettu) + "</small>" : "";
     return fmtFiyat(net(d)) + brut;
   }
 
   function bilgiYaz() {
-    $("bilgi").textContent = liste.length + " Hisse · Temettü: Brüt tutarından %" +
-      fmt(stopajOrani(), 2) + " stopaj düşülmüş net tutar · Fiyat: TradingView'den alınmaktadır.";
+    $("sayi").innerHTML = "<b>" + liste.length + "</b>Hisse";
   }
 
   /* ------------------------- kurlar: USD ve gram altın ------------------------- */
@@ -413,7 +420,7 @@
       var d = ham[kod] || {};
       var t = Number(d.hisse_basi_tl) || 0;
       if (t > 0) {
-        veri[kod] = { temettu: t, fiyat: Number(d.fiyat) || 0, tarih: d.tarih || "" };
+        veri[kod] = { temettu: t, fiyat: Number(d.fiyat) || 0, tarih: d.tarih || "", stopajsiz: !stopajUygulanir(kod) };
         liste.push(kod);
       }
     });
