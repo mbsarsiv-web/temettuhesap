@@ -42,6 +42,17 @@
     border: 1px solid var(--cizgi); border-radius: 8px;
     font-size: 16px; background: #fff; color: var(--yazi);
   }
+  .stopaj {
+    display: flex; align-items: center; gap: 4px; flex: none;
+    font-size: 12px; font-weight: 600; color: var(--soluk);
+  }
+  .stopaj input {
+    width: 52px; height: 40px; padding: 0 4px; text-align: center;
+    border: 1px solid var(--girdi-kenar); background: var(--girdi); color: var(--yazi);
+    border-radius: 8px; font-size: 16px; font-weight: 700;
+  }
+  .stopaj input:focus { outline: 2px solid var(--yazi); }
+  td small.brut { display: block; font-size: 9px; color: var(--soluk); font-weight: 400; margin-top: 1px; text-decoration: line-through; }
   .temizle {
     height: 40px; padding: 0 12px; border-radius: 8px;
     border: 1px solid var(--cizgi); background: #fff; color: #9b2c2c;
@@ -146,6 +157,9 @@
 <div class="ust" id="ust">
   <div class="ust-satir">
     <input class="ara" id="ara" type="search" placeholder="Hisse ara (örn. AKSA)" autocomplete="off" autocapitalize="characters">
+    <label class="stopaj" title="Temettüden kesilen stopaj oranı">Stopaj %
+      <input id="stopaj" type="text" inputmode="decimal" autocomplete="off" value="15">
+    </label>
     <button class="temizle" id="temizle" type="button">Temizle</button>
   </div>
   <div class="sekmeler" id="sekmeler">
@@ -210,7 +224,7 @@
 
   var veri = {};          // { KOD: {temettu, fiyat, tarih} }
   var liste = [];         // sıralı hisse kodları
-  var giris = { sol: {}, sag: {} };   // kullanıcının girdiği değerler
+  var giris = { sol: {}, sag: {}, stopaj: "15" };   // kullanıcının girdiği değerler
   var aktifSekme = "sol";
 
   /* ------------------------- yardımcılar ------------------------- */
@@ -237,12 +251,34 @@
   function fmtLot(n)   { return fmt(Math.round(n), 0); }
   function fmtTL(n)    { return fmt(Math.round(n), 0) + " TL"; }
 
+  function stopajOrani() {
+    var n = parseFloat(String(giris.stopaj === undefined ? "15" : giris.stopaj).replace(",", "."));
+    if (!isFinite(n) || n < 0) n = 0;
+    if (n > 100) n = 100;
+    return n;
+  }
+  function net(d) { return d.temettu * (1 - stopajOrani() / 100); }
+
+  function temettuHucre(d) {
+    var n = stopajOrani();
+    var brut = n > 0 ? "<small class='brut'>" + fmtFiyat(d.temettu) + "</small>" : "";
+    return fmtFiyat(net(d)) + brut;
+  }
+
+  function bilgiYaz() {
+    $("bilgi").textContent = liste.length + " hisse · temettü: İş Yatırım brüt tutarından %" +
+      fmt(stopajOrani(), 2) + " stopaj düşülmüş net tutar · fiyat: TradingView";
+  }
+
   function depoOku() {
     try {
       var h = localStorage.getItem(DEPO_ANAHTAR);
       if (h) {
         var o = JSON.parse(h);
-        if (o && o.sol && o.sag) giris = o;
+        if (o && o.sol && o.sag) {
+          giris = o;
+          if (giris.stopaj === undefined) giris.stopaj = "15";
+        }
       }
     } catch (e) { /* depolama yoksa sorun değil */ }
   }
@@ -287,7 +323,8 @@
         $("alan").style.display = "flex";
         $("alan").className = "goster";
         tablolariCiz();
-        $("bilgi").textContent = liste.length + " hisse · temettü: İş Yatırım (son hisse başı brüt TL), fiyat: TradingView";
+        $("stopaj").value = String(giris.stopaj);
+        bilgiYaz();
         ustYukseklik();
         sekmeAyarla(aktifSekme);
       })
@@ -310,7 +347,7 @@
       var tarihHtml = d.tarih ? "<small>" + d.tarih + "</small>" : "";
       var ortak = "<td class='hisse'>" + k + tarihHtml + "</td>" +
                   "<td>" + fmtFiyat(d.fiyat) + "</td>" +
-                  "<td>" + fmtFiyat(d.temettu) + "</td>";
+                  "<td data-c='temettu'>" + temettuHucre(d) + "</td>";
 
       sol.push("<tr data-kod='" + k + "'>" + ortak +
         "<td data-c='lot'>0</td>" +
@@ -331,9 +368,10 @@
   function satirSol(tr, kod) {
     var d = veri[kod];
     var aylik = sayi(giris.sol[kod]);
+    var nt = net(d);                           // stopaj düşülmüş hisse başı temettü
     var lot = 0, maliyet = 0;
-    if (aylik > 0 && d.temettu > 0) {
-      lot = (aylik * 12) / d.temettu;          // yıllık hedef / hisse başı temettü
+    if (aylik > 0 && nt > 0) {
+      lot = (aylik * 12) / nt;                 // yıllık hedef / net hisse başı temettü
       maliyet = lot * d.fiyat;
     }
     tr.querySelector("[data-c=lot]").textContent = fmtLot(lot);
@@ -346,7 +384,7 @@
     var d = veri[kod];
     var lot = sayi(giris.sag[kod]);
     var maliyet = lot * d.fiyat;
-    var aylik = (lot * d.temettu) / 12;        // yıllık temettü / 12
+    var aylik = (lot * net(d)) / 12;           // yıllık net temettü / 12
     tr.querySelector("[data-c=maliyet]").textContent = fmtTL(maliyet);
     tr.querySelector("[data-c=aylik]").textContent = fmtTL(aylik);
     tr.className = lot > 0 ? "dolu" : "";
@@ -394,6 +432,23 @@
   }
   $("sol-body").addEventListener("input", girdiOlayi);
   $("sag-body").addEventListener("input", girdiOlayi);
+
+  // Stopaj oranı değişince temettü hücrelerini ve hesapları yenile
+  $("stopaj").addEventListener("input", function () {
+    var t = this.value.replace(/[^0-9.,]/g, "");
+    if (t !== this.value) this.value = t;
+    giris.stopaj = t;
+    depoYaz();
+    ["sol-body", "sag-body"].forEach(function (id) {
+      var satirlar = $(id).children;
+      for (var i = 0; i < satirlar.length; i++) {
+        var h = satirlar[i].querySelector("[data-c=temettu]");
+        if (h) h.innerHTML = temettuHucre(veri[satirlar[i].getAttribute("data-kod")]);
+      }
+    });
+    bilgiYaz();
+    hesaplaHepsi();
+  });
 
   // Arama
   $("ara").addEventListener("input", function () {
