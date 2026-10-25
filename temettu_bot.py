@@ -21,17 +21,12 @@ def parse_turkce_sayi(val):
 
 def parse_date_score(val):
     s = str(val).strip()
-    # Unix Timestamp (Milyarlarca saniye) düzeltmesi
     m = re.search(r'Date\(([-0-9]+)\)', s)
     if m: 
         t = time.gmtime(int(m.group(1)) // 1000)
         return t.tm_year * 10000 + t.tm_mon * 100 + t.tm_mday
-    
-    # Standart YYYY-MM-DD
     m_iso = re.search(r'(\d{4})-(\d{2})-(\d{2})', s)
     if m_iso: return int(m_iso.group(1))*10000 + int(m_iso.group(2))*100 + int(m_iso.group(3))
-    
-    # Standart DD.MM.YYYY
     m2 = re.search(r'(\d{2})[\./-](\d{2})[\./-](\d{4})', s)
     if m2: return int(m2.group(3))*10000 + int(m2.group(2))*100 + int(m2.group(1))
     return 0
@@ -54,7 +49,6 @@ def main():
     }
     session.headers.update(headers)
 
-    # 1. TradingView Fiyatları (Hata toleranslı)
     tv_url = "https://scanner.tradingview.com/turkey/scan"
     payload_tv = {"columns": ["name", "close"], "filter": [{"left": "type", "operation": "in_range", "right": ["stock"]}], "range": [0, 1500]}
     fiyatlar = {}
@@ -63,11 +57,11 @@ def main():
         if 'data' in tv_res:
             fiyatlar = {item['d'][0].replace("BIST:", ""): item['d'][1] for item in tv_res['data']}
     except Exception:
-        pass # TradingView engellese bile fiyatlar { } kalarak devam eder
+        pass 
 
-    # 2. İş Yatırım Temettü Verileri
     api_url = "https://www.isyatirim.com.tr/_layouts/15/IsYatirim.Website/StockInfo/CompanyInfoAjax.aspx/GetSermayeArttirimlari"
-    payload_is = {"hisseKodu": "", "hisseTanimKodu": "04", "yil": 0, "zaman": "HEPSI", "endeksKodu": "", "sektorKodu": ""}
+    # Eksik olan endeksKodu parametresi eklendi
+    payload_is = {"hisseKodu": "", "hisseTanimKodu": "04", "yil": 0, "zaman": "HEPSI", "endeksKodu": "09", "sektorKodu": ""}
     
     temettu_verileri = {}
     try:
@@ -99,16 +93,7 @@ def main():
                     val = parse_turkce_sayi(v)
                     if val <= 0: continue
                     
-                    # Dağıtma oranı veya verim gibi sütunları yoksay
-                    if "DAGITMA" in ku or "VERIM" in ku: continue
-                    
-                    # API'de Hisse Başı ibaresi açıksa
-                    if ("PAY" in ku or "HISSE" in ku) and ("TEMETTU" in ku or "NAKIT" in ku) and "ORAN" not in ku and "TUTAR" not in ku:
-                        if "NET" in ku: hb_net = max(hb_net, val)
-                        else: hb_brut = max(hb_brut, val)
-                    
-                    # Yüzdelik oran ibaresi açıksa (100'e bölüp TL'ye çevirir)
-                    if "ORAN" in ku and "TEMETTU" in ku:
+                    if "ORAN" in ku and "NAKIT" in ku:
                         if "NET" in ku: hb_net = max(hb_net, val / 100.0)
                         else: hb_brut = max(hb_brut, val / 100.0)
                 
@@ -120,10 +105,6 @@ def main():
                     gecmis_veriler[kod].append({"tarih": tarih, "tutar": secilen_hb})
             
             for kod, liste in gecmis_veriler.items():
-                # Eğer piyasa fiyatlarını çektik ama bu hisse borsada yoksa yoksay
-                if len(fiyatlar) > 0 and kod not in fiyatlar: continue
-                
-                # En güncel tarihi matematiksel olarak hatasız bul
                 son_temettu = max(liste, key=lambda x: parse_date_score(x["tarih"]))
                 
                 temettu_verileri[kod] = {
@@ -143,7 +124,7 @@ def main():
     sha = get_res.json().get('sha', '') if get_res.status_code == 200 else ""
     
     encoded = base64.b64encode(json.dumps(temettu_verileri, indent=4).encode('utf-8')).decode('utf-8')
-    data = {"message": "otomatik güncelleme: kesin tarih ve guvenli bypass", "content": encoded}
+    data = {"message": "otomatik güncelleme: endeksKodu duzeltildi", "content": encoded}
     if sha: data["sha"] = sha
     
     requests.put(api_url_gh, headers=auth_headers, json=data)
