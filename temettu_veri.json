@@ -1,5 +1,6 @@
 {
   "ACSEL": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 74.5,
@@ -14,6 +15,7 @@
     "yogunluk": 0.8
   },
   "ADEL": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 22.9,
@@ -28,6 +30,7 @@
     "yogunluk": 0.9
   },
   "AEFES": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 16.22,
@@ -43,6 +46,7 @@
     "yogunluk": 1.0
   },
   "AGESA": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 195.2,
@@ -57,6 +61,7 @@
     "yogunluk": 0.9
   },
   "AGHOL": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 28.82,
@@ -71,6 +76,7 @@
     "yogunluk": 0.9
   },
   "AKBNK": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 63.35,
@@ -85,6 +91,7 @@
     "yogunluk": 0.8
   },
   "AKCNS": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 180.5,
@@ -99,6 +106,7 @@
     "yogunluk": 1.0
   },
   "AKMGY": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 176.5,
@@ -114,6 +122,7 @@
     "yogunluk": 1.0
   },
   "AKSA": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 10.3,
@@ -128,6 +137,7 @@
     "yogunluk": 1.0
   },
   "ALARK": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 101.3,
@@ -142,6 +152,7 @@
     "yogunluk": 1.0
   },
   "ALCAR": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 574.5,
@@ -156,6 +167,7 @@
     "yogunluk": 0.7
   },
   "ALGYO": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 2.52,
@@ -170,6 +182,7 @@
     "yogunluk": 0.9
   },
   "ALKA": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 4.81,
@@ -184,6 +197,7 @@
     "yogunluk": 0.7
   },
   "ALKIM": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 9.5,
@@ -198,6 +212,7 @@
     "yogunluk": 0.8
   },
   "ANHYT": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 93.2,
@@ -212,6 +227,7 @@
     "yogunluk": 1.0
   },
   "ASELS": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 338.0,
@@ -226,6 +242,7 @@
     "yogunluk": 1.0
   },
   "AYES": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 5.7,
@@ -240,6 +257,7 @@
     "yogunluk": 0.8
   },
   "AYGAZ": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 269.0,
@@ -253,7 +271,23 @@
     "yil": 2026,
     "yogunluk": 1.0
   },
+  "BASGZ": {
+    "arz_kaynagi": "otomatik",
+    "arz_yili": 2021,
+    "degerlendirilen_yil": 5,
+    "fiyat": 34.0,
+    "hisse_basi_tl": 2.0,
+    "odeme_sayisi": 1,
+    "tarih": "18.06.2026",
+    "tarihler": [
+      "18.06.2026"
+    ],
+    "temettu_yili_sayisi": 4,
+    "yil": 2026,
+    "yogunluk": 0.8
+  },
   "BFREN": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 88.8,
@@ -268,6 +302,7 @@
     "yogunluk": 0.8
   },
   "BIMAS": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 373.0,
@@ -284,6 +319,7 @@
     "yogunluk": 1.0
   },
   "BRISA": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 66.5,
@@ -298,6 +334,7 @@
     "yogunluk": 0.7
   },
   "BRYAT": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 1181.0,
@@ -312,6 +349,7 @@
     "yogunluk": 1.0
   },
   "CCOLA": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 74.75,
@@ -326,6 +364,7 @@
     "yogunluk": 1.0
   },
   "CEMTS": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 6.47,
@@ -340,6 +379,7 @@
     "yogunluk": 1.0
   },
   "CIMSA": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 37.44,
@@ -354,6 +394,7 @@
     "yogunluk": 0.7
   },
   "CLEBI": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 1223.0,
@@ -368,6 +409,7 @@
     "yogunluk": 1.0
   },
   "DOAS": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 130.6,
@@ -383,6 +425,7 @@
     "yogunluk": 0.8
   },
   "DOHOL": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 16.38,
@@ -397,6 +440,7 @@
     "yogunluk": 0.7
   },
   "ECILC": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 49.62,
@@ -411,6 +455,7 @@
     "yogunluk": 1.0
   },
   "ECZYT": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 168.7,
@@ -425,6 +470,7 @@
     "yogunluk": 1.0
   },
   "EGEEN": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 3895.0,
@@ -439,6 +485,7 @@
     "yogunluk": 1.0
   },
   "EGGUB": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 76.75,
@@ -453,6 +500,7 @@
     "yogunluk": 1.0
   },
   "EGPRO": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 26.52,
@@ -468,6 +516,7 @@
     "yogunluk": 0.8
   },
   "EKGYO": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 17.02,
@@ -482,6 +531,7 @@
     "yogunluk": 0.8
   },
   "ENJSA": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 112.9,
@@ -496,6 +546,7 @@
     "yogunluk": 0.8
   },
   "ENKAI": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 74.5,
@@ -511,6 +562,7 @@
     "yogunluk": 1.0
   },
   "ERBOS": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 93.75,
@@ -525,6 +577,7 @@
     "yogunluk": 0.9
   },
   "EREGL": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 31.6,
@@ -539,6 +592,7 @@
     "yogunluk": 0.9
   },
   "ETYAT": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 9.99,
@@ -553,6 +607,7 @@
     "yogunluk": 0.8
   },
   "EUKYO": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 9.0,
@@ -567,6 +622,7 @@
     "yogunluk": 0.8
   },
   "EUYO": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 3.02,
@@ -581,6 +637,7 @@
     "yogunluk": 0.8
   },
   "FMIZP": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 197.0,
@@ -595,6 +652,7 @@
     "yogunluk": 0.9
   },
   "FROTO": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 65.05,
@@ -609,6 +667,7 @@
     "yogunluk": 1.0
   },
   "GARAN": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 126.5,
@@ -623,6 +682,7 @@
     "yogunluk": 0.8
   },
   "GEDIK": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 4.66,
@@ -637,6 +697,7 @@
     "yogunluk": 0.7
   },
   "GENTS": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 3.3,
@@ -651,6 +712,7 @@
     "yogunluk": 0.9
   },
   "GOLTS": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 219.2,
@@ -665,6 +727,7 @@
     "yogunluk": 0.9
   },
   "GRNYO": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 6.79,
@@ -679,6 +742,7 @@
     "yogunluk": 0.8
   },
   "HLGYO": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 3.61,
@@ -693,6 +757,7 @@
     "yogunluk": 1.0
   },
   "INDES": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 10.97,
@@ -707,6 +772,7 @@
     "yogunluk": 0.9
   },
   "ISBIR": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 49.5,
@@ -721,6 +787,7 @@
     "yogunluk": 0.9
   },
   "ISBTR": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 390000.0,
@@ -735,6 +802,7 @@
     "yogunluk": 0.8
   },
   "ISCTR": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 12.17,
@@ -749,6 +817,7 @@
     "yogunluk": 0.8
   },
   "ISDMR": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 52.25,
@@ -762,7 +831,23 @@
     "yil": 2026,
     "yogunluk": 0.9
   },
+  "ISKPL": {
+    "arz_kaynagi": "otomatik",
+    "arz_yili": 2021,
+    "degerlendirilen_yil": 5,
+    "fiyat": 2.68,
+    "hisse_basi_tl": 0.0004,
+    "odeme_sayisi": 1,
+    "tarih": "26.06.2026",
+    "tarihler": [
+      "26.06.2026"
+    ],
+    "temettu_yili_sayisi": 4,
+    "yil": 2026,
+    "yogunluk": 0.8
+  },
   "ISMEN": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 26.24,
@@ -777,6 +862,7 @@
     "yogunluk": 1.0
   },
   "JANTS": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 10.7,
@@ -791,6 +877,7 @@
     "yogunluk": 1.0
   },
   "KARTN": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 84.5,
@@ -805,6 +892,7 @@
     "yogunluk": 0.7
   },
   "KCHOL": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 197.5,
@@ -819,6 +907,7 @@
     "yogunluk": 1.0
   },
   "KFEIN": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 4.79,
@@ -832,7 +921,23 @@
     "yil": 2026,
     "yogunluk": 0.7
   },
+  "KONTR": {
+    "arz_kaynagi": "otomatik",
+    "arz_yili": 2020,
+    "degerlendirilen_yil": 6,
+    "fiyat": 1.27,
+    "hisse_basi_tl": 0.0308,
+    "odeme_sayisi": 1,
+    "tarih": "08.07.2025",
+    "tarihler": [
+      "08.07.2025"
+    ],
+    "temettu_yili_sayisi": 5,
+    "yil": 2025,
+    "yogunluk": 0.83
+  },
   "KORDS": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 2.55,
@@ -847,6 +952,7 @@
     "yogunluk": 0.7
   },
   "KSTUR": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 1455.0,
@@ -861,6 +967,7 @@
     "yogunluk": 0.9
   },
   "LKMNH": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 10.97,
@@ -875,7 +982,23 @@
     "yil": 2026,
     "yogunluk": 1.0
   },
+  "MERCN": {
+    "arz_kaynagi": "otomatik",
+    "arz_yili": 2021,
+    "degerlendirilen_yil": 5,
+    "fiyat": 8.81,
+    "hisse_basi_tl": 0.2101,
+    "odeme_sayisi": 1,
+    "tarih": "28.07.2026",
+    "tarihler": [
+      "28.07.2026"
+    ],
+    "temettu_yili_sayisi": 5,
+    "yil": 2026,
+    "yogunluk": 1.0
+  },
   "MSGYO": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 4.01,
@@ -889,7 +1012,23 @@
     "yil": 2026,
     "yogunluk": 0.7
   },
+  "MTRKS": {
+    "arz_kaynagi": "otomatik",
+    "arz_yili": 2021,
+    "degerlendirilen_yil": 5,
+    "fiyat": 14.68,
+    "hisse_basi_tl": 0.1991,
+    "odeme_sayisi": 1,
+    "tarih": "15.05.2026",
+    "tarihler": [
+      "15.05.2026"
+    ],
+    "temettu_yili_sayisi": 5,
+    "yil": 2026,
+    "yogunluk": 1.0
+  },
   "MTRYO": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 6.93,
@@ -903,7 +1042,23 @@
     "yil": 2025,
     "yogunluk": 0.7
   },
+  "NTGAZ": {
+    "arz_kaynagi": "otomatik",
+    "arz_yili": 2021,
+    "degerlendirilen_yil": 5,
+    "fiyat": 9.68,
+    "hisse_basi_tl": 0.8696,
+    "odeme_sayisi": 1,
+    "tarih": "06.05.2026",
+    "tarihler": [
+      "06.05.2026"
+    ],
+    "temettu_yili_sayisi": 5,
+    "yil": 2026,
+    "yogunluk": 1.0
+  },
   "NUHCM": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 204.9,
@@ -918,6 +1073,7 @@
     "yogunluk": 1.0
   },
   "OSMEN": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 4.8,
@@ -935,6 +1091,7 @@
     "yogunluk": 0.7
   },
   "OTKAR": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 304.75,
@@ -949,6 +1106,7 @@
     "yogunluk": 0.8
   },
   "PAGYO": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 109.1,
@@ -963,6 +1121,7 @@
     "yogunluk": 1.0
   },
   "PETUN": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 8.45,
@@ -978,6 +1137,7 @@
     "yogunluk": 0.9
   },
   "PNSUT": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 8.72,
@@ -992,6 +1152,7 @@
     "yogunluk": 0.8
   },
   "POLHO": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 13.05,
@@ -1006,6 +1167,7 @@
     "yogunluk": 0.9
   },
   "POLTK": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 2795.0,
@@ -1020,6 +1182,7 @@
     "yogunluk": 0.7
   },
   "PRKAB": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 17.26,
@@ -1034,6 +1197,7 @@
     "yogunluk": 0.8
   },
   "PSDTC": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 61.65,
@@ -1048,6 +1212,7 @@
     "yogunluk": 0.8
   },
   "SAHOL": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 87.0,
@@ -1062,6 +1227,7 @@
     "yogunluk": 1.0
   },
   "SANKO": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 21.3,
@@ -1076,6 +1242,7 @@
     "yogunluk": 0.8
   },
   "SARKY": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 16.0,
@@ -1090,6 +1257,7 @@
     "yogunluk": 1.0
   },
   "SELEC": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 72.9,
@@ -1104,6 +1272,7 @@
     "yogunluk": 1.0
   },
   "SISE": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 33.88,
@@ -1118,6 +1287,7 @@
     "yogunluk": 1.0
   },
   "SODSN": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 5.07,
@@ -1132,6 +1302,7 @@
     "yogunluk": 0.8
   },
   "SUMAS": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 156.7,
@@ -1146,6 +1317,7 @@
     "yogunluk": 0.7
   },
   "TBORG": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 111.3,
@@ -1160,6 +1332,7 @@
     "yogunluk": 0.7
   },
   "TCELL": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 90.1,
@@ -1174,6 +1347,7 @@
     "yogunluk": 0.9
   },
   "TKFEN": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 174.8,
@@ -1188,6 +1362,7 @@
     "yogunluk": 0.9
   },
   "TOASO": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 222.6,
@@ -1202,6 +1377,7 @@
     "yogunluk": 1.0
   },
   "TTRAK": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 353.0,
@@ -1216,6 +1392,7 @@
     "yogunluk": 0.9
   },
   "TUPRS": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 360.75,
@@ -1231,6 +1408,7 @@
     "yogunluk": 0.7
   },
   "VAKKO": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 46.62,
@@ -1245,6 +1423,7 @@
     "yogunluk": 0.7
   },
   "VERUS": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 485.5,
@@ -1259,6 +1438,7 @@
     "yogunluk": 0.9
   },
   "VESBE": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 3.23,
@@ -1273,6 +1453,7 @@
     "yogunluk": 1.0
   },
   "YAPRK": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 6.39,
@@ -1287,6 +1468,7 @@
     "yogunluk": 0.7
   },
   "YGGYO": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 176.6,
@@ -1301,6 +1483,7 @@
     "yogunluk": 1.0
   },
   "YONGA": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 25.7,
@@ -1315,6 +1498,7 @@
     "yogunluk": 0.7
   },
   "YUNSA": {
+    "arz_kaynagi": null,
     "arz_yili": null,
     "degerlendirilen_yil": 10,
     "fiyat": 5.14,
