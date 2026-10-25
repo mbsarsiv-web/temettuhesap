@@ -10,14 +10,18 @@ GITHUB_TOKEN = os.environ.get("GH_TOKEN")
 REPO = "mbsarsiv-web/temettu-bot"
 DOSYA = "temettu_veri.json"
 
-# NOT: Filtreleme (Yoğunluk >= 0,50 / Son 10 Yıl / Verim >= %3) artık bu botta YAPILMAZ.
+# NOT: Filtreleme (Yoğunluk >= 0,50 / Son 10 Yıl / Verim >= %3) bu botta YAPILMAZ.
 # Hisse listesi ve filtreler "TEMETTÜ ANALİZ" uygulamasının kaynağından, hesaplama
-# uygulaması (index.html) içinde uygulanır. Bot yalnızca fiyat ve hisse başı temettü
-# verisini tüm temettü veren hisseler için üretir.
+# uygulaması (index.html) içinde uygulanır. Bot, fiyat ve hisse başı temettü verisini üretir.
 
 IS_URL = "https://www.isyatirim.com.tr/_layouts/15/IsYatirim.Website/StockInfo/CompanyInfoAjax.aspx/GetSermayeArttirimlari"
 IS_SAYFA = "https://www.isyatirim.com.tr/tr-tr/analiz/hisse/Sayfalar/Temettu-Ve-Sermaye-Artirimi-Tarihcesi.aspx"
 TV_URL = "https://scanner.tradingview.com/turkey/scan"
+FIYAT_GECMISI_URL = ("https://www.isyatirim.com.tr/_layouts/15/Isyatirim.Website/Common/Data.aspx/HisseTekil"
+                     "?hisse=%s&startdate=%s&enddate=%s")
+GAS_URL = "https://script.google.com/macros/s/AKfycbxo9u41oj1aXxgkuE7gTnHdeG_mzT41o3WmaYhhqNNUJi_NTDzLOmSBSnHAhfsvhOiK/exec"
+
+YEDEK_FIYAT_BUTCE_SN = 300   # Yedek fiyat kaynakları için toplam süre sınırı
 
 
 def log(*a):
@@ -86,13 +90,16 @@ def parse_tarih(val):
 
     return 0, ""
 
-def fiyatlari_cek(session):
+# ----------------------------------------------------------------------
+# FİYAT KAYNAKLARI
+# ----------------------------------------------------------------------
+def _tv_tara(session, turler):
     payload = {
         "columns": ["name", "close"],
-        "filter": [{"left": "type", "operation": "in_range", "right": ["stock"]}],
+        "filter": [{"left": "type", "operation": "in_range", "right": turler}],
         "range": [0, 1500],
     }
-    fiyatlar = {}
+    sonuc = {}
     try:
         r = session.post(TV_URL, json=payload, timeout=20)
         js = r.json()
@@ -100,12 +107,140 @@ def fiyatlari_cek(session):
             kod = str(item["d"][0]).replace("BIST:", "").strip().upper()
             fiyat = item["d"][1]
             if fiyat:
-                fiyatlar[kod] = float(fiyat)
-        log("TradingView fiyat sayisi:", len(fiyatlar))
+                sonuc[kod] = float(fiyat)
     except Exception as e:
-        log("TradingView HATA:", repr(e))
+        log("TradingView (%s) HATA:" % ",".join(turler), repr(e))
+    return sonuc
+
+def fiyatlari_cek(session):
+    fiyatlar = _tv_tara(session, ["stock"])
+    log("TradingView hisse fiyat sayisi:", len(fiyatlar))
+
+    # Bazı kodlar 'stock' dışında bir türde olabilir (ör. fon/DR): ayrı ayrı denenir
+    for tur in (["fund"], ["dr"]):
+        ek = _tv_tara(session, tur)
+        yeni = 0
+        for k, v in ek.items():
+            if k not in fiyatlar:
+                fiyatlar[k] = v
+                yeni += 1
+        if ek:
+            log("TradingView ek tur %s: +%d" % (tur[0], yeni))
     return fiyatlar
 
+def yahoo_fiyat(kod):
+    url = "https://query2.finance.yahoo.com/v8/finance/chart/%s.IS?interval=1d&range=5d" % kod
+    try:
+        r = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=12)
+        if r.status_code != 200:
+            return 0.0
+        res = r.json().get("chart", {}).get("result") or []
+        if not res:
+            return 0.0
+        meta = res[0].get("meta", {})
+        p = meta.get("regularMarketPrice")
+        if p and float(p) > 0:
+            return float(p)
+        kapanislar = (res[0].get("indicators", {}).get("quote") or [{}])[0].get("close") or []
+        for v in reversed(kapanislar):
+            if v:
+                return float(v)
+    except Exception:
+        pass
+    return 0.0
+
+def isyatirim_fiyat(kod):
+    bit = time.strftime("%d-%m-%Y", time.gmtime())
+    bas = time.strftime("%d-%m-%Y", time.gmtime(time.time() - 25 * 86400))
+    hdr = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+        "Accept": "application/json, text/plain, */*",
+        "Referer": IS_SAYFA,
+    }
+    for sembol in (kod + ".E", kod):
+        try:
+            r = requests.get(FIYAT_GECMISI_URL % (sembol, bas, bit), headers=hdr, timeout=12)
+            if r.status_code != 200:
+                continue
+            js = r.json()
+            rows = js.get("value") if isinstance(js, dict) else js
+            if not rows:
+                continue
+            en_yeni, fiyat = 0, 0.0
+            for row in rows:
+                if not isinstance(row, dict):
+                    continue
+                ti = 0
+                for k, v in row.items():
+                    if "TARIH" in str(k).upper():
+                        ti, _ = parse_tarih(v)
+                        break
+                p = 0.0
+                for k, v in row.items():
+                    if "KAPANIS" in str(k).upper():
+                        p = parse_sayi(v)
+                        break
+                if p <= 0:
+                    for k in ("HGDG_AOF", "AOF"):
+                        if k in row:
+                            p = parse_sayi(row[k])
+                            break
+                if p > 0 and ti >= en_yeni:
+                    en_yeni, fiyat = ti, p
+            if fiyat > 0:
+                return fiyat
+        except Exception:
+            continue
+    return 0.0
+
+def eksik_fiyatlari_tamamla(kodlar, fiyatlar, oncelik=()):
+    # Temettü Analiz listesindeki hisseler önce denenir (süre sınırı dolarsa onlar kaçmasın)
+    eksik = sorted((k for k in kodlar if k not in fiyatlar), key=lambda k: (k not in oncelik, k))
+    if not eksik:
+        return
+    log("Fiyati eksik hisse sayisi:", len(eksik), "->", ", ".join(eksik[:40]))
+    baslangic = time.time()
+    bulunan = 0
+    for kod in eksik:
+        if time.time() - baslangic > YEDEK_FIYAT_BUTCE_SN:
+            log("Yedek fiyat suresi doldu.")
+            break
+        p = yahoo_fiyat(kod)
+        kaynak = "yahoo"
+        if p <= 0:
+            p = isyatirim_fiyat(kod)
+            kaynak = "isyatirim"
+        if p > 0:
+            fiyatlar[kod] = p
+            bulunan += 1
+            log("  yedek fiyat: %s = %s (%s)" % (kod, p, kaynak))
+        time.sleep(0.3)
+    kalan = [k for k in eksik if k not in fiyatlar]
+    log("Yedek kaynaklarla bulunan:", bulunan, "| hala fiyati olmayan:", ", ".join(kalan) if kalan else "yok")
+
+# ----------------------------------------------------------------------
+# "TEMETTÜ ANALİZ" kaynağındaki hisse kodları
+# ----------------------------------------------------------------------
+def gas_kodlari(session):
+    try:
+        r = session.get(GAS_URL + "?t=%d" % int(time.time()), timeout=120)
+        js = r.json()
+        tablo = js.get("anaTablo") or []
+        kodlar = set()
+        for satir in tablo[1:]:
+            if satir and satir[0] is not None:
+                k = str(satir[0]).strip().upper()
+                if k:
+                    kodlar.add(k)
+        log("Temettu Analiz kaynagindaki hisse sayisi:", len(kodlar))
+        return kodlar
+    except Exception as e:
+        log("Temettu Analiz kaynagi okunamadi (yedek kullanilmayacak):", repr(e))
+        return set()
+
+# ----------------------------------------------------------------------
+# İş Yatırım temettü verisi
+# ----------------------------------------------------------------------
 def is_yatirim_satirlari(session):
     session.headers.update({
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
@@ -170,7 +305,7 @@ def satiri_coz(satir):
 
     return kod, t_int, t_str, hb
 
-def temettuleri_hazirla(satirlar, fiyatlar):
+def temettu_kayitlari(satirlar):
     ham = {}
     for satir in satirlar:
         if not isinstance(satir, dict):
@@ -179,13 +314,16 @@ def temettuleri_hazirla(satirlar, fiyatlar):
         if not kod or hb <= 0 or t_int <= 0:
             continue
         ham.setdefault(kod, {})[(t_int, round(hb, 6))] = t_str
+    return ham
 
+def veriyi_hazirla(ham, fiyatlar, gas):
     sonuc = {}
-    fiyatsiz = 0
+    atlanan = 0
 
     for kod, kayitlar in ham.items():
-        if fiyatlar and kod not in fiyatlar:
-            fiyatsiz += 1
+        fiyat = fiyatlar.get(kod, 0.0)
+        if fiyat <= 0 and kod not in gas:
+            atlanan += 1
             continue
 
         yillik = {}
@@ -195,7 +333,6 @@ def temettuleri_hazirla(satirlar, fiyatlar):
         son_yil = max(yillik.keys())
         odemeler = sorted(yillik[son_yil])
         toplam = sum(o[1] for o in odemeler)
-        fiyat = fiyatlar.get(kod, 0.0)
 
         sonuc[kod] = {
             "tarih": odemeler[-1][2],
@@ -206,7 +343,25 @@ def temettuleri_hazirla(satirlar, fiyatlar):
             "tarihler": [o[2] for o in odemeler],
         }
 
-    log("Fiyati bulunamadigi icin atlanan hisse:", fiyatsiz)
+    # Temettü kaydı olmayan ama Temettü Analiz listesinde bulunan hisseler (yalnızca fiyat)
+    sadece_fiyat = 0
+    for kod in gas:
+        if kod in sonuc:
+            continue
+        fiyat = fiyatlar.get(kod, 0.0)
+        if fiyat > 0:
+            sonuc[kod] = {
+                "tarih": "",
+                "hisse_basi_tl": 0.0,
+                "fiyat": round(fiyat, 4),
+                "yil": 0,
+                "odeme_sayisi": 0,
+                "tarihler": [],
+            }
+            sadece_fiyat += 1
+
+    log("Fiyati olmadigi icin atlanan (listede olmayan) hisse:", atlanan)
+    log("Yalnizca fiyat eklenen hisse:", sadece_fiyat)
     return sonuc
 
 def github_a_yaz(veri):
@@ -241,12 +396,17 @@ def main():
     fiyatlar = fiyatlari_cek(session)
 
     satirlar = is_yatirim_satirlari(session)
-
     if not satirlar:
         log("HATA: Is Yatirim'dan gecerli satir alinamadi.")
         sys.exit(1)
 
-    veri = temettuleri_hazirla(satirlar, fiyatlar)
+    ham = temettu_kayitlari(satirlar)
+    gas = gas_kodlari(session)
+
+    hedef = set(ham.keys()) | gas
+    eksik_fiyatlari_tamamla(hedef, fiyatlar, gas)
+
+    veri = veriyi_hazirla(ham, fiyatlar, gas)
     log("Hazirlanan hisse sayisi:", len(veri))
 
     if not veri:
