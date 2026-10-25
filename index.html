@@ -37,30 +37,33 @@
   }
   .ust-satir { display: flex; gap: 8px; align-items: center; }
   .ara {
-    flex: 1; min-width: 0;
-    height: 40px; padding: 0 12px;
+    flex: 1 1 90px; min-width: 90px;
+    height: 40px; padding: 0 10px;
     border: 1px solid var(--cizgi); border-radius: 8px;
     font-size: 16px; background: #fff; color: var(--yazi);
   }
-  .ust-kur { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
-  .ust-kur .kur { flex: 1; min-width: 0; font-size: 11.5px; line-height: 1.3; color: var(--yazi); font-variant-numeric: tabular-nums; }
-  .ust-kur .kur b { font-weight: 700; }
-  .ust-kur .kur .soluk { color: var(--soluk); }
   .stopaj {
-    display: flex; align-items: center; gap: 4px; flex: none;
-    font-size: 12px; font-weight: 600; color: var(--soluk);
+    display: flex; flex-direction: column; align-items: center; gap: 1px; flex: none;
+    font-size: 9.5px; font-weight: 700; color: var(--soluk); line-height: 1;
   }
   .stopaj input {
-    width: 52px; height: 36px; padding: 0 4px; text-align: center;
+    width: 48px; height: 28px; padding: 0 2px; text-align: center;
     border: 1px solid var(--girdi-kenar); background: var(--girdi); color: var(--yazi);
-    border-radius: 8px; font-size: 16px; font-weight: 700;
+    border-radius: 6px; font-size: 16px; font-weight: 700;
   }
   .stopaj input:focus { outline: 2px solid var(--yazi); }
+  .kur {
+    flex: none; font-size: 10.5px; line-height: 1.3; color: var(--yazi);
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
+  .kur b { font-weight: 700; }
+  .kur .soluk { color: var(--soluk); }
+  .kur .ek { display: none; }
   td small.brut { display: block; font-size: 9px; color: var(--soluk); font-weight: 400; margin-top: 1px; text-decoration: line-through; }
   .temizle {
-    height: 40px; padding: 0 12px; border-radius: 8px;
+    height: 40px; padding: 0 9px; border-radius: 8px; flex: none;
     border: 1px solid var(--cizgi); background: #fff; color: #9b2c2c;
-    font-size: 14px; font-weight: 600; white-space: nowrap;
+    font-size: 13px; font-weight: 600; white-space: nowrap;
   }
   .sekmeler { display: none; margin-top: 8px; gap: 6px; }
   .sekme {
@@ -134,6 +137,9 @@
     #alan { display: none; }
     #alan.goster { display: flex; }
     .sekmeler { display: none !important; }
+    .kur { font-size: 12.5px; }
+    .kur .ek { display: inline; }
+    .ara { flex: 0 1 240px; }
     .toplam .bloklar { justify-content: center; gap: 40px; }
     .toplam .blok { display: flex !important; max-width: 660px; }
     table { font-size: 14px; }
@@ -164,13 +170,12 @@
 <div class="ust" id="ust">
   <div class="ust-satir">
     <input class="ara" id="ara" type="search" placeholder="Hisse ara (örn. AKSA)" autocomplete="off" autocapitalize="characters">
-    <button class="temizle" id="temizle" type="button">Temizle</button>
-  </div>
-  <div class="ust-kur">
-    <label class="stopaj" title="Temettüden kesilen stopaj oranı">Stopaj %
+    <label class="stopaj" title="Temettüden kesilen stopaj oranı">
+      <span>Stopaj %</span>
       <input id="stopaj" type="text" inputmode="decimal" autocomplete="off" value="15">
     </label>
     <div class="kur" id="kur">Kurlar yükleniyor…</div>
+    <button class="temizle" id="temizle" type="button">Temizle</button>
   </div>
   <div class="sekmeler" id="sekmeler">
     <button class="sekme sol aktif" data-hedef="sol" type="button">Aylık temettü</button>
@@ -278,8 +283,8 @@
   }
 
   function bilgiYaz() {
-    $("bilgi").textContent = liste.length + " hisse · temettü: İş Yatırım brüt tutarından %" +
-      fmt(stopajOrani(), 2) + " stopaj düşülmüş net tutar · fiyat: TradingView";
+    $("bilgi").textContent = liste.length + " Hisse · Temettü: Brüt tutarından %" +
+      fmt(stopajOrani(), 2) + " stopaj düşülmüş net tutar · Fiyat: TradingView'den alınmaktadır.";
   }
 
   /* ------------------------- kurlar: USD ve gram altın ------------------------- */
@@ -363,13 +368,16 @@
     });
     var k = $("kur");
     if (!kurHazir()) {
-      k.textContent = "Kur alınamadı: dolar ve altın karşılığı gösterilemiyor";
+      k.textContent = "Kur alınamadı";
+      k.title = "Dolar ve altın karşılığı gösterilemiyor";
     } else {
       var d = new Date(kur.zaman);
       var saat = d.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
-      k.innerHTML = "1 $ = <b>" + fmt(kur.usdTry, 2) + " TL</b> · 1 gr altın = <b>" + fmt(gramAltinTL(), 2) + " TL</b>" +
-        " <span class='soluk'>(" + fmt(gramAltinTL() / kur.usdTry, 2) + " $) · " + saat +
-        (kur.onbellek ? " · son kayıtlı kur" : "") + "</span>";
+      k.innerHTML = "1 $ = <b>" + fmt(kur.usdTry, 2) + " TL</b><br>" +
+        "1 gr altın = <b>" + fmt(gramAltinTL(), 2) + " TL</b>" +
+        "<span class='soluk ek'> (" + fmt(gramAltinTL() / kur.usdTry, 2) + " $) · " + saat + "</span>" +
+        (kur.onbellek ? " <span class='soluk'>(eski)</span>" : "");
+      k.title = "Kur saati: " + saat + (kur.onbellek ? " — son kayıtlı kur kullanılıyor" : "");
     }
     ustYukseklik();
   }
