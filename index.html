@@ -28,7 +28,6 @@
     padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
   }
 
-  /* ---------- Ust cubuk ---------- */
   .ust {
     position: sticky; top: 0; z-index: 30;
     background: var(--zemin);
@@ -69,7 +68,6 @@
     font-size: 13px; font-weight: 600; white-space: nowrap;
   }
   
-  /* Daima Sekmeli Görünüm */
   .sekmeler { display: flex; margin-top: 8px; gap: 6px; }
   .sekme {
     flex: 1; height: 42px; border: 0; border-radius: 8px;
@@ -79,7 +77,6 @@
   .sekme.sag { background: var(--mavi); }
   .sekme.aktif { opacity: 1; box-shadow: 0 0 0 2px var(--yazi) inset; }
 
-  /* ---------- Yerlesim ---------- */
   #yukleniyor, #hata {
     margin: 24px 12px; padding: 16px; text-align: center;
     background: #fff; border: 1px solid var(--cizgi); border-radius: 10px;
@@ -121,7 +118,6 @@
   input.girdi:focus { outline: 2px solid var(--yazi); outline-offset: 0; }
   .bos-sonuc { padding: 18px; color: var(--soluk); font-size: 14px; display: none; }
 
-  /* ---------- Alt toplam cubugu ---------- */
   .toplam {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
     padding: 3px 8px calc(3px + env(safe-area-inset-bottom, 0px));
@@ -137,7 +133,6 @@
   .toplam .kalem small { display: block; font-size: 10.5px; font-weight: 800; color: #f0cc5a; white-space: nowrap; min-height: 12px; }
   .toplam .etiket { display: none; }
 
-  /* ---------- Masaüstü Tipografi Düzenlemeleri ---------- */
   @media (min-width: 900px) {
     .ust-satir { flex-wrap: nowrap; }
     .ara { flex: 1 1 300px; }
@@ -188,7 +183,6 @@
 <div id="hata"></div>
 
 <div id="alan">
-  <!-- SOL: AYLIK TEMETTÜ GİRİLECEK -->
   <div class="panel p-sol aktif" id="panel-sol">
     <table>
       <caption>AYLIK TEMETTÜ GİRİLECEK</caption>
@@ -200,7 +194,6 @@
     <div class="bos-sonuc" id="sol-bos">Aramaya uyan hisse yok.</div>
   </div>
 
-  <!-- SAĞ: LOT GİRİLECEK -->
   <div class="panel p-sag" id="panel-sag">
     <table>
       <caption>LOT GİRİLECEK</caption>
@@ -213,7 +206,6 @@
   </div>
 </div>
 
-<!-- Alt toplam çubuğu -->
 <div class="toplam" id="toplam">
   <div class="bloklar">
     <div class="blok aktif" id="blok-sol">
@@ -239,12 +231,11 @@
   var JSON_RAW   = "https://raw.githubusercontent.com/mbsarsiv-web/temettu-bot/main/temettu_veri.json";
   var DEPO_ANAHTAR = "temettuhesap_v2";
 
-  var veri = {};          // { KOD: {temettu, fiyat, tarih} }
-  var liste = [];         // sıralı hisse kodları
-  var giris = { sol: {}, sag: {}, stopaj: "15" };   // kullanıcının girdiği değerler
+  var veri = {};          
+  var liste = [];         
+  var giris = { sol: {}, sag: {}, stopaj: "15" };   
   var aktifSekme = "sol";
 
-  /* ------------------------- yardımcılar ------------------------- */
   function $(id) { return document.getElementById(id); }
 
   function sayi(metin) {
@@ -287,7 +278,6 @@
     $("sayi").innerHTML = "<b>" + liste.length + "</b>Hisse";
   }
 
-  /* ------------------------- kurlar: USD ve gram altın ------------------------- */
   var KUR_ANAHTAR = "temettuhesap_kur_v1";
   var OZ_GRAM = 31.1034768;
   var kur = { usdTry: 0, xauUsd: 0, zaman: 0, onbellek: false };
@@ -397,7 +387,6 @@
     try { localStorage.setItem(DEPO_ANAHTAR, JSON.stringify(giris)); } catch (e) {}
   }
 
-  /* ------------------------- veri yükleme ------------------------- */
   function jsonGetir(url) {
     var ayrac = url.indexOf("?") > -1 ? "&" : "?";
     return fetch(url + ayrac + "t=" + Date.now(), { cache: "no-store" }).then(function (r) {
@@ -412,11 +401,21 @@
       var d = ham[kod] || {};
       var t = Number(d.hisse_basi_tl) || 0;
       if (t > 0) {
-        veri[kod] = { temettu: t, fiyat: Number(d.fiyat) || 0, tarih: d.tarih || "", stopajsiz: !stopajUygulanir(kod) };
+        veri[kod] = {
+          temettu: t, 
+          fiyat: Number(d.fiyat) || 0, 
+          tarih: d.tarih || "", 
+          stopajsiz: !stopajUygulanir(kod),
+          ortalama_verim: Number(d.ortalama_verim) || 0
+        };
         liste.push(kod);
       }
     });
-    liste.sort(function (a, b) { return a.localeCompare(b, "tr"); });
+    
+    // Hisseleri Görseldeki Gibi "Ortalama Verim" Sütununa Göre Yüksekten Düşüğe Sıralama
+    liste.sort(function (a, b) {
+      return veri[b].ortalama_verim - veri[a].ortalama_verim;
+    });
   }
 
   function baslat() {
@@ -440,7 +439,6 @@
         sekmeAyarla(aktifSekme);
       })
       .catch(function (e) {
-        console.error(e);
         $("yukleniyor").style.display = "none";
         var h = $("hata");
         h.style.display = "block";
@@ -448,7 +446,6 @@
       });
   }
 
-  /* ------------------------- tablo çizimi ------------------------- */
   function tablolariCiz() {
     var sol = [], sag = [];
     liste.forEach(function (k) {
@@ -473,7 +470,6 @@
     hesaplaHepsi();
   }
 
-  /* ------------------------- hesaplamalar ------------------------- */
   function satirSol(tr, kod) {
     var d = veri[kod];
     var aylik = sayi(giris.sol[kod]);
@@ -530,7 +526,6 @@
 
   function hesaplaHepsi() { hesaplaSol(); hesaplaSag(); }
 
-  /* ------------------------- olaylar ------------------------- */
   function girdiOlayi(e) {
     var el = e.target;
     if (!el.classList || !el.classList.contains("girdi")) return;
