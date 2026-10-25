@@ -175,7 +175,7 @@
   <div class="ust-satir">
     <input class="ara" id="ara" type="search" placeholder="Hisse ara (örn. AKSA)" autocomplete="off" autocapitalize="characters">
     <div class="sag-grup">
-      <label class="stopaj" title="Temettüden kesilen stopaj oranı (GYO ile biten hisselerde uygulanmaz)">
+      <label class="stopaj" title="Temettüden kesilen stopaj oranı (kodunda GY geçen hisselerde uygulanmaz)">
         <span>Stopaj %</span>
         <input id="stopaj" type="text" inputmode="decimal" autocomplete="off" value="15">
       </label>
@@ -280,8 +280,8 @@
     if (n > 100) n = 100;
     return n;
   }
-  // GYO ile biten hisselerde stopaj uygulanmaz
-  function stopajUygulanir(kod) { return !/GYO$/.test(String(kod).toUpperCase()); }
+  // Kodunda "GY" harfleri geçen hisselerde (AVPGY, YGGYO, KLGYO...) stopaj uygulanmaz
+  function stopajUygulanir(kod) { return String(kod).toUpperCase().indexOf("GY") === -1; }
   function net(d) { return d.temettu * (1 - (d.stopajsiz ? 0 : stopajOrani()) / 100); }
 
   function temettuHucre(d) {
