@@ -80,30 +80,30 @@ def main():
                 if not kod or not tarih: continue
                 kod = str(kod).strip().upper()
 
-                hisse_basi = 0.0
+                oran_brut = 0.0
+                oran_net = 0.0
                 
                 for k, v in satir.items():
                     k_upper = str(k).upper().replace('İ', 'I').replace('Ü', 'U')
+                    val = parse_turkce_sayi(v)
                     
-                    # İlgisiz oranları ve toplam sermayeyi atla
-                    if any(x in k_upper for x in ["BEDELSIZ", "BEDELLI", "RUCHAN", "SERMAYE", "VERIM"]):
+                    if val <= 0: continue
+                    
+                    # Karışıklık yaratan tüm sütunları KARA LİSTEYE al (Dağıtma Oranı, Verim, Milyonluk Tutar)
+                    if any(x in k_upper for x in ["DAGITMA", "VERIM", "TUTAR", "BEDEL", "RUCHAN", "SERMAYE", "HESAPLANAN"]):
                         continue
                         
-                    # İçinde Temettü, Nakit, Kar veya Pay geçen sütunları yakala
-                    if "TEMETTU" in k_upper or "NAKIT" in k_upper or "PAY" in k_upper or "KAR" in k_upper:
-                        val = parse_turkce_sayi(v)
-                        if val <= 0: continue
-                        
-                        # Eğer oran (%) olarak verilmişse 100'e bölerek Hisse Başı TL'ye çevir
-                        if "ORAN" in k_upper:
-                            val = val / 100.0
-                            
-                        # Milyonluk toplam dağıtımları elemek için 5000 TL barajı (Hisse başı makul rakamlar)
-                        if 0 < val < 5000:
-                            if val > hisse_basi:
-                                hisse_basi = val
+                    # Yalnızca saf "Nakit Temettü Oranını" yakala
+                    if "ORAN" in k_upper and ("NAKIT" in k_upper or "TEMETTU" in k_upper):
+                        if "NET" in k_upper:
+                            oran_net = val
+                        else:
+                            oran_brut = val
                 
-                if hisse_basi > 0:
+                # Brüt oranı önceliklendir, yoksa neti al ve 100'e bölerek Hisse Başı TL'ye çevir
+                secilen_oran = oran_brut if oran_brut > 0 else oran_net
+                if secilen_oran > 0:
+                    hisse_basi = secilen_oran / 100.0
                     if kod not in gecmis_veriler:
                         gecmis_veriler[kod] = []
                     gecmis_veriler[kod].append({"tarih": tarih, "tutar": hisse_basi})
@@ -128,7 +128,7 @@ def main():
     sha = get_res.json().get('sha', '') if get_res.status_code == 200 else ""
     
     encoded = base64.b64encode(json.dumps(temettu_verileri, indent=4).encode('utf-8')).decode('utf-8')
-    data = {"message": "otomatik güncelleme: esnek hisse basi algoritmasi", "content": encoded}
+    data = {"message": "otomatik güncelleme: kesin sutun filtresi", "content": encoded}
     if sha: data["sha"] = sha
     
     requests.put(api_url_gh, headers=auth_headers, json=data)
