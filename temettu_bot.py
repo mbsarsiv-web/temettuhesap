@@ -9,7 +9,7 @@ GITHUB_TOKEN = os.environ.get("GH_TOKEN")
 REPO = "mbsarsiv-web/temettuhesap"
 
 def parse_turkce_sayi(val):
-    if not val: return 0.0
+    if val is None or str(val).strip() == "": return 0.0
     if isinstance(val, (int, float)): return float(val)
     s = str(val).strip()
     if ',' in s and '.' in s:
@@ -47,7 +47,6 @@ def main():
     }
     session.headers.update(headers)
 
-    # 1. TradingView Fiyatları
     tv_url = "https://scanner.tradingview.com/turkey/scan"
     payload_tv = {"columns": ["name", "close"], "filter": [{"left": "type", "operation": "in_range", "right": ["stock"]}], "range": [0, 1500]}
     try:
@@ -56,7 +55,6 @@ def main():
     except:
         fiyatlar = {}
 
-    # 2. İş Yatırım Temettü Verileri
     api_url = "https://www.isyatirim.com.tr/_layouts/15/IsYatirim.Website/StockInfo/CompanyInfoAjax.aspx/GetSermayeArttirimlari"
     payload_is = {"hisseKodu": "", "hisseTanimKodu": "04", "yil": 0, "zaman": "HEPSI", "endeksKodu": "09", "sektorKodu": ""}
     
@@ -82,31 +80,34 @@ def main():
                 if not kod or not tarih: continue
                 kod = str(kod).strip().upper()
 
-                oran_brut = 0.0
-                oran_net = 0.0
+                hisse_basi = 0.0
                 
                 for k, v in satir.items():
                     k_upper = str(k).upper().replace('İ', 'I').replace('Ü', 'U')
                     
-                    # Yalnızca tam isabet "Nakit Temettü Oranı" içeren API başlıklarını hedefle
-                    if "NAKIT" in k_upper and "ORAN" in k_upper and "TEMETTU" in k_upper:
+                    # İlgisiz oranları ve toplam sermayeyi atla
+                    if any(x in k_upper for x in ["BEDELSIZ", "BEDELLI", "RUCHAN", "SERMAYE", "VERIM"]):
+                        continue
+                        
+                    # İçinde Temettü, Nakit, Kar veya Pay geçen sütunları yakala
+                    if "TEMETTU" in k_upper or "NAKIT" in k_upper or "PAY" in k_upper or "KAR" in k_upper:
                         val = parse_turkce_sayi(v)
-                        if "NET" in k_upper:
-                            if val > oran_net: oran_net = val
-                        else:
-                            if val > oran_brut: oran_brut = val
+                        if val <= 0: continue
+                        
+                        # Eğer oran (%) olarak verilmişse 100'e bölerek Hisse Başı TL'ye çevir
+                        if "ORAN" in k_upper:
+                            val = val / 100.0
+                            
+                        # Milyonluk toplam dağıtımları elemek için 5000 TL barajı (Hisse başı makul rakamlar)
+                        if 0 < val < 5000:
+                            if val > hisse_basi:
+                                hisse_basi = val
                 
-                # Brüt oran varsa (Örn: 364.0) onu kullan, yoksa neti kullan
-                secilen_oran = oran_brut if oran_brut > 0 else oran_net
-                
-                if secilen_oran > 0:
-                    # İş Yatırım Hisse Başı TL = Oran / 100 mantığı (Örn: 364.0 / 100 = 3.64 TL)
-                    hisse_basi = secilen_oran / 100.0
+                if hisse_basi > 0:
                     if kod not in gecmis_veriler:
                         gecmis_veriler[kod] = []
                     gecmis_veriler[kod].append({"tarih": tarih, "tutar": hisse_basi})
             
-            # Her hisse için en güncel tarihli olanı seç
             for kod, liste in gecmis_veriler.items():
                 if kod in fiyatlar:
                     son_temettu = max(liste, key=lambda x: parse_date_score(x["tarih"]))
@@ -118,7 +119,6 @@ def main():
     except Exception:
         pass
 
-    # 3. GitHub'a Gönderim
     if not GITHUB_TOKEN: return
 
     api_url_gh = f"https://api.github.com/repos/{REPO}/contents/temettu_veri.json"
@@ -128,7 +128,7 @@ def main():
     sha = get_res.json().get('sha', '') if get_res.status_code == 200 else ""
     
     encoded = base64.b64encode(json.dumps(temettu_verileri, indent=4).encode('utf-8')).decode('utf-8')
-    data = {"message": "otomatik güncelleme: hisse basi tam isabet", "content": encoded}
+    data = {"message": "otomatik güncelleme: esnek hisse basi algoritmasi", "content": encoded}
     if sha: data["sha"] = sha
     
     requests.put(api_url_gh, headers=auth_headers, json=data)
