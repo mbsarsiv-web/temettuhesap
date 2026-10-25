@@ -2,12 +2,15 @@ name: Temettu Otomasyonu
 
 on:
   schedule:
+    # GitHub cron saati UTC'dir. Turkiye UTC+3 oldugu icin 06:00 UTC = 09:00 (TSI).
+    # Haftanin gunu: 0 = Pazar  ->  her Pazar sabahi 09:00
     - cron: '0 6 * * 0'
   workflow_dispatch:
 
 jobs:
   guncelle:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
