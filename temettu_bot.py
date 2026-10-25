@@ -50,6 +50,7 @@ def main():
     }
     session.headers.update(headers)
 
+    # 1. TradingView Fiyat Çekimi
     tv_url = "https://scanner.tradingview.com/turkey/scan"
     payload_tv = {"columns": ["name", "close"], "filter": [{"left": "type", "operation": "in_range", "right": ["stock"]}], "range": [0, 1500]}
     fiyatlar = {}
@@ -60,9 +61,9 @@ def main():
     except Exception:
         pass 
 
-    # endeksKodu kısıtlaması kaldırılarak BIST'teki TÜM hisseler hedeflendi
+    # 2. İş Yatırım Veri Çekimi (endeksKodu: 09 zorunluluğu eklendi)
     api_url = "https://www.isyatirim.com.tr/_layouts/15/IsYatirim.Website/StockInfo/CompanyInfoAjax.aspx/GetSermayeArttirimlari"
-    payload_is = {"hisseKodu": "", "hisseTanimKodu": "04", "yil": 0, "zaman": "HEPSI", "endeksKodu": "", "sektorKodu": ""}
+    payload_is = {"hisseKodu": "", "hisseTanimKodu": "04", "yil": 0, "zaman": "HEPSI", "endeksKodu": "09", "sektorKodu": ""}
     
     temettu_verileri = {}
     try:
@@ -74,30 +75,30 @@ def main():
             
             gecmis_veriler = {}
             for satir in data:
-                kod = satir.get("SHHE_HS_KOD") or satir.get("HISSE_KODU") or ""
-                tarih = satir.get("SHHE_TARIH") or satir.get("TARIH") or ""
+                kod = ""
+                tarih = ""
+                raw_hb = 0.0
+                raw_oran = 0.0
                 
-                if not kod or not tarih:
-                    for k, v in satir.items():
-                        ku = str(k).upper()
-                        if not kod and "KOD" in ku: kod = v
-                        if not tarih and "TARIH" in ku: tarih = v
+                # Arama ve eşleştirme motoru tamamen "Bitiş Kelimesine" (endswith) sabitlendi
+                for k, v in satir.items():
+                    ku = str(k).upper().replace('İ', 'I')
+                    if ku.endswith("HS_KOD") or ku.endswith("HISSE_KODU") or ku == "KOD":
+                        if not kod: kod = str(v)
+                    elif ku.endswith("TARIH"):
+                        if not tarih: tarih = str(v)
+                    elif ku.endswith("PAY_BASINA_BRUT_TEMETTU") or ku.endswith("HISSE_BASI_TL"):
+                        if raw_hb == 0.0: raw_hb = parse_turkce_sayi(v)
+                    elif ku.endswith("NAKIT_TEMETTU_ORANI") and not ku.endswith("NET_TEMETTU_ORANI"):
+                        if raw_oran == 0.0: raw_oran = parse_turkce_sayi(v)
                 
                 if not kod or not tarih: continue
-                kod = str(kod).strip().upper()
+                kod = kod.strip().upper()
 
-                hb = 0.0
-                for k, v in satir.items():
-                    ku = str(k).upper().replace('İ', 'I').replace('Ü', 'U')
-                    
-                    # Exact Substring Match: Sütun ön eklerini (SHHE_) umursamadan doğrudan veriyi çeker
-                    if "PAY_BASINA_BRUT_TEMETTU" in ku or "HISSE_BASI" in ku:
-                        val = parse_turkce_sayi(v)
-                        if val > hb: hb = val
-                        
-                    elif "NAKIT_TEMETTU_ORANI" in ku and "NET" not in ku:
-                        val = parse_turkce_sayi(v) / 100.0
-                        if val > hb: hb = val
+                hb = raw_hb
+                # Eğer Hisse Başı Brüt boş gelirse, sadece Nakit Oranı 100'e bölerek yansıt (Tam İsabet)
+                if hb == 0.0 and raw_oran > 0:
+                    hb = raw_oran / 100.0
                 
                 if hb > 0:
                     date_val = parse_date_int(tarih)
@@ -106,17 +107,11 @@ def main():
                             gecmis_veriler[kod] = []
                         gecmis_veriler[kod].append({"tarih": tarih, "date_val": date_val, "tutar": hb})
             
-            current_date_int = time.gmtime().tm_year * 10000 + time.gmtime().tm_mon * 100 + time.gmtime().tm_mday
-            
             for kod, liste in gecmis_veriler.items():
                 if len(fiyatlar) > 0 and kod not in fiyatlar: continue
                 
-                # Sadece mevcut yıl ve geçmiş tarihlere izin ver
-                gecerli_liste = [x for x in liste if x["date_val"] <= (current_date_int + 200)]
-                if not gecerli_liste:
-                    gecerli_liste = liste
-                
-                son_temettu = max(gecerli_liste, key=lambda x: x["date_val"])
+                # Tarihe göre en güncel (En yüksek Date Int) veriyi al
+                son_temettu = max(liste, key=lambda x: x["date_val"])
                 
                 temettu_verileri[kod] = {
                     "tarih": format_tarih(son_temettu["tarih"]),
@@ -126,6 +121,7 @@ def main():
     except Exception:
         pass
 
+    # 3. GitHub Veri Gönderimi
     if not GITHUB_TOKEN: return
 
     api_url_gh = f"https://api.github.com/repos/{REPO}/contents/temettu_veri.json"
@@ -135,7 +131,7 @@ def main():
     sha = get_res.json().get('sha', '') if get_res.status_code == 200 else ""
     
     encoded = base64.b64encode(json.dumps(temettu_verileri, indent=4).encode('utf-8')).decode('utf-8')
-    data = {"message": "otomatik güncelleme: endekskodu sifirlandi, sutun aramasi genisletildi", "content": encoded}
+    data = {"message": "otomatik güncelleme: endeksKodu:09 zorunlulugu ve kesin sutun eslestirme", "content": encoded}
     if sha: data["sha"] = sha
     
     requests.put(api_url_gh, headers=auth_headers, json=data)
