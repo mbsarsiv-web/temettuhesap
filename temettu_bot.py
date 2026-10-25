@@ -11,19 +11,19 @@ REPO = "mbsarsiv-web/temettu-bot"
 DOSYA = "temettu_veri.json"
 
 # --- Filtre ayarlari ---
-YIL_PENCERESI = 10        # en fazla kac tamamlanmis yil geriye bakilacak
-YOGUNLUK_ESIGI = 0.7      # temettu yogunlugu bunun altindaysa hisse elenir (7/10 = 0.7)
-MIN_DEGERLENDIRME_YILI = 1  # halka arzdan bu yana en az kac tamamlanmis yil gecmis olmali
-MIN_TEMETTU_VERIMI = 3.0  # %3 temettu verimi altinda olan hisseler elenir
+YIL_PENCERESI = 10          # Son 10 Yıl filtresi
+YOGUNLUK_ESIGI = 0.5        # >= 0.50 (Orta) temettü yoğunluğu
+MIN_DEGERLENDIRME_YILI = 1  # Halka arzdan bu yana en az kac tamamlanmis yil gecmis olmali
+MIN_ORTALAMA_VERIM = 3.0    # >= %3 Ortalama Temettü Verimi
 FIYAT_GECMISI_URL = ("https://www.isyatirim.com.tr/_layouts/15/Isyatirim.Website/Common/Data.aspx/HisseTekil"
                      "?hisse=%s&startdate=%s&enddate=%s")
 TV_ARZ_ALAN_ADAYLARI = ["ipo_offer_date_first", "ipo_offer_date_last", "ipo_date",
-                        "listing_date", "first_trading_date"]  # TradingView'de denenecek sutunlar
-TAHMINI_ARZ_YILI_KULLAN = True  # arz yili hicbir kaynaktan bulunamazsa: ilk temettu yilini arz yili say
-IZLE = ["MACKO"]                # bu hisselerin degerlendirme ayrintisi log'a yazilir
-OTOMATIK_ZAMAN_ASIMI = 8     # sn: tek bir fiyat gecmisi istegi icin
-OTOMATIK_BUTCE_SN = 240      # sn: otomatik halka arz aramasi icin toplam ust sinir
-HALKA_ARZ_DOSYA = "halka_arz.json"  # {"KOD": halka_arz_yili} - yalnizca son 10 yildaki arzlar yeterli
+                        "listing_date", "first_trading_date"] 
+TAHMINI_ARZ_YILI_KULLAN = True  
+IZLE = ["MACKO"]                
+OTOMATIK_ZAMAN_ASIMI = 8     
+OTOMATIK_BUTCE_SN = 240      
+HALKA_ARZ_DOSYA = "halka_arz.json"  
 
 IS_URL = "https://www.isyatirim.com.tr/_layouts/15/IsYatirim.Website/StockInfo/CompanyInfoAjax.aspx/GetSermayeArttirimlari"
 IS_SAYFA = "https://www.isyatirim.com.tr/tr-tr/analiz/hisse/Sayfalar/Temettu-Ve-Sermaye-Artirimi-Tarihcesi.aspx"
@@ -33,14 +33,10 @@ TV_URL = "https://scanner.tradingview.com/turkey/scan"
 def log(*a):
     print(*a, flush=True)
 
-
-# ---------------------------------------------------------------- yardimcilar
 def tr_upper(s):
     return str(s).replace("i", "İ").replace("ı", "I").upper().replace("İ", "I")
 
-
 def parse_sayi(val):
-    """'1,2345' / '1.234,56' / 1.5 / '0.4930' -> float"""
     if val is None:
         return 0.0
     if isinstance(val, bool):
@@ -62,9 +58,7 @@ def parse_sayi(val):
     except ValueError:
         return 0.0
 
-
 def parse_tarih(val):
-    """Her tur tarih bicimini (YYYYMMDD int, 'dd.mm.yyyy' str) dondurur. Bulamazsa (0, '')."""
     if val is None:
         return 0, ""
 
@@ -105,8 +99,6 @@ def parse_tarih(val):
 
     return 0, ""
 
-
-# ---------------------------------------------------------------- fiyatlar
 def fiyatlari_cek(session):
     payload = {
         "columns": ["name", "close"],
@@ -127,7 +119,6 @@ def fiyatlari_cek(session):
         log("TradingView HATA:", repr(e))
     return fiyatlar
 
-
 def _tv_yil(v):
     if v is None or isinstance(v, bool):
         return None
@@ -144,7 +135,6 @@ def _tv_yil(v):
         y = ti // 10000 if ti else 0
     return y if 1980 <= y <= bu_yil else None
 
-
 def tv_arz_yillari(session):
     url = TV_URL
     taban = [{"left": "type", "operation": "in_range", "right": ["stock"]}]
@@ -155,15 +145,11 @@ def tv_arz_yillari(session):
                              timeout=20)
             if r.status_code == 200 and r.json().get("data") is not None:
                 calisan.append(kolon)
-            else:
-                log("TradingView sutunu yok/reddedildi: %s (HTTP %s)" % (kolon, r.status_code))
         except Exception as e:
-            log("TradingView sutun denemesi HATA (%s): %s" % (kolon, repr(e)))
+            pass
 
     if not calisan:
-        log("TradingView'de kullanilabilir halka arz sutunu bulunamadi.")
         return {}
-    log("TradingView halka arz sutunlari calisiyor:", calisan)
 
     sonuc = {}
     try:
@@ -176,17 +162,11 @@ def tv_arz_yillari(session):
                 sonuc[kod] = min(yillar)
     except Exception as e:
         log("TradingView halka arz verisi HATA:", repr(e))
-    log("TradingView'den halka arz yili bulunan hisse sayisi:", len(sonuc))
-    if "MACKO" in sonuc:
-        log("TradingView MACKO halka arz yili:", sonuc["MACKO"])
     return sonuc
 
-
-# ---------------------------------------------------------------- is yatirim
 def is_yatirim_satirlari(session):
     session.headers.update({
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                      "(KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
         "Accept": "application/json, text/javascript, */*; q=0.01",
         "Accept-Language": "tr-TR,tr;q=0.9,en;q=0.8",
         "Content-Type": "application/json; charset=UTF-8",
@@ -197,8 +177,8 @@ def is_yatirim_satirlari(session):
 
     try:
         session.get(IS_SAYFA, timeout=20)
-    except Exception as e:
-        log("Sayfa on-yukleme uyarisi:", repr(e))
+    except Exception:
+        pass
 
     payload = {
         "hisseKodu": "",
@@ -210,9 +190,7 @@ def is_yatirim_satirlari(session):
     }
 
     r = session.post(IS_URL, json=payload, timeout=60)
-    log("Is Yatirim HTTP durum:", r.status_code)
     if r.status_code != 200:
-        log("Yanit govdesi (ilk 500):", r.text[:500])
         return []
 
     js = r.json()
@@ -227,14 +205,9 @@ def is_yatirim_satirlari(session):
                 data = v
                 break
     if not isinstance(data, list):
-        log("Beklenmeyen veri yapisi:", str(data)[:300])
         return []
 
-    log("Is Yatirim ham satir sayisi:", len(data))
-    if data:
-        log("Ornek satir anahtarlari:", list(data[0].keys()))
     return data
-
 
 def satiri_coz(satir):
     kod = str(satir.get("SHHE_HS_KODU") or satir.get("HISSE_KODU") or "").strip().upper()
@@ -248,9 +221,7 @@ def satiri_coz(satir):
 
     return kod, t_int, t_str, hb
 
-
 _OTO = {"ardisik_hata": 0, "devre_disi": False, "baslangic": None}
-
 
 def ilk_islem_yili_bul(kod, baslangic_yili):
     if _OTO["devre_disi"]:
@@ -259,39 +230,34 @@ def ilk_islem_yili_bul(kod, baslangic_yili):
         _OTO["baslangic"] = time.time()
     if time.time() - _OTO["baslangic"] > OTOMATIK_BUTCE_SN:
         _OTO["devre_disi"] = True
-        log("Otomatik halka arz aramasi sure butcesi (%d sn) dolunca durduruldu." % OTOMATIK_BUTCE_SN)
         return None
 
     bas = "01-01-%d" % baslangic_yili
     bit = time.strftime("%d-%m-%Y", time.gmtime())
     hdr = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
         "Accept": "application/json, text/plain, */*",
         "Referer": IS_SAYFA,
     }
 
     def hata(mesaj):
         _OTO["ardisik_hata"] += 1
-        if _OTO["ardisik_hata"] == 1:
-            log("Fiyat gecmisi uyarisi (%s): %s" % (kod, mesaj))
         if _OTO["ardisik_hata"] >= 5:
             _OTO["devre_disi"] = True
-            log("Ust uste %d hata: otomatik halka arz aramasi KAPATILDI." % _OTO["ardisik_hata"])
 
     for sembol in (kod + ".E", kod):
         try:
-            r = requests.get(FIYAT_GECMISI_URL % (sembol, bas, bit), headers=hdr,
-                             timeout=OTOMATIK_ZAMAN_ASIMI)
-        except Exception as e:
-            hata(repr(e))
+            r = requests.get(FIYAT_GECMISI_URL % (sembol, bas, bit), headers=hdr, timeout=OTOMATIK_ZAMAN_ASIMI)
+        except Exception:
+            hata("istek hatasi")
             return None
         if r.status_code != 200:
-            hata("HTTP %s %s" % (r.status_code, r.text[:120]))
+            hata("HTTP hatasi")
             return None
         try:
             js = r.json()
-        except Exception as e:
-            hata("JSON okunamadi: " + repr(e))
+        except Exception:
+            hata("JSON hatasi")
             return None
 
         _OTO["ardisik_hata"] = 0
@@ -313,16 +279,11 @@ def ilk_islem_yili_bul(kod, baslangic_yili):
         return yil if yil > baslangic_yili else None
     return None
 
-
 def halka_arz_yillarini_yukle():
     try:
         with open(HALKA_ARZ_DOSYA, "r", encoding="utf-8") as f:
             ham = json.load(f)
-    except FileNotFoundError:
-        log("%s bulunamadi." % HALKA_ARZ_DOSYA)
-        return {}
-    except Exception as e:
-        log("%s okunamadi:" % HALKA_ARZ_DOSYA, repr(e))
+    except Exception:
         return {}
 
     sonuc = {}
@@ -336,7 +297,6 @@ def halka_arz_yillarini_yukle():
         if 1900 < y < 2100:
             sonuc[str(k).strip().upper()] = y
     return sonuc
-
 
 def temettuleri_hazirla(satirlar, fiyatlar, halka_arz=None, arz_bulucu=None, tv_arz=None):
     halka_arz = halka_arz or {}
@@ -355,10 +315,9 @@ def temettuleri_hazirla(satirlar, fiyatlar, halka_arz=None, arz_bulucu=None, tv_
         ham.setdefault(kod, {})[(t_int, round(hb, 6))] = t_str
 
     sonuc = {}
-    elenen = 0
-    kontrol = []
-    otomatik_bulunan = {}
-    tahmin_edilen = {}
+    elenen_yogunluk = 0
+    elenen_verim = 0
+
     for kod, kayitlar in ham.items():
         if fiyatlar and kod not in fiyatlar:
             continue
@@ -388,22 +347,17 @@ def temettuleri_hazirla(satirlar, fiyatlar, halka_arz=None, arz_bulucu=None, tv_
             if bulunan:
                 arz_yili = bulunan
                 arz_kaynagi = "otomatik"
-                otomatik_bulunan[kod] = bulunan
                 bas, degerlendirilen, temettu_yili, yogunluk = degerlendir(arz_yili)
-                gecti = (degerlendirilen >= MIN_DEGERLENDIRME_YILI
-                         and round(yogunluk, 4) >= YOGUNLUK_ESIGI)
+                gecti = (degerlendirilen >= MIN_DEGERLENDIRME_YILI and round(yogunluk, 4) >= YOGUNLUK_ESIGI)
             elif TAHMINI_ARZ_YILI_KULLAN:
                 arz_yili = min(yillik)
                 arz_kaynagi = "tahmin"
-                tahmin_edilen[kod] = arz_yili
                 bas, degerlendirilen, temettu_yili, yogunluk = degerlendir(arz_yili)
-                gecti = (degerlendirilen >= MIN_DEGERLENDIRME_YILI
-                         and round(yogunluk, 4) >= YOGUNLUK_ESIGI)
-            else:
-                kontrol.append(kod)
+                gecti = (degerlendirilen >= MIN_DEGERLENDIRME_YILI and round(yogunluk, 4) >= YOGUNLUK_ESIGI)
 
+        # 1. Filtre: Yoğunluk
         if not gecti:
-            elenen += 1
+            elenen_yogunluk += 1
             continue
 
         son_yil = max(yillik.keys())
@@ -411,14 +365,18 @@ def temettuleri_hazirla(satirlar, fiyatlar, halka_arz=None, arz_bulucu=None, tv_
         toplam = sum(o[1] for o in odemeler)
         fiyat = fiyatlar.get(kod, 0.0)
 
-        # Temettü verimi %3 Filtresi
-        if fiyat > 0:
-            verim = (toplam / fiyat) * 100
-            if verim < MIN_TEMETTU_VERIMI:
-                elenen += 1
-                continue
+        # 2. Filtre: Ortalama Verim (%3 Sınırı)
+        toplam_temettu_pencere = sum(sum(o[1] for o in yillik[y]) for y in yillik if y >= bas)
+        temettu_veren_yil_sayisi = len([y for y in yillik if y >= bas])
+        
+        if temettu_veren_yil_sayisi > 0 and fiyat > 0:
+            ortalama_temettu_tl = toplam_temettu_pencere / temettu_veren_yil_sayisi
+            ortalama_verim = (ortalama_temettu_tl / fiyat) * 100
         else:
-            elenen += 1
+            ortalama_verim = 0.0
+
+        if ortalama_verim < MIN_ORTALAMA_VERIM:
+            elenen_verim += 1
             continue
 
         sonuc[kod] = {
@@ -433,13 +391,13 @@ def temettuleri_hazirla(satirlar, fiyatlar, halka_arz=None, arz_bulucu=None, tv_
             "degerlendirilen_yil": degerlendirilen,
             "temettu_yili_sayisi": temettu_yili,
             "yogunluk": round(yogunluk, 2),
+            "ortalama_verim": round(ortalama_verim, 2)
         }
 
-    log("Temettü yoğunluğu veya %3 Verim şartını sağlayamadığı için elenen hisse sayısı:", elenen)
+    log("Yoğunluk sınırına (<0.50) takılan hisse:", elenen_yogunluk)
+    log("Ortalama verim sınırına (<%3) takılan hisse:", elenen_verim)
     return sonuc
 
-
-# ---------------------------------------------------------------- github
 def github_a_yaz(veri):
     if not GITHUB_TOKEN:
         log("GH_TOKEN yok, GitHub'a yazilamadi.")
@@ -462,18 +420,14 @@ def github_a_yaz(veri):
         govde["sha"] = sha
 
     p = requests.put(url, headers=h, json=govde, timeout=30)
-    log("GitHub yazma durumu:", p.status_code)
     if p.status_code not in (200, 201):
         log(p.text[:500])
         return False
     return True
 
-
-# ---------------------------------------------------------------- ana akis
 def main():
     session = requests.Session()
     fiyatlar = fiyatlari_cek(session)
-
     try:
         satirlar = is_yatirim_satirlari(session)
     except Exception as e:
@@ -481,18 +435,16 @@ def main():
         satirlar = []
 
     tv_arz = tv_arz_yillari(session)
-    veri = temettuleri_hazirla(
-        satirlar, fiyatlar, halka_arz_yillarini_yukle(), ilk_islem_yili_bul, tv_arz)
+    veri = temettuleri_hazirla(satirlar, fiyatlar, halka_arz_yillarini_yukle(), ilk_islem_yili_bul, tv_arz)
     log("Hazirlanan hisse sayisi:", len(veri))
 
     if not veri:
-        log("HATA: Hic temettu verisi uretilemedi. Mevcut JSON korunuyor.")
+        log("HATA: Hic temettu verisi uretilemedi.")
         sys.exit(1)
 
     if not github_a_yaz(veri):
         sys.exit(1)
     log("Tamamlandi.")
-
 
 if __name__ == "__main__":
     main()
