@@ -21,10 +21,17 @@ def parse_turkce_sayi(val):
 
 def parse_date_score(val):
     s = str(val).strip()
+    # Unix Timestamp (Milyarlarca saniye) düzeltmesi
     m = re.search(r'Date\(([-0-9]+)\)', s)
-    if m: return int(m.group(1)) // 1000
+    if m: 
+        t = time.gmtime(int(m.group(1)) // 1000)
+        return t.tm_year * 10000 + t.tm_mon * 100 + t.tm_mday
+    
+    # Standart YYYY-MM-DD
     m_iso = re.search(r'(\d{4})-(\d{2})-(\d{2})', s)
     if m_iso: return int(m_iso.group(1))*10000 + int(m_iso.group(2))*100 + int(m_iso.group(3))
+    
+    # Standart DD.MM.YYYY
     m2 = re.search(r'(\d{2})[\./-](\d{2})[\./-](\d{4})', s)
     if m2: return int(m2.group(3))*10000 + int(m2.group(2))*100 + int(m2.group(1))
     return 0
@@ -47,16 +54,20 @@ def main():
     }
     session.headers.update(headers)
 
+    # 1. TradingView Fiyatları (Hata toleranslı)
     tv_url = "https://scanner.tradingview.com/turkey/scan"
     payload_tv = {"columns": ["name", "close"], "filter": [{"left": "type", "operation": "in_range", "right": ["stock"]}], "range": [0, 1500]}
+    fiyatlar = {}
     try:
         tv_res = session.post(tv_url, json=payload_tv, timeout=10).json()
-        fiyatlar = {item['d'][0].replace("BIST:", ""): item['d'][1] for item in tv_res['data']}
-    except:
-        fiyatlar = {}
+        if 'data' in tv_res:
+            fiyatlar = {item['d'][0].replace("BIST:", ""): item['d'][1] for item in tv_res['data']}
+    except Exception:
+        pass # TradingView engellese bile fiyatlar { } kalarak devam eder
 
+    # 2. İş Yatırım Temettü Verileri
     api_url = "https://www.isyatirim.com.tr/_layouts/15/IsYatirim.Website/StockInfo/CompanyInfoAjax.aspx/GetSermayeArttirimlari"
-    payload_is = {"hisseKodu": "", "hisseTanimKodu": "04", "yil": 0, "zaman": "HEPSI", "endeksKodu": "09", "sektorKodu": ""}
+    payload_is = {"hisseKodu": "", "hisseTanimKodu": "04", "yil": 0, "zaman": "HEPSI", "endeksKodu": "", "sektorKodu": ""}
     
     temettu_verileri = {}
     try:
@@ -73,49 +84,53 @@ def main():
                 
                 if not kod or not tarih:
                     for k, v in satir.items():
-                        k_upper = str(k).upper().replace('İ', 'I')
-                        if not kod and "KOD" in k_upper: kod = v
-                        if not tarih and "TARIH" in k_upper: tarih = v
+                        ku = str(k).upper().replace('İ', 'I')
+                        if not kod and "KOD" in ku: kod = v
+                        if not tarih and "TARIH" in ku: tarih = v
                 
                 if not kod or not tarih: continue
                 kod = str(kod).strip().upper()
 
-                oran_brut = 0.0
-                oran_net = 0.0
+                hb_brut = 0.0
+                hb_net = 0.0
                 
                 for k, v in satir.items():
-                    k_upper = str(k).upper().replace('İ', 'I').replace('Ü', 'U')
+                    ku = str(k).upper().replace('İ', 'I').replace('Ü', 'U')
                     val = parse_turkce_sayi(v)
-                    
                     if val <= 0: continue
                     
-                    # Karışıklık yaratan tüm sütunları KARA LİSTEYE al (Dağıtma Oranı, Verim, Milyonluk Tutar)
-                    if any(x in k_upper for x in ["DAGITMA", "VERIM", "TUTAR", "BEDEL", "RUCHAN", "SERMAYE", "HESAPLANAN"]):
-                        continue
-                        
-                    # Yalnızca saf "Nakit Temettü Oranını" yakala
-                    if "ORAN" in k_upper and ("NAKIT" in k_upper or "TEMETTU" in k_upper):
-                        if "NET" in k_upper:
-                            oran_net = val
-                        else:
-                            oran_brut = val
+                    # Dağıtma oranı veya verim gibi sütunları yoksay
+                    if "DAGITMA" in ku or "VERIM" in ku: continue
+                    
+                    # API'de Hisse Başı ibaresi açıksa
+                    if ("PAY" in ku or "HISSE" in ku) and ("TEMETTU" in ku or "NAKIT" in ku) and "ORAN" not in ku and "TUTAR" not in ku:
+                        if "NET" in ku: hb_net = max(hb_net, val)
+                        else: hb_brut = max(hb_brut, val)
+                    
+                    # Yüzdelik oran ibaresi açıksa (100'e bölüp TL'ye çevirir)
+                    if "ORAN" in ku and "TEMETTU" in ku:
+                        if "NET" in ku: hb_net = max(hb_net, val / 100.0)
+                        else: hb_brut = max(hb_brut, val / 100.0)
                 
-                # Brüt oranı önceliklendir, yoksa neti al ve 100'e bölerek Hisse Başı TL'ye çevir
-                secilen_oran = oran_brut if oran_brut > 0 else oran_net
-                if secilen_oran > 0:
-                    hisse_basi = secilen_oran / 100.0
+                secilen_hb = hb_brut if hb_brut > 0 else hb_net
+                
+                if secilen_hb > 0:
                     if kod not in gecmis_veriler:
                         gecmis_veriler[kod] = []
-                    gecmis_veriler[kod].append({"tarih": tarih, "tutar": hisse_basi})
+                    gecmis_veriler[kod].append({"tarih": tarih, "tutar": secilen_hb})
             
             for kod, liste in gecmis_veriler.items():
-                if kod in fiyatlar:
-                    son_temettu = max(liste, key=lambda x: parse_date_score(x["tarih"]))
-                    temettu_verileri[kod] = {
-                        "tarih": format_tarih(son_temettu["tarih"]),
-                        "hisse_basi_tl": round(son_temettu["tutar"], 4),
-                        "fiyat": fiyatlar[kod]
-                    }
+                # Eğer piyasa fiyatlarını çektik ama bu hisse borsada yoksa yoksay
+                if len(fiyatlar) > 0 and kod not in fiyatlar: continue
+                
+                # En güncel tarihi matematiksel olarak hatasız bul
+                son_temettu = max(liste, key=lambda x: parse_date_score(x["tarih"]))
+                
+                temettu_verileri[kod] = {
+                    "tarih": format_tarih(son_temettu["tarih"]),
+                    "hisse_basi_tl": round(son_temettu["tutar"], 4),
+                    "fiyat": fiyatlar.get(kod, 0.0)
+                }
     except Exception:
         pass
 
@@ -128,7 +143,7 @@ def main():
     sha = get_res.json().get('sha', '') if get_res.status_code == 200 else ""
     
     encoded = base64.b64encode(json.dumps(temettu_verileri, indent=4).encode('utf-8')).decode('utf-8')
-    data = {"message": "otomatik güncelleme: kesin sutun filtresi", "content": encoded}
+    data = {"message": "otomatik güncelleme: kesin tarih ve guvenli bypass", "content": encoded}
     if sha: data["sha"] = sha
     
     requests.put(api_url_gh, headers=auth_headers, json=data)
