@@ -17,6 +17,7 @@
     --soluk: #6a766f;
     --girdi: #fffde0;
     --girdi-kenar: #c9c27a;
+    --genislik: 900px;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
@@ -25,16 +26,18 @@
     background: var(--zemin);
     color: var(--yazi);
     -webkit-text-size-adjust: 100%;
-    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+    -webkit-tap-highlight-color: transparent;
+    padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px));
   }
 
+  /* ---------- Üst bar ---------- */
   .ust {
     position: sticky; top: 0; z-index: 30;
     background: var(--zemin);
     padding: calc(8px + env(safe-area-inset-top, 0px)) 10px 8px;
     border-bottom: 1px solid var(--cizgi);
   }
-  .ust-satir { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .ust-satir { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; max-width: var(--genislik); margin: 0 auto; }
   .ara {
     flex: 1 1 100%; min-width: 120px;
     height: 46px; padding: 0 14px;
@@ -43,13 +46,13 @@
   }
   .sag-grup { display: flex; align-items: center; gap: 8px; flex: none; margin-left: auto; }
   .sayi { flex: none; text-align: center; font-size: 10px; line-height: 1.15; color: var(--soluk); font-weight: 600; }
-  .sayi b { display: block; font-size: 15px; color: var(--yazi); font-weight: 800; }
+  .sayi b { display: block; font-size: 16px; color: var(--yazi); font-weight: 800; }
   .stopaj {
     display: flex; flex-direction: column; align-items: center; gap: 1px; flex: none;
     font-size: 9.5px; font-weight: 700; color: var(--soluk); line-height: 1;
   }
   .stopaj input {
-    width: 48px; height: 28px; padding: 0 2px; text-align: center;
+    width: 48px; height: 30px; padding: 0 2px; text-align: center;
     border: 1px solid var(--girdi-kenar); background: var(--girdi); color: var(--yazi);
     border-radius: 6px; font-size: 16px; font-weight: 700;
   }
@@ -61,14 +64,13 @@
   .kur b { font-weight: 700; }
   .kur .soluk { color: var(--soluk); }
   .kur .ek { display: none; }
-  td small.brut { display: block; font-size: 9px; color: var(--soluk); font-weight: 400; margin-top: 1px; text-decoration: line-through; }
   .temizle {
-    height: 40px; padding: 0 9px; border-radius: 8px; flex: none;
+    height: 40px; padding: 0 10px; border-radius: 8px; flex: none;
     border: 1px solid var(--cizgi); background: #fff; color: #9b2c2c;
     font-size: 13px; font-weight: 600; white-space: nowrap;
   }
 
-  .sekmeler { display: flex; margin-top: 8px; gap: 6px; }
+  .sekmeler { display: flex; margin: 8px auto 0; gap: 6px; max-width: var(--genislik); }
   .sekme {
     flex: 1; height: 42px; border: 0; border-radius: 8px;
     font-size: 14px; font-weight: 700; color: #fff; opacity: .55; cursor: pointer;
@@ -89,43 +91,50 @@
     font-size: 14px; font-weight: 700; cursor: pointer;
   }
 
-  #alan { display: none; padding: 10px; }
+  /* ---------- Tablo (masaüstü) ---------- */
+  #alan { display: none; padding: 10px; max-width: var(--genislik); margin: 0 auto; }
   #alan.goster { display: block; }
   .panel { display: none; background: var(--kart); border: 1px solid var(--cizgi); border-radius: 8px; overflow: clip; }
   .panel.aktif { display: block; }
 
-  table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 13px; text-align: center; }
-  caption { padding: 10px 6px; color: #fff; font-size: 13px; font-weight: 700; letter-spacing: .02em; }
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 16px; text-align: center; }
+  caption { padding: 10px 6px; color: #fff; font-size: 14px; font-weight: 700; letter-spacing: .02em; }
   .p-sol caption { background: var(--yesil); }
   .p-sag caption { background: var(--mavi); }
-  thead th { color: #fff; font-size: 11px; padding: 7px 2px; border: 1px solid rgba(255,255,255,.25); position: sticky; top: var(--ust-yuk, 96px); z-index: 5; }
+  thead th { color: #fff; font-size: 12px; padding: 8px 2px; border: 1px solid rgba(255,255,255,.25); position: sticky; top: var(--ust-yuk, 96px); z-index: 5; }
   .p-sol thead th { background: var(--yesil-koyu); }
   .p-sag thead th { background: var(--mavi-koyu); }
-  tbody td { padding: 5px 2px; border-bottom: 1px solid var(--cizgi); font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  tbody td { padding: 7px 3px; border-bottom: 1px solid var(--cizgi); font-size: 16px; font-weight: 600; font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   tbody tr:nth-child(even) { background: #f8faf9; }
   tbody tr.dolu { background: #e9f4ec; }
   .p-sag tbody tr.dolu { background: #e8eff8; }
-  td.hisse { font-weight: 700; text-align: left; padding-left: 6px; line-height: 1.15; }
-  td.hisse small { display: block; font-weight: 400; font-size: 10px; color: var(--soluk); margin-top: 1px; }
-  th:nth-child(1), td:nth-child(1) { width: 17%; }
-  th:nth-child(2), td:nth-child(2) { width: 14%; }
-  th:nth-child(3), td:nth-child(3) { width: 14%; }
-  th:nth-child(4), td:nth-child(4) { width: 18%; }
-  th:nth-child(5), td:nth-child(5) { width: 19%; }
-  th:nth-child(6), td:nth-child(6) { width: 18%; }
+  td.hisse { font-weight: 800; font-size: 18px; text-align: left; padding-left: 8px; line-height: 1.15; }
+  td.hisse small { display: block; font-weight: 500; font-size: 12px; color: var(--soluk); margin-top: 2px; }
+  td small.brut { display: block; font-size: 11px; color: var(--soluk); font-weight: 400; margin-top: 1px; text-decoration: line-through; }
+  td::before { content: none; }
+
+  @media (min-width: 641px) {
+    th:nth-child(1), td:nth-child(1) { width: 19%; }
+    th:nth-child(2), td:nth-child(2) { width: 13%; }
+    th:nth-child(3), td:nth-child(3) { width: 15%; }
+    th:nth-child(4), td:nth-child(4) { width: 15%; }
+    th:nth-child(5), td:nth-child(5) { width: 18%; }
+    th:nth-child(6), td:nth-child(6) { width: 20%; }
+  }
 
   input.girdi {
-    width: 100%; height: 34px; padding: 0 2px;
-    text-align: center; font-size: 16px; font-weight: 700;
+    width: 100%; height: 42px; padding: 0 4px;
+    text-align: center; font-size: 19px; font-weight: 800;
     border: 1px solid var(--girdi-kenar); background: var(--girdi); color: var(--yazi);
-    border-radius: 5px;
+    border-radius: 6px;
   }
   input.girdi:focus { outline: 2px solid var(--yazi); outline-offset: 0; }
-  .bos-sonuc { padding: 18px; color: var(--soluk); font-size: 14px; display: none; }
+  .bos-sonuc { padding: 18px; color: var(--soluk); font-size: 15px; display: none; }
 
+  /* ---------- Alt toplam çubuğu ---------- */
   .toplam {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
-    padding: 3px 8px calc(3px + env(safe-area-inset-bottom, 0px));
+    padding: 5px 8px calc(5px + env(safe-area-inset-bottom, 0px));
     background: var(--yazi); color: #fff;
     font-variant-numeric: tabular-nums; line-height: 1.1;
   }
@@ -133,9 +142,9 @@
   .toplam .blok { display: none; flex: 1; gap: 6px; justify-content: space-between; max-width: 660px; }
   .toplam .blok.aktif { display: flex; }
   .toplam .kalem { text-align: center; flex: 1; min-width: 0; }
-  .toplam .kalem span { display: block; font-size: 9px; opacity: .65; }
-  .toplam .kalem b { display: block; font-size: 13px; white-space: nowrap; }
-  .toplam .kalem small { display: block; font-size: 10.5px; font-weight: 800; color: #f0cc5a; white-space: nowrap; min-height: 12px; }
+  .toplam .kalem span { display: block; font-size: 10px; opacity: .7; }
+  .toplam .kalem b { display: block; font-size: 15px; white-space: nowrap; }
+  .toplam .kalem small { display: block; font-size: 11px; font-weight: 800; color: #f0cc5a; white-space: nowrap; min-height: 12px; }
   .toplam .etiket { display: none; }
 
   @media (min-width: 900px) {
@@ -143,23 +152,55 @@
     .ara { flex: 1 1 300px; }
     .kur { font-size: 12.5px; }
     .kur .ek { display: inline; }
-    table { font-size: 14px; }
-    thead th { font-size: 12px; }
     .toplam .etiket { display: block; font-size: 10px; font-weight: 700; align-self: center; flex: .7; text-align: left; }
     .toplam .sol-r { color: #7fd69f; }
     .toplam .sag-r { color: #8db8f2; }
   }
 
-  @media (max-width: 899px) {
-    table { font-size: 12px; }
-    td.hisse small { font-size: 9px; }
-    .toplam .kalem b { font-size: 12.5px; }
-    .toplam .kalem small { font-size: 10px; font-weight: 800; }
+  /* ---------- Mobil: her hisse bir kart ---------- */
+  @media (max-width: 640px) {
+    .ust { padding: calc(6px + env(safe-area-inset-top, 0px)) 8px 6px; }
+    .ara { height: 42px; font-size: 17px; }
+    .sekmeler { margin-top: 6px; }
+    .sekme { height: 40px; font-size: 13px; }
+    .temizle { height: 36px; }
+
+    #alan { padding: 8px; }
+    .panel { background: transparent; border: 0; overflow: visible; }
+    caption { display: block; border-radius: 8px; margin-bottom: 8px; padding: 9px 6px; }
+    table, tbody { display: block; width: 100%; }
+    thead { display: none; }
+
+    tbody tr {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px 10px; align-items: end;
+      margin: 0 0 8px; padding: 10px 12px;
+      background: #fff; border: 1px solid var(--cizgi); border-radius: 12px;
+    }
+    tbody tr:nth-child(even) { background: #fff; }
+    tbody tr.dolu { background: #e9f4ec; border-color: #b7d9c2; }
+    .p-sag tbody tr.dolu { background: #e8eff8; border-color: #b9cde8; }
+
+    tbody td {
+      display: block; width: auto !important; padding: 0; border: 0;
+      text-align: left; font-size: 16px; font-weight: 700; overflow: visible;
+    }
+    tbody td::before {
+      content: attr(data-l); display: block; margin-bottom: 2px;
+      font-size: 10px; font-weight: 700; letter-spacing: .03em; color: var(--soluk);
+    }
+    td.hisse { font-size: 20px; padding-left: 0; }
+    td.hisse::before { content: none; }
+    td.hisse small { font-size: 12px; }
+    td small.brut { font-size: 11px; }
+    td.c-in { grid-column: 1; grid-row: 2; }
+    input.girdi { height: 48px; font-size: 21px; }
+
+    .toplam .kalem b { font-size: 14.5px; }
   }
-  @media (max-width: 380px) {
-    table { font-size: 11px; }
-    thead th { font-size: 9.5px; }
-    input.girdi { font-size: 15px; }
+  @media (max-width: 360px) {
+    tbody td { font-size: 15px; }
+    td.hisse { font-size: 18px; }
+    .toplam .kalem b { font-size: 13.5px; }
   }
 </style>
 </head>
@@ -560,7 +601,7 @@
 
   function veriyiIsle(bot, gas) {
     veri = {}; liste = [];
-    var fiyatsiz = 0;
+    var fiyatsiz = [];
 
     gas.liste.forEach(function (g) {
       var kod = g.kod;
@@ -572,33 +613,25 @@
         tarih = String(g.hbYil);
       }
       var fiyat = Number(b.fiyat) || 0;
-      if (!(fiyat > 0)) fiyatsiz++;
+      if (!(fiyat > 0)) fiyatsiz.push(kod);
 
       veri[kod] = {
         temettu: t,
         fiyat: fiyat,
         tarih: tarih,
         stopajsiz: !stopajUygulanir(kod),
-        ortalama_verim: g.ort,
-        adet: g.adet,
-        yogunluk: g.yog
+        ortalama_verim: g.ort
       };
       liste.push(kod);
     });
 
-    // Diğer uygulamadaki "Ortalama Verim (Yüksek → Düşük)" sıralaması
-    liste.sort(function (a, b) {
-      var A = veri[a], B = veri[b];
-      if (Math.abs(B.ortalama_verim - A.ortalama_verim) > 0.0001) return B.ortalama_verim - A.ortalama_verim;
-      if (B.adet !== A.adet) return B.adet - A.adet;
-      if (Math.abs(B.yogunluk - A.yogunluk) > 0.0001) return B.yogunluk - A.yogunluk;
-      return a.localeCompare(b);
-    });
+    // Alfabetik sıralama (A → Z)
+    liste.sort(function (a, b) { return a < b ? -1 : (a > b ? 1 : 0); });
 
     veriKaynakNotu = "Filtre: Yoğunluk ≥ 0,50 · Son 10 Yıl · Ort. verim ≥ %3 (Temettü Analiz kaynağı, " +
       gas.toplamHisse + " hisse içinden)" +
       (gas.onbellek ? " — son kayıtlı liste kullanılıyor" : "") +
-      (fiyatsiz > 0 ? " — " + fiyatsiz + " hissede fiyat bulunamadı" : "");
+      (fiyatsiz.length > 0 ? " — fiyatı bulunamayan: " + fiyatsiz.join(", ") : "");
   }
 
   function hataGoster(mesaj) {
@@ -638,18 +671,18 @@
       var tarihHtml = d.tarih ? "<small>" + d.tarih + "</small>" : "";
       var fiyatMetni = d.fiyat > 0 ? fmtFiyat(d.fiyat) : "-";
       var ortak = "<td class='hisse'>" + k + tarihHtml + "</td>" +
-                  "<td>" + fiyatMetni + "</td>" +
-                  "<td data-c='temettu'>" + temettuHucre(d) + "</td>";
+                  "<td data-l='FİYAT'>" + fiyatMetni + "</td>" +
+                  "<td data-c='temettu' data-l='TEMETTÜ'>" + temettuHucre(d) + "</td>";
 
       sol.push("<tr data-kod='" + k + "'>" + ortak +
-        "<td data-c='lot'>0</td>" +
-        "<td data-c='maliyet'>0 TL</td>" +
-        "<td><input class='girdi' inputmode='decimal' autocomplete='off' placeholder='0' data-t='sol' data-kod='" + k + "' value='" + (giris.sol[k] || "") + "'></td></tr>");
+        "<td data-c='lot' data-l='LOT'>0</td>" +
+        "<td data-c='maliyet' data-l='MALİYET'>0 TL</td>" +
+        "<td class='c-in' data-l='AYLIK TEMETTÜ (TL)'><input class='girdi' inputmode='decimal' autocomplete='off' placeholder='0' data-t='sol' data-kod='" + k + "' value='" + (giris.sol[k] || "") + "'></td></tr>");
 
       sag.push("<tr data-kod='" + k + "'>" + ortak +
-        "<td><input class='girdi' inputmode='decimal' autocomplete='off' placeholder='0' data-t='sag' data-kod='" + k + "' value='" + (giris.sag[k] || "") + "'></td>" +
-        "<td data-c='maliyet'>0 TL</td>" +
-        "<td data-c='aylik'>0 TL</td></tr>");
+        "<td class='c-in' data-l='LOT'><input class='girdi' inputmode='decimal' autocomplete='off' placeholder='0' data-t='sag' data-kod='" + k + "' value='" + (giris.sag[k] || "") + "'></td>" +
+        "<td data-c='maliyet' data-l='MALİYET'>0 TL</td>" +
+        "<td data-c='aylik' data-l='AYLIK TEMETTÜ'>0 TL</td></tr>");
     });
     $("sol-body").innerHTML = sol.join("");
     $("sag-body").innerHTML = sag.join("");
@@ -725,6 +758,16 @@
   }
   $("sol-body").addEventListener("input", girdiOlayi);
   $("sag-body").addEventListener("input", girdiOlayi);
+
+  // Kutuya dokununca içeriği seç: mobilde üzerine yazmak kolaylaşır
+  function girdiOdak(e) {
+    var el = e.target;
+    if (el.classList && el.classList.contains("girdi")) {
+      setTimeout(function () { try { el.select(); } catch (x) {} }, 0);
+    }
+  }
+  $("sol-body").addEventListener("focusin", girdiOdak);
+  $("sag-body").addEventListener("focusin", girdiOdak);
 
   $("stopaj").addEventListener("input", function () {
     var t = this.value.replace(/[^0-9.,]/g, "");
