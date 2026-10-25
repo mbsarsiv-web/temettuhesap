@@ -27,58 +27,58 @@
     color: var(--yazi);
     -webkit-text-size-adjust: 100%;
     -webkit-tap-highlight-color: transparent;
-    padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px));
   }
 
   /* ---------- Üst bar ---------- */
   .ust {
     position: sticky; top: 0; z-index: 30;
     background: var(--zemin);
-    padding: calc(8px + env(safe-area-inset-top, 0px)) 10px 8px;
+    padding: calc(5px + env(safe-area-inset-top, 0px)) 10px 5px;
     border-bottom: 1px solid var(--cizgi);
   }
   .ust-satir { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; max-width: var(--genislik); margin: 0 auto; }
   .ara {
     flex: 1 1 100%; min-width: 120px;
-    height: 46px; padding: 0 14px;
-    border: 1px solid var(--cizgi); border-radius: 10px;
-    font-size: 18px; background: #fff; color: var(--yazi);
+    height: 36px; padding: 0 12px;
+    border: 1px solid var(--cizgi); border-radius: 8px;
+    font-size: 16px; background: #fff; color: var(--yazi);
   }
   .sag-grup { display: flex; align-items: center; gap: 8px; flex: none; margin-left: auto; }
-  .sayi { flex: none; text-align: center; font-size: 10px; line-height: 1.15; color: var(--soluk); font-weight: 600; }
-  .sayi b { display: block; font-size: 16px; color: var(--yazi); font-weight: 800; }
+  .sayi { flex: none; text-align: center; font-size: 9.5px; line-height: 1.1; color: var(--soluk); font-weight: 600; }
+  .sayi b { display: block; font-size: 15px; color: var(--yazi); font-weight: 800; }
   .stopaj {
     display: flex; flex-direction: column; align-items: center; gap: 1px; flex: none;
-    font-size: 9.5px; font-weight: 700; color: var(--soluk); line-height: 1;
+    font-size: 9px; font-weight: 700; color: var(--soluk); line-height: 1;
   }
   .stopaj input {
-    width: 48px; height: 30px; padding: 0 2px; text-align: center;
+    width: 44px; height: 26px; padding: 0 2px; text-align: center;
     border: 1px solid var(--girdi-kenar); background: var(--girdi); color: var(--yazi);
     border-radius: 6px; font-size: 16px; font-weight: 700;
   }
   .stopaj input:focus { outline: 2px solid var(--yazi); }
   .kur {
-    flex: none; font-size: 10.5px; line-height: 1.3; color: var(--yazi);
+    flex: none; font-size: 10.5px; line-height: 1.25; color: var(--yazi);
     font-variant-numeric: tabular-nums; white-space: nowrap;
   }
   .kur b { font-weight: 700; }
   .kur .soluk { color: var(--soluk); }
   .kur .ek { display: none; }
   .temizle {
-    height: 40px; padding: 0 10px; border-radius: 8px; flex: none;
+    height: 32px; padding: 0 10px; border-radius: 8px; flex: none;
     border: 1px solid var(--cizgi); background: #fff; color: #9b2c2c;
     font-size: 13px; font-weight: 600; white-space: nowrap;
   }
 
-  .sekmeler { display: flex; margin: 8px auto 0; gap: 6px; max-width: var(--genislik); }
+  .sekmeler { display: flex; margin: 5px auto 0; gap: 6px; max-width: var(--genislik); }
   .sekme {
-    flex: 1; height: 42px; border: 0; border-radius: 8px;
-    font-size: 14px; font-weight: 700; color: #fff; opacity: .55; cursor: pointer;
+    flex: 1; height: 32px; border: 0; border-radius: 8px;
+    font-size: 13px; font-weight: 700; color: #fff; opacity: .55; cursor: pointer;
   }
   .sekme.sol { background: var(--yesil); }
   .sekme.sag { background: var(--mavi); }
   .sekme.aktif { opacity: 1; box-shadow: 0 0 0 2px var(--yazi) inset; }
-  .durum { max-width: var(--genislik); margin: 5px auto 0; font-size: 11px; line-height: 1.3; color: var(--soluk); }
+  .durum { max-width: var(--genislik); margin: 3px auto 0; font-size: 11px; line-height: 1.3; color: var(--soluk); }
   .durum:empty { display: none; }
   .durum.uyari { color: #9b2c2c; font-weight: 700; }
 
@@ -95,25 +95,25 @@
   }
 
   /* ---------- Tablo (masaüstü) ---------- */
-  #alan { display: none; padding: 10px; max-width: var(--genislik); margin: 0 auto; }
+  #alan { display: none; padding: 8px 10px; max-width: var(--genislik); margin: 0 auto; }
   #alan.goster { display: block; }
   .panel { display: none; background: var(--kart); border: 1px solid var(--cizgi); border-radius: 8px; overflow: clip; }
   .panel.aktif { display: block; }
 
-  table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 16px; text-align: center; }
-  caption { padding: 10px 6px; color: #fff; font-size: 14px; font-weight: 700; letter-spacing: .02em; }
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 15px; text-align: center; }
+  caption { padding: 6px; color: #fff; font-size: 13px; font-weight: 700; letter-spacing: .02em; }
   .p-sol caption { background: var(--yesil); }
   .p-sag caption { background: var(--mavi); }
-  thead th { color: #fff; font-size: 12px; padding: 8px 2px; border: 1px solid rgba(255,255,255,.25); position: sticky; top: var(--ust-yuk, 96px); z-index: 5; }
+  thead th { color: #fff; font-size: 11.5px; padding: 5px 2px; border: 1px solid rgba(255,255,255,.25); position: sticky; top: var(--ust-yuk, 96px); z-index: 5; }
   .p-sol thead th { background: var(--yesil-koyu); }
   .p-sag thead th { background: var(--mavi-koyu); }
-  tbody td { padding: 7px 3px; border-bottom: 1px solid var(--cizgi); font-size: 16px; font-weight: 600; font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  tbody td { padding: 3px 3px; border-bottom: 1px solid var(--cizgi); font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.15; }
   tbody tr:nth-child(even) { background: #f8faf9; }
   tbody tr.dolu { background: #e9f4ec; }
   .p-sag tbody tr.dolu { background: #e8eff8; }
-  td.hisse { font-weight: 800; font-size: 18px; text-align: left; padding-left: 8px; line-height: 1.15; }
-  td.hisse small { display: block; font-weight: 500; font-size: 12px; color: var(--soluk); margin-top: 2px; }
-  td small.brut { display: block; font-size: 11px; color: var(--soluk); font-weight: 400; margin-top: 1px; text-decoration: line-through; }
+  td.hisse { font-weight: 800; font-size: 16px; text-align: left; padding-left: 8px; line-height: 1.1; }
+  td.hisse small { display: block; font-weight: 500; font-size: 11px; color: var(--soluk); margin-top: 1px; }
+  td small.brut { display: block; font-size: 10.5px; color: var(--soluk); font-weight: 400; margin-top: 0; text-decoration: line-through; }
   td::before { content: none; }
 
   @media (min-width: 641px) {
@@ -126,8 +126,8 @@
   }
 
   input.girdi {
-    width: 100%; height: 42px; padding: 0 4px;
-    text-align: center; font-size: 19px; font-weight: 800;
+    width: 100%; height: 32px; padding: 0 4px;
+    text-align: center; font-size: 17px; font-weight: 800;
     border: 1px solid var(--girdi-kenar); background: var(--girdi); color: var(--yazi);
     border-radius: 6px;
   }
@@ -137,7 +137,7 @@
   /* ---------- Alt toplam çubuğu ---------- */
   .toplam {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
-    padding: 5px 8px calc(5px + env(safe-area-inset-bottom, 0px));
+    padding: 4px 8px calc(4px + env(safe-area-inset-bottom, 0px));
     background: var(--yazi); color: #fff;
     font-variant-numeric: tabular-nums; line-height: 1.1;
   }
@@ -148,36 +148,32 @@
   .toplam .kalem span { display: block; font-size: 10px; opacity: .7; }
   .toplam .kalem b { display: block; font-size: 15px; white-space: nowrap; }
   .toplam .kalem small { display: block; font-size: 11px; font-weight: 800; color: #f0cc5a; white-space: nowrap; min-height: 12px; }
-  .toplam .etiket { display: none; }
 
   @media (min-width: 900px) {
     .ust-satir { flex-wrap: nowrap; }
     .ara { flex: 1 1 300px; }
     .kur { font-size: 12.5px; }
     .kur .ek { display: inline; }
-    .toplam .etiket { display: block; font-size: 10px; font-weight: 700; align-self: center; flex: .7; text-align: left; }
-    .toplam .sol-r { color: #7fd69f; }
-    .toplam .sag-r { color: #8db8f2; }
   }
 
   /* ---------- Mobil: her hisse bir kart ---------- */
   @media (max-width: 640px) {
-    .ust { padding: calc(6px + env(safe-area-inset-top, 0px)) 8px 6px; }
-    .ara { height: 42px; font-size: 17px; }
-    .sekmeler { margin-top: 6px; }
-    .sekme { height: 40px; font-size: 13px; }
-    .temizle { height: 36px; }
+    .ust { padding: calc(4px + env(safe-area-inset-top, 0px)) 8px 4px; }
+    .ara { height: 36px; font-size: 16px; }
+    .sekmeler { margin-top: 4px; }
+    .sekme { height: 32px; font-size: 13px; }
+    .temizle { height: 32px; }
 
-    #alan { padding: 8px; }
+    #alan { padding: 6px 8px; }
     .panel { background: transparent; border: 0; overflow: visible; }
-    caption { display: block; border-radius: 8px; margin-bottom: 8px; padding: 9px 6px; }
+    caption { display: block; border-radius: 8px; margin-bottom: 5px; padding: 6px; }
     table, tbody { display: block; width: 100%; }
     thead { display: none; }
 
     tbody tr {
-      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px 10px; align-items: end;
-      margin: 0 0 8px; padding: 10px 12px;
-      background: #fff; border: 1px solid var(--cizgi); border-radius: 12px;
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3px 10px; align-items: end;
+      margin: 0 0 5px; padding: 5px 10px;
+      background: #fff; border: 1px solid var(--cizgi); border-radius: 10px;
     }
     tbody tr:nth-child(even) { background: #fff; }
     tbody tr.dolu { background: #e9f4ec; border-color: #b7d9c2; }
@@ -185,24 +181,24 @@
 
     tbody td {
       display: block; width: auto !important; padding: 0; border: 0;
-      text-align: left; font-size: 16px; font-weight: 700; overflow: visible;
+      text-align: left; font-size: 15px; font-weight: 700; overflow: visible; line-height: 1.15;
     }
     tbody td::before {
-      content: attr(data-l); display: block; margin-bottom: 2px;
-      font-size: 10px; font-weight: 700; letter-spacing: .03em; color: var(--soluk);
+      content: attr(data-l); display: block; margin-bottom: 0;
+      font-size: 9px; font-weight: 700; letter-spacing: .03em; color: var(--soluk);
     }
-    td.hisse { font-size: 20px; padding-left: 0; }
+    td.hisse { font-size: 18px; padding-left: 0; }
     td.hisse::before { content: none; }
-    td.hisse small { font-size: 12px; }
-    td small.brut { font-size: 11px; }
+    td.hisse small { font-size: 11px; margin-top: 0; }
+    td small.brut { font-size: 10px; }
     td.c-in { grid-column: 1; grid-row: 2; }
-    input.girdi { height: 48px; font-size: 21px; }
+    input.girdi { height: 36px; font-size: 19px; }
 
     .toplam .kalem b { font-size: 14.5px; }
   }
   @media (max-width: 360px) {
-    tbody td { font-size: 15px; }
-    td.hisse { font-size: 18px; }
+    tbody td { font-size: 14px; }
+    td.hisse { font-size: 17px; }
     .toplam .kalem b { font-size: 13.5px; }
   }
 </style>
@@ -259,13 +255,11 @@
 <div class="toplam" id="toplam">
   <div class="bloklar">
     <div class="blok aktif" id="blok-sol">
-      <div class="etiket sol-r">TÜRK LİRASI</div>
       <div class="kalem"><span>Lot</span><b id="sol-toplam-lot">-</b></div>
       <div class="kalem"><span>Maliyet</span><b id="sol-toplam-maliyet">0 TL</b><small id="sol-alt-maliyet"></small></div>
       <div class="kalem"><span>Aylık temettü</span><b id="sol-toplam-aylik">0 TL</b><small id="sol-alt-aylik"></small></div>
     </div>
     <div class="blok" id="blok-sag">
-      <div class="etiket sag-r">TOPLAM (TL)</div>
       <div class="kalem"><span>Lot</span><b id="sag-toplam-lot">-</b></div>
       <div class="kalem"><span>Maliyet</span><b id="sag-toplam-maliyet">0 TL</b><small id="sag-alt-maliyet"></small></div>
       <div class="kalem"><span>Aylık temettü</span><b id="sag-toplam-aylik">0 TL</b><small id="sag-alt-aylik"></small></div>
@@ -711,25 +705,20 @@
     for (var i = 0; i < hucreler.length; i++) hucreler[i].textContent = fmtFiyat(fiyat);
   }
 
+  // Yalnızca sorun varsa (fiyatı alınamayan hisse) uyarı gösterir; normalde hiçbir metin yazmaz
   function durumYaz() {
     var el = $("durum");
     if (!el) return;
-    var n = liste.length, canli = 0, eksik = [];
-    liste.forEach(function (k) {
-      if (veri[k].canli) canli++;
-      if (!(veri[k].fiyat > 0)) eksik.push(k);
-    });
-    var metin = "Fiyat: " + canli + "/" + n + " hisse canlı";
-    if (canliZaman && canli > 0) {
-      metin += " (" + new Date(canliZaman).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" }) + ")";
-    }
+    var eksik = [];
+    liste.forEach(function (k) { if (!(veri[k].fiyat > 0)) eksik.push(k); });
     if (eksik.length > 0) {
       el.className = "durum uyari";
       el.textContent = "⚠ " + eksik.length + " hissenin fiyatı alınamadı: " + eksik.join(", ");
     } else {
       el.className = "durum";
-      el.textContent = metin;
+      el.textContent = "";
     }
+    ustYukseklik();
   }
 
   function canliFiyatlariYukle() {
