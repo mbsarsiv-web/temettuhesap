@@ -1,178 +1,456 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <title>Temettü Hesaplama</title>
-  <style>
-    body { font-family: Arial, sans-serif; background-color: #f4f7f5; margin: 20px; color: #333; }
-    .split-table-container { display: flex; gap: 20px; width: 100%; overflow-x: auto; margin-bottom: 20px; }
-    .split-table { background-color: white; border-collapse: collapse; flex: 1; min-width: 500px; font-size: 12px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    .split-table th { background-color: #274e37; color: white; padding: 8px; border: 1px solid #ccc; font-weight: bold; }
-    .split-table td { padding: 6px; border: 1px solid #ccc; vertical-align: middle; }
-    .table2-header { background-color: #2b5797 !important; }
-    .edit-input { width: 80px; text-align: center; border: 1px solid #ccc; background-color: #ffffe0; font-weight: bold; padding: 4px; border-radius: 3px; }
-    .edit-input:focus { outline: 2px solid #274e37; }
-    .text-left { text-align: left; padding-left: 10px !important; font-weight: bold; }
-    .summary-row td { font-weight: bold; background-color: #f9f9f9; }
-    #loading { text-align: center; font-size: 16px; font-weight: bold; color: #274e37; margin-bottom: 20px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Temettü Hesaplama</title>
+<style>
+  :root {
+    --yesil: #1e6b3e;
+    --yesil-koyu: #174f2f;
+    --mavi: #2b5797;
+    --mavi-koyu: #1f4274;
+    --zemin: #f1f4f2;
+    --kart: #ffffff;
+    --cizgi: #d9dfdb;
+    --yazi: #1d2a22;
+    --soluk: #6a766f;
+    --girdi: #fffde0;
+    --girdi-kenar: #c9c27a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--zemin);
+    color: var(--yazi);
+    -webkit-text-size-adjust: 100%;
+    padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* ---------- Ust cubuk ---------- */
+  .ust {
+    position: sticky; top: 0; z-index: 30;
+    background: var(--zemin);
+    padding: calc(8px + env(safe-area-inset-top, 0px)) 10px 8px;
+    border-bottom: 1px solid var(--cizgi);
+  }
+  .ust-satir { display: flex; gap: 8px; align-items: center; }
+  .ara {
+    flex: 1; min-width: 0;
+    height: 40px; padding: 0 12px;
+    border: 1px solid var(--cizgi); border-radius: 8px;
+    font-size: 16px; background: #fff; color: var(--yazi);
+  }
+  .temizle {
+    height: 40px; padding: 0 12px; border-radius: 8px;
+    border: 1px solid var(--cizgi); background: #fff; color: #9b2c2c;
+    font-size: 14px; font-weight: 600; white-space: nowrap;
+  }
+  .sekmeler { display: none; margin-top: 8px; gap: 6px; }
+  .sekme {
+    flex: 1; height: 42px; border: 0; border-radius: 8px;
+    font-size: 14px; font-weight: 700; color: #fff; opacity: .55;
+  }
+  .sekme.sol { background: var(--yesil); }
+  .sekme.sag { background: var(--mavi); }
+  .sekme.aktif { opacity: 1; box-shadow: 0 0 0 2px var(--yazi) inset; }
+  .bilgi { font-size: 12px; color: var(--soluk); margin: 6px 2px 0; }
+
+  /* ---------- Yerlesim ---------- */
+  #yukleniyor, #hata {
+    margin: 24px 12px; padding: 16px; text-align: center;
+    background: #fff; border: 1px solid var(--cizgi); border-radius: 10px;
+    font-weight: 600; color: var(--yesil);
+  }
+  #hata { color: #9b2c2c; display: none; line-height: 1.5; }
+  #alan { display: none; gap: 14px; padding: 10px; align-items: flex-start; }
+  .panel { flex: 1; min-width: 0; background: var(--kart); border: 1px solid var(--cizgi); border-radius: 8px; overflow: clip; }
+
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 13px; text-align: center; }
+  caption { padding: 10px 6px; color: #fff; font-size: 13px; font-weight: 700; letter-spacing: .02em; }
+  .p-sol caption { background: var(--yesil); }
+  .p-sag caption { background: var(--mavi); }
+  thead th { color: #fff; font-size: 11px; padding: 7px 2px; border: 1px solid rgba(255,255,255,.25); position: sticky; top: var(--ust-yuk, 96px); z-index: 5; }
+  .p-sol thead th { background: var(--yesil-koyu); }
+  .p-sag thead th { background: var(--mavi-koyu); }
+  tbody td { padding: 5px 2px; border-bottom: 1px solid var(--cizgi); font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  tbody tr:nth-child(even) { background: #f8faf9; }
+  tbody tr.dolu { background: #e9f4ec; }
+  .p-sag tbody tr.dolu { background: #e8eff8; }
+  td.hisse { font-weight: 700; text-align: left; padding-left: 6px; line-height: 1.15; }
+  td.hisse small { display: block; font-weight: 400; font-size: 10px; color: var(--soluk); margin-top: 1px; }
+  th:nth-child(1), td:nth-child(1) { width: 17%; }
+  th:nth-child(2), td:nth-child(2) { width: 14%; }
+  th:nth-child(3), td:nth-child(3) { width: 14%; }
+  th:nth-child(4), td:nth-child(4) { width: 18%; }
+  th:nth-child(5), td:nth-child(5) { width: 19%; }
+  th:nth-child(6), td:nth-child(6) { width: 18%; }
+
+  input.girdi {
+    width: 100%; height: 34px; padding: 0 2px;
+    text-align: center; font-size: 16px; font-weight: 700;
+    border: 1px solid var(--girdi-kenar); background: var(--girdi); color: var(--yazi);
+    border-radius: 5px;
+  }
+  input.girdi:focus { outline: 2px solid var(--yazi); outline-offset: 0; }
+  .bos-sonuc { padding: 18px; color: var(--soluk); font-size: 14px; display: none; }
+
+  /* ---------- Alt toplam cubugu ---------- */
+  .toplam {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+    padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px));
+    background: var(--yazi); color: #fff;
+    display: flex; gap: 14px; justify-content: space-around; align-items: center;
+    font-variant-numeric: tabular-nums;
+  }
+  .toplam .blok { display: none; flex: 1; gap: 12px; justify-content: space-between; }
+  .toplam .blok.aktif { display: flex; }
+  .toplam .kalem { text-align: center; flex: 1; min-width: 0; }
+  .toplam .kalem span { display: block; font-size: 10px; opacity: .7; }
+  .toplam .kalem b { font-size: 15px; white-space: nowrap; }
+  .toplam .etiket { font-size: 11px; font-weight: 700; align-self: center; flex: .8; text-align: left; }
+  .toplam .sol-r { color: #7fd69f; }
+  .toplam .sag-r { color: #8db8f2; }
+
+  /* ---------- Masaustu: iki tablo yan yana ---------- */
+  @media (min-width: 900px) {
+    #alan { display: none; }
+    #alan.goster { display: flex; }
+    .sekmeler { display: none !important; }
+    .toplam { justify-content: center; gap: 40px; }
+    .toplam .blok { display: flex !important; max-width: 640px; }
+    table { font-size: 14px; }
+    thead th { font-size: 12px; }
+  }
+
+  /* ---------- Mobil: tek tablo, sekmeli ---------- */
+  @media (max-width: 899px) {
+    .sekmeler { display: flex; }
+    #alan { padding: 8px 6px; }
+    .panel { display: none; }
+    .panel.aktif { display: block; }
+    table { font-size: 12px; }
+    td.hisse small { font-size: 9px; }
+    .toplam .kalem b { font-size: 14px; }
+  }
+  @media (max-width: 380px) {
+    table { font-size: 11px; }
+    thead th { font-size: 9.5px; }
+    input.girdi { font-size: 15px; }
+  }
+</style>
 </head>
 <body>
 
-  <div id="loading">Veriler yükleniyor... Lütfen bekleyin. (Bot yeni çalıştıysa birkaç saniye sürebilir)</div>
+<div class="ust" id="ust">
+  <div class="ust-satir">
+    <input class="ara" id="ara" type="search" placeholder="Hisse ara (örn. AKSA)" autocomplete="off" autocapitalize="characters">
+    <button class="temizle" id="temizle" type="button">Temizle</button>
+  </div>
+  <div class="sekmeler" id="sekmeler">
+    <button class="sekme sol aktif" data-hedef="sol" type="button">Aylık temettü</button>
+    <button class="sekme sag" data-hedef="sag" type="button">Lot</button>
+  </div>
+  <div class="bilgi" id="bilgi"></div>
+</div>
 
-  <div class="split-table-container" id="tables-container" style="display: none;">
-    <!-- SOL TABLO: AYLIK TEMETTÜ GİRİLECEK -->
-    <table class="split-table" id="sol-tablo">
+<div id="yukleniyor">Veriler yükleniyor…</div>
+<div id="hata"></div>
+
+<div id="alan">
+  <!-- SOL: AYLIK TEMETTÜ GİRİLECEK -->
+  <div class="panel p-sol aktif" id="panel-sol">
+    <table>
+      <caption>AYLIK TEMETTÜ GİRİLECEK</caption>
       <thead>
-        <tr><th colspan="6">AYLIK TEMETTÜ GİRİLECEK</th></tr>
         <tr><th>HİSSE</th><th>FİYAT</th><th>TEMETTÜ</th><th>LOT</th><th>MALİYET</th><th>AYLIK TEMETTÜ</th></tr>
       </thead>
       <tbody id="sol-body"></tbody>
-      <tfoot>
-        <tr class="summary-row">
-          <td colspan="3" class="text-left">TÜRK LİRASI</td>
-          <td id="sol-toplam-lot">-</td>
-          <td id="sol-toplam-maliyet">0,00 TL</td>
-          <td id="sol-toplam-aylik">0,00 TL</td>
-        </tr>
-      </tfoot>
     </table>
-
-    <!-- SAĞ TABLO: LOT GİRİLECEK -->
-    <table class="split-table" id="sag-tablo">
-      <thead>
-        <tr><th colspan="6" class="table2-header">LOT GİRİLECEK</th></tr>
-        <tr>
-          <th class="table2-header">HİSSE</th><th class="table2-header">FİYAT</th><th class="table2-header">TEMETTÜ</th><th class="table2-header">LOT</th><th class="table2-header">MALİYET</th><th class="table2-header">AYLIK TEMETTÜ</th>
-        </tr>
-      </thead>
-      <tbody id="sag-body"></tbody>
-      <tfoot>
-        <tr class="summary-row">
-          <td colspan="3" class="text-left">TOPLAM (TL)</td>
-          <td id="sag-toplam-lot">-</td>
-          <td id="sag-toplam-maliyet">0,00 TL</td>
-          <td id="sag-toplam-aylik">0,00 TL</td>
-        </tr>
-      </tfoot>
-    </table>
+    <div class="bos-sonuc" id="sol-bos">Aramaya uyan hisse yok.</div>
   </div>
 
-  <script>
-    let hisseVerileri = {}; 
-    let hisseListesi = []; 
+  <!-- SAĞ: LOT GİRİLECEK -->
+  <div class="panel p-sag" id="panel-sag">
+    <table>
+      <caption>LOT GİRİLECEK</caption>
+      <thead>
+        <tr><th>HİSSE</th><th>FİYAT</th><th>TEMETTÜ</th><th>LOT</th><th>MALİYET</th><th>AYLIK TEMETTÜ</th></tr>
+      </thead>
+      <tbody id="sag-body"></tbody>
+    </table>
+    <div class="bos-sonuc" id="sag-bos">Aramaya uyan hisse yok.</div>
+  </div>
+</div>
 
-    async function baslat() {
-      try {
-        const temettuRes = await fetch('temettu_veri.json?t=' + new Date().getTime());
-        if (!temettuRes.ok) throw new Error("JSON henüz oluşmadı");
-        const temettuData = await temettuRes.json();
+<!-- Alt toplam çubuğu -->
+<div class="toplam" id="toplam">
+  <div class="blok aktif" id="blok-sol">
+    <div class="etiket sol-r">TÜRK LİRASI</div>
+    <div class="kalem"><span>Lot</span><b id="sol-toplam-lot">-</b></div>
+    <div class="kalem"><span>Maliyet</span><b id="sol-toplam-maliyet">0 TL</b></div>
+    <div class="kalem"><span>Aylık temettü</span><b id="sol-toplam-aylik">0 TL</b></div>
+  </div>
+  <div class="blok" id="blok-sag">
+    <div class="etiket sag-r">TOPLAM (TL)</div>
+    <div class="kalem"><span>Lot</span><b id="sag-toplam-lot">-</b></div>
+    <div class="kalem"><span>Maliyet</span><b id="sag-toplam-maliyet">0 TL</b></div>
+    <div class="kalem"><span>Aylık temettü</span><b id="sag-toplam-aylik">0 TL</b></div>
+  </div>
+</div>
 
-        for (const [kod, detay] of Object.entries(temettuData)) {
-          if (detay.hisse_basi_tl > 0) {
-            hisseVerileri[kod] = {
-              temettu: detay.hisse_basi_tl,
-              fiyat: detay.fiyat || 0 
-            };
-            hisseListesi.push(kod);
-          }
-        }
-        
-        hisseListesi.sort();
-        
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('tables-container').style.display = 'flex';
-        
-        tablolariCiz();
-      } catch (e) {
-        console.error("Hata:", e);
-        document.getElementById('loading').innerText = "GitHub Actions botunun çalışması bekleniyor. Lütfen 'Actions' sekmesinden botu manuel tetikleyip 2-3 dakika sonra sayfayı yenileyin.";
+<script>
+(function () {
+  "use strict";
+
+  var JSON_YEREL = "temettu_veri.json";
+  var JSON_RAW   = "https://raw.githubusercontent.com/mbsarsiv-web/temettuhesap/main/temettu_veri.json";
+  var DEPO_ANAHTAR = "temettuhesap_v2";
+
+  var veri = {};          // { KOD: {temettu, fiyat, tarih} }
+  var liste = [];         // sıralı hisse kodları
+  var giris = { sol: {}, sag: {} };   // kullanıcının girdiği değerler
+  var aktifSekme = "sol";
+
+  /* ------------------------- yardımcılar ------------------------- */
+  function $(id) { return document.getElementById(id); }
+
+  function sayi(metin) {
+    if (metin === null || metin === undefined) return 0;
+    var s = String(metin).trim().replace(/\s/g, "");
+    if (s === "") return 0;
+    if (s.indexOf(",") > -1 && s.indexOf(".") > -1) {
+      // 1.234,56 -> 1234.56
+      s = s.replace(/\./g, "").replace(",", ".");
+    } else if (s.indexOf(",") > -1) {
+      s = s.replace(",", ".");
+    }
+    var n = parseFloat(s);
+    return isFinite(n) && n > 0 ? n : 0;
+  }
+
+  function fmt(n, maxOndalik) {
+    return n.toLocaleString("tr-TR", { minimumFractionDigits: 0, maximumFractionDigits: maxOndalik });
+  }
+  function fmtFiyat(n) { return fmt(n, 4); }
+  function fmtLot(n)   { return fmt(Math.round(n), 0); }
+  function fmtTL(n)    { return fmt(Math.round(n), 0) + " TL"; }
+
+  function depoOku() {
+    try {
+      var h = localStorage.getItem(DEPO_ANAHTAR);
+      if (h) {
+        var o = JSON.parse(h);
+        if (o && o.sol && o.sag) giris = o;
       }
-    }
+    } catch (e) { /* depolama yoksa sorun değil */ }
+  }
+  function depoYaz() {
+    try { localStorage.setItem(DEPO_ANAHTAR, JSON.stringify(giris)); } catch (e) {}
+  }
 
-    function formatTL(num) { return num.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  /* ------------------------- veri yükleme ------------------------- */
+  function jsonGetir(url) {
+    var ayrac = url.indexOf("?") > -1 ? "&" : "?";
+    return fetch(url + ayrac + "t=" + Date.now(), { cache: "no-store" }).then(function (r) {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    });
+  }
 
-    function tablolariCiz() {
-      const solBody = document.getElementById('sol-body');
-      const sagBody = document.getElementById('sag-body');
-      solBody.innerHTML = ''; sagBody.innerHTML = '';
+  function veriyiIsle(ham) {
+    veri = {}; liste = [];
+    Object.keys(ham || {}).forEach(function (kod) {
+      var d = ham[kod] || {};
+      var t = Number(d.hisse_basi_tl) || 0;
+      if (t > 0) {
+        veri[kod] = { temettu: t, fiyat: Number(d.fiyat) || 0, tarih: d.tarih || "" };
+        liste.push(kod);
+      }
+    });
+    liste.sort(function (a, b) { return a.localeCompare(b, "tr"); });
+  }
 
-      hisseListesi.forEach((hisse) => {
-        const fiyat = hisseVerileri[hisse].fiyat;
-        const temettu = hisseVerileri[hisse].temettu;
-
-        const trSol = document.createElement('tr');
-        trSol.innerHTML = `
-          <td class="text-left">${hisse}</td>
-          <td>${formatTL(fiyat)}</td>
-          <td>${formatTL(temettu)}</td>
-          <td id="sol_lot_${hisse}">0,00</td>
-          <td id="sol_maliyet_${hisse}">0,00 TL</td>
-          <td><input type="number" class="edit-input" id="sol_aylik_${hisse}" placeholder="0" oninput="hesaplaSol()"></td>
-        `;
-        solBody.appendChild(trSol);
-
-        const trSag = document.createElement('tr');
-        trSag.innerHTML = `
-          <td class="text-left">${hisse}</td>
-          <td>${formatTL(fiyat)}</td>
-          <td>${formatTL(temettu)}</td>
-          <td><input type="number" class="edit-input" id="sag_lot_${hisse}" placeholder="0" oninput="hesaplaSag()"></td>
-          <td id="sag_maliyet_${hisse}">0,00 TL</td>
-          <td id="sag_aylik_${hisse}">0,00 TL</td>
-        `;
-        sagBody.appendChild(trSag);
+  function baslat() {
+    depoOku();
+    jsonGetir(JSON_YEREL)
+      .then(function (d) {
+        if (!d || Object.keys(d).length === 0) throw new Error("bos");
+        return d;
+      })
+      .catch(function () { return jsonGetir(JSON_RAW); })
+      .then(function (d) {
+        veriyiIsle(d);
+        if (liste.length === 0) throw new Error("bos");
+        $("yukleniyor").style.display = "none";
+        $("alan").style.display = "flex";
+        $("alan").className = "goster";
+        tablolariCiz();
+        $("bilgi").textContent = liste.length + " hisse · temettü: İş Yatırım (son hisse başı brüt TL), fiyat: TradingView";
+        ustYukseklik();
+        sekmeAyarla(aktifSekme);
+      })
+      .catch(function (e) {
+        console.error(e);
+        $("yukleniyor").style.display = "none";
+        var h = $("hata");
+        h.style.display = "block";
+        h.innerHTML = "Temettü verisi bulunamadı.<br>GitHub → Actions → “Temettu Otomasyonu” → Run workflow ile botu çalıştırın, " +
+                      "işlem yeşil bitince 1–2 dakika sonra sayfayı yenileyin.<br>" +
+                      "Bot kırmızı biterse log çıktısındaki İş Yatırım satırlarını kontrol edin.";
       });
+  }
 
-      hesaplaSol(); hesaplaSag();
+  /* ------------------------- tablo çizimi ------------------------- */
+  function tablolariCiz() {
+    var sol = [], sag = [];
+    liste.forEach(function (k) {
+      var d = veri[k];
+      var tarihHtml = d.tarih ? "<small>" + d.tarih + "</small>" : "";
+      var ortak = "<td class='hisse'>" + k + tarihHtml + "</td>" +
+                  "<td>" + fmtFiyat(d.fiyat) + "</td>" +
+                  "<td>" + fmtFiyat(d.temettu) + "</td>";
+
+      sol.push("<tr data-kod='" + k + "'>" + ortak +
+        "<td data-c='lot'>0</td>" +
+        "<td data-c='maliyet'>0 TL</td>" +
+        "<td><input class='girdi' inputmode='decimal' autocomplete='off' placeholder='0' data-t='sol' data-kod='" + k + "' value='" + (giris.sol[k] || "") + "'></td></tr>");
+
+      sag.push("<tr data-kod='" + k + "'>" + ortak +
+        "<td><input class='girdi' inputmode='decimal' autocomplete='off' placeholder='0' data-t='sag' data-kod='" + k + "' value='" + (giris.sag[k] || "") + "'></td>" +
+        "<td data-c='maliyet'>0 TL</td>" +
+        "<td data-c='aylik'>0 TL</td></tr>");
+    });
+    $("sol-body").innerHTML = sol.join("");
+    $("sag-body").innerHTML = sag.join("");
+    hesaplaHepsi();
+  }
+
+  /* ------------------------- hesaplamalar ------------------------- */
+  function satirSol(tr, kod) {
+    var d = veri[kod];
+    var aylik = sayi(giris.sol[kod]);
+    var lot = 0, maliyet = 0;
+    if (aylik > 0 && d.temettu > 0) {
+      lot = (aylik * 12) / d.temettu;          // yıllık hedef / hisse başı temettü
+      maliyet = lot * d.fiyat;
     }
+    tr.querySelector("[data-c=lot]").textContent = fmtLot(lot);
+    tr.querySelector("[data-c=maliyet]").textContent = fmtTL(maliyet);
+    tr.className = aylik > 0 ? "dolu" : "";
+    return { lot: lot, maliyet: maliyet, aylik: aylik };
+  }
 
-    function hesaplaSol() {
-      let toplamMaliyet = 0, toplamAylik = 0;
-      hisseListesi.forEach((hisse) => {
-        const fiyat = hisseVerileri[hisse].fiyat;
-        const temettu = hisseVerileri[hisse].temettu;
-        const aylikHedef = parseFloat(document.getElementById(`sol_aylik_${hisse}`).value) || 0;
-        
-        if (aylikHedef > 0 && temettu > 0 && fiyat > 0) {
-          const lot = (aylikHedef * 12) / temettu;
-          const maliyet = lot * fiyat;
-          document.getElementById(`sol_lot_${hisse}`).innerText = formatTL(lot);
-          document.getElementById(`sol_maliyet_${hisse}`).innerText = formatTL(maliyet) + " TL";
-          toplamMaliyet += maliyet; toplamAylik += aylikHedef;
-        } else {
-          document.getElementById(`sol_lot_${hisse}`).innerText = "0,00";
-          document.getElementById(`sol_maliyet_${hisse}`).innerText = "0,00 TL";
-        }
-      });
-      document.getElementById('sol-toplam-maliyet').innerText = formatTL(toplamMaliyet) + " TL";
-      document.getElementById('sol-toplam-aylik').innerText = formatTL(toplamAylik) + " TL";
+  function satirSag(tr, kod) {
+    var d = veri[kod];
+    var lot = sayi(giris.sag[kod]);
+    var maliyet = lot * d.fiyat;
+    var aylik = (lot * d.temettu) / 12;        // yıllık temettü / 12
+    tr.querySelector("[data-c=maliyet]").textContent = fmtTL(maliyet);
+    tr.querySelector("[data-c=aylik]").textContent = fmtTL(aylik);
+    tr.className = lot > 0 ? "dolu" : "";
+    return { lot: lot, maliyet: maliyet, aylik: aylik };
+  }
+
+  function hesaplaSol() {
+    var T = { lot: 0, maliyet: 0, aylik: 0 };
+    var satirlar = $("sol-body").children;
+    for (var i = 0; i < satirlar.length; i++) {
+      var r = satirSol(satirlar[i], satirlar[i].getAttribute("data-kod"));
+      T.lot += r.lot; T.maliyet += r.maliyet; T.aylik += r.aylik;
     }
+    $("sol-toplam-lot").textContent = T.lot > 0 ? fmtLot(T.lot) : "-";
+    $("sol-toplam-maliyet").textContent = fmtTL(T.maliyet);
+    $("sol-toplam-aylik").textContent = fmtTL(T.aylik);
+  }
 
-    function hesaplaSag() {
-      let toplamMaliyet = 0, toplamAylik = 0;
-      hisseListesi.forEach((hisse) => {
-        const fiyat = hisseVerileri[hisse].fiyat;
-        const temettu = hisseVerileri[hisse].temettu;
-        const lot = parseFloat(document.getElementById(`sag_lot_${hisse}`).value) || 0;
-
-        if (lot > 0 && fiyat > 0) {
-          const maliyet = lot * fiyat;
-          const aylikTemettu = (lot * temettu) / 12;
-          document.getElementById(`sag_maliyet_${hisse}`).innerText = formatTL(maliyet) + " TL";
-          document.getElementById(`sag_aylik_${hisse}`).innerText = formatTL(aylikTemettu) + " TL";
-          toplamMaliyet += maliyet; toplamAylik += aylikTemettu;
-        } else {
-          document.getElementById(`sag_maliyet_${hisse}`).innerText = "0,00 TL";
-          document.getElementById(`sag_aylik_${hisse}`).innerText = "0,00 TL";
-        }
-      });
-      document.getElementById('sag-toplam-maliyet').innerText = formatTL(toplamMaliyet) + " TL";
-      document.getElementById('sag-toplam-aylik').innerText = formatTL(toplamAylik) + " TL";
+  function hesaplaSag() {
+    var T = { lot: 0, maliyet: 0, aylik: 0 };
+    var satirlar = $("sag-body").children;
+    for (var i = 0; i < satirlar.length; i++) {
+      var r = satirSag(satirlar[i], satirlar[i].getAttribute("data-kod"));
+      T.lot += r.lot; T.maliyet += r.maliyet; T.aylik += r.aylik;
     }
+    $("sag-toplam-lot").textContent = T.lot > 0 ? fmtLot(T.lot) : "-";
+    $("sag-toplam-maliyet").textContent = fmtTL(T.maliyet);
+    $("sag-toplam-aylik").textContent = fmtTL(T.aylik);
+  }
 
-    baslat();
-  </script>
+  function hesaplaHepsi() { hesaplaSol(); hesaplaSag(); }
+
+  /* ------------------------- olaylar ------------------------- */
+  function girdiOlayi(e) {
+    var el = e.target;
+    if (!el.classList || !el.classList.contains("girdi")) return;
+    // yalnızca rakam, virgül, nokta
+    var temiz = el.value.replace(/[^0-9.,]/g, "");
+    if (temiz !== el.value) el.value = temiz;
+    var t = el.getAttribute("data-t");
+    var kod = el.getAttribute("data-kod");
+    if (temiz === "") delete giris[t][kod]; else giris[t][kod] = temiz;
+    depoYaz();
+    if (t === "sol") hesaplaSol(); else hesaplaSag();
+  }
+  $("sol-body").addEventListener("input", girdiOlayi);
+  $("sag-body").addEventListener("input", girdiOlayi);
+
+  // Arama
+  $("ara").addEventListener("input", function () {
+    var q = this.value.trim().toLocaleUpperCase("tr");
+    ["sol", "sag"].forEach(function (t) {
+      var satirlar = $(t + "-body").children, gorunen = 0;
+      for (var i = 0; i < satirlar.length; i++) {
+        var eslesir = q === "" || satirlar[i].getAttribute("data-kod").indexOf(q) > -1;
+        satirlar[i].style.display = eslesir ? "" : "none";
+        if (eslesir) gorunen++;
+      }
+      $(t + "-bos").style.display = gorunen === 0 ? "block" : "none";
+    });
+  });
+
+  // Temizle (yalnızca açık olan tabloyu)
+  $("temizle").addEventListener("click", function () {
+    var ad = aktifSekme === "sol" ? "Aylık temettü" : "Lot";
+    var masaustu = window.matchMedia("(min-width: 900px)").matches;
+    var mesaj = masaustu ? "Girilen tüm değerler silinsin mi?" : ad + " sütunundaki tüm değerler silinsin mi?";
+    if (!window.confirm(mesaj)) return;
+    var hedefler = masaustu ? ["sol", "sag"] : [aktifSekme];
+    hedefler.forEach(function (t) {
+      giris[t] = {};
+      var inputs = $(t + "-body").querySelectorAll("input.girdi");
+      for (var i = 0; i < inputs.length; i++) inputs[i].value = "";
+    });
+    depoYaz();
+    hesaplaHepsi();
+  });
+
+  // Sekmeler (mobil)
+  function sekmeAyarla(hedef) {
+    aktifSekme = hedef;
+    $("panel-sol").classList.toggle("aktif", hedef === "sol");
+    $("panel-sag").classList.toggle("aktif", hedef === "sag");
+    $("blok-sol").classList.toggle("aktif", hedef === "sol");
+    $("blok-sag").classList.toggle("aktif", hedef === "sag");
+    var b = $("sekmeler").children;
+    for (var i = 0; i < b.length; i++) {
+      b[i].classList.toggle("aktif", b[i].getAttribute("data-hedef") === hedef);
+    }
+    ustYukseklik();
+  }
+  $("sekmeler").addEventListener("click", function (e) {
+    var h = e.target.getAttribute && e.target.getAttribute("data-hedef");
+    if (h) sekmeAyarla(h);
+  });
+
+  // Sabit tablo başlığı için üst çubuk yüksekliği
+  function ustYukseklik() {
+    document.documentElement.style.setProperty("--ust-yuk", $("ust").offsetHeight + "px");
+  }
+  window.addEventListener("resize", ustYukseklik);
+
+  baslat();
+})();
+</script>
 </body>
 </html>
