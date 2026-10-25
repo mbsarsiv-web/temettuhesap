@@ -25,7 +25,7 @@
     background: var(--zemin);
     color: var(--yazi);
     -webkit-text-size-adjust: 100%;
-    padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px));
   }
 
   /* ---------- Ust cubuk ---------- */
@@ -110,17 +110,19 @@
   /* ---------- Alt toplam cubugu ---------- */
   .toplam {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
-    padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px));
+    padding: 6px 10px calc(8px + env(safe-area-inset-bottom, 0px));
     background: var(--yazi); color: #fff;
-    display: flex; gap: 14px; justify-content: space-around; align-items: center;
     font-variant-numeric: tabular-nums;
   }
-  .toplam .blok { display: none; flex: 1; gap: 12px; justify-content: space-between; }
+  .toplam .kur { text-align: center; font-size: 10.5px; opacity: .75; padding-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,.15); margin-bottom: 5px; }
+  .toplam .bloklar { display: flex; gap: 14px; justify-content: space-around; align-items: center; }
+  .toplam .blok { display: none; flex: 1; gap: 10px; justify-content: space-between; }
   .toplam .blok.aktif { display: flex; }
   .toplam .kalem { text-align: center; flex: 1; min-width: 0; }
   .toplam .kalem span { display: block; font-size: 10px; opacity: .7; }
   .toplam .kalem b { font-size: 15px; white-space: nowrap; }
-  .toplam .etiket { font-size: 11px; font-weight: 700; align-self: center; flex: .8; text-align: left; }
+  .toplam .kalem small { display: block; font-size: 10px; color: #e8c866; white-space: nowrap; margin-top: 1px; min-height: 12px; }
+  .toplam .etiket { font-size: 11px; font-weight: 700; align-self: center; flex: .7; text-align: left; }
   .toplam .sol-r { color: #7fd69f; }
   .toplam .sag-r { color: #8db8f2; }
 
@@ -129,8 +131,8 @@
     #alan { display: none; }
     #alan.goster { display: flex; }
     .sekmeler { display: none !important; }
-    .toplam { justify-content: center; gap: 40px; }
-    .toplam .blok { display: flex !important; max-width: 640px; }
+    .toplam .bloklar { justify-content: center; gap: 40px; }
+    .toplam .blok { display: flex !important; max-width: 660px; }
     table { font-size: 14px; }
     thead th { font-size: 12px; }
   }
@@ -144,6 +146,7 @@
     table { font-size: 12px; }
     td.hisse small { font-size: 9px; }
     .toplam .kalem b { font-size: 14px; }
+    .toplam .kalem small { font-size: 9.5px; }
   }
   @media (max-width: 380px) {
     table { font-size: 11px; }
@@ -200,17 +203,20 @@
 
 <!-- Alt toplam çubuğu -->
 <div class="toplam" id="toplam">
-  <div class="blok aktif" id="blok-sol">
-    <div class="etiket sol-r">TÜRK LİRASI</div>
-    <div class="kalem"><span>Lot</span><b id="sol-toplam-lot">-</b></div>
-    <div class="kalem"><span>Maliyet</span><b id="sol-toplam-maliyet">0 TL</b></div>
-    <div class="kalem"><span>Aylık temettü</span><b id="sol-toplam-aylik">0 TL</b></div>
-  </div>
-  <div class="blok" id="blok-sag">
-    <div class="etiket sag-r">TOPLAM (TL)</div>
-    <div class="kalem"><span>Lot</span><b id="sag-toplam-lot">-</b></div>
-    <div class="kalem"><span>Maliyet</span><b id="sag-toplam-maliyet">0 TL</b></div>
-    <div class="kalem"><span>Aylık temettü</span><b id="sag-toplam-aylik">0 TL</b></div>
+  <div class="kur" id="kur">Kurlar yükleniyor…</div>
+  <div class="bloklar">
+    <div class="blok aktif" id="blok-sol">
+      <div class="etiket sol-r">TÜRK LİRASI</div>
+      <div class="kalem"><span>Lot</span><b id="sol-toplam-lot">-</b></div>
+      <div class="kalem"><span>Maliyet</span><b id="sol-toplam-maliyet">0 TL</b><small id="sol-alt-maliyet"></small></div>
+      <div class="kalem"><span>Aylık temettü</span><b id="sol-toplam-aylik">0 TL</b><small id="sol-alt-aylik"></small></div>
+    </div>
+    <div class="blok" id="blok-sag">
+      <div class="etiket sag-r">TOPLAM (TL)</div>
+      <div class="kalem"><span>Lot</span><b id="sag-toplam-lot">-</b></div>
+      <div class="kalem"><span>Maliyet</span><b id="sag-toplam-maliyet">0 TL</b><small id="sag-alt-maliyet"></small></div>
+      <div class="kalem"><span>Aylık temettü</span><b id="sag-toplam-aylik">0 TL</b><small id="sag-alt-aylik"></small></div>
+    </div>
   </div>
 </div>
 
@@ -268,6 +274,93 @@
   function bilgiYaz() {
     $("bilgi").textContent = liste.length + " hisse · temettü: İş Yatırım brüt tutarından %" +
       fmt(stopajOrani(), 2) + " stopaj düşülmüş net tutar · fiyat: TradingView";
+  }
+
+  /* ------------------------- kurlar: USD ve gram altın ------------------------- */
+  var KUR_ANAHTAR = "temettuhesap_kur_v1";
+  var OZ_GRAM = 31.1034768;                 // 1 troy ons = 31,1034768 gram
+  var kur = { usdTry: 0, xauUsd: 0, zaman: 0, onbellek: false };
+  var toplamlar = { sol: { maliyet: 0, aylik: 0 }, sag: { maliyet: 0, aylik: 0 } };
+
+  function jsonAl(url) {
+    var ctrl = (typeof AbortController !== "undefined") ? new AbortController() : null;
+    var zamanlayici = setTimeout(function () { if (ctrl) ctrl.abort(); }, 7000);
+    return fetch(url, { cache: "no-store", signal: ctrl ? ctrl.signal : undefined })
+      .then(function (r) { clearTimeout(zamanlayici); if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+      .catch(function (e) { clearTimeout(zamanlayici); throw e; });
+  }
+
+  function ilkBasarili(kaynaklar) {
+    // kaynaklar: [{url, al: function(json) -> sayı}] — sırayla dener, ilk geçerli sayıyı döndürür
+    var i = 0;
+    function dene() {
+      if (i >= kaynaklar.length) return Promise.reject(new Error("tüm kaynaklar başarısız"));
+      var k = kaynaklar[i++];
+      return jsonAl(k.url).then(function (j) {
+        var n = Number(k.al(j));
+        if (!isFinite(n) || n <= 0) throw new Error("geçersiz değer");
+        return n;
+      }).catch(dene);
+    }
+    return dene();
+  }
+
+  var USD_KAYNAKLARI = [
+    { url: "https://open.er-api.com/v6/latest/USD", al: function (j) { return j.rates.TRY; } },
+    { url: "https://api.frankfurter.dev/v1/latest?base=USD&symbols=TRY", al: function (j) { return j.rates.TRY; } },
+    { url: "https://api.exchangerate-api.com/v4/latest/USD", al: function (j) { return j.rates.TRY; } }
+  ];
+  var ALTIN_KAYNAKLARI = [
+    { url: "https://api.gold-api.com/price/XAU", al: function (j) { return j.price; } },
+    { url: "https://data-asg.goldprice.org/dbXRates/USD", al: function (j) { return j.items[0].xauPrice; } },
+    { url: "https://open.er-api.com/v6/latest/USD", al: function (j) { return 1 / j.rates.XAU; } }
+  ];
+
+  function kurOnbellekOku() {
+    try {
+      var o = JSON.parse(localStorage.getItem(KUR_ANAHTAR));
+      if (o && o.usdTry > 0 && o.xauUsd > 0) { kur = { usdTry: o.usdTry, xauUsd: o.xauUsd, zaman: o.zaman, onbellek: true }; }
+    } catch (e) {}
+  }
+  function kurOnbellekYaz() {
+    try { localStorage.setItem(KUR_ANAHTAR, JSON.stringify({ usdTry: kur.usdTry, xauUsd: kur.xauUsd, zaman: kur.zaman })); } catch (e) {}
+  }
+
+  function kurYenile() {
+    var yeni = { usdTry: kur.usdTry, xauUsd: kur.xauUsd };
+    var p1 = ilkBasarili(USD_KAYNAKLARI).then(function (n) { yeni.usdTry = n; yeni.usdOk = true; }, function () {});
+    var p2 = ilkBasarili(ALTIN_KAYNAKLARI).then(function (n) { yeni.xauUsd = n; yeni.altinOk = true; }, function () {});
+    return Promise.all([p1, p2]).then(function () {
+      if (yeni.usdOk || yeni.altinOk) {
+        kur = { usdTry: yeni.usdTry, xauUsd: yeni.xauUsd, zaman: Date.now(), onbellek: !(yeni.usdOk && yeni.altinOk) };
+        if (yeni.usdOk && yeni.altinOk) kurOnbellekYaz();
+      }
+      altSatirlariYaz();
+    });
+  }
+
+  function kurHazir() { return kur.usdTry > 0 && kur.xauUsd > 0; }
+  function gramAltinTL() { return (kur.xauUsd / OZ_GRAM) * kur.usdTry; }
+
+  function usdMetin(tl) { return "$" + fmt(tl / kur.usdTry, tl / kur.usdTry < 100 ? 2 : 0); }
+  function grMetin(tl) { var g = tl / gramAltinTL(); return fmt(g, g < 10 ? 2 : 1) + " gr"; }
+  function esdegerMetin(tl) {
+    if (!kurHazir()) return "";
+    if (!(tl > 0)) return "$0 · 0 gr";
+    return usdMetin(tl) + " · " + grMetin(tl);
+  }
+
+  function altSatirlariYaz() {
+    ["sol", "sag"].forEach(function (t) {
+      $(t + "-alt-maliyet").textContent = esdegerMetin(toplamlar[t].maliyet);
+      $(t + "-alt-aylik").textContent = esdegerMetin(toplamlar[t].aylik);
+    });
+    var k = $("kur");
+    if (!kurHazir()) { k.textContent = "Kur alınamadı: dolar ve altın karşılığı gösterilemiyor"; return; }
+    var d = new Date(kur.zaman);
+    var saat = d.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
+    k.textContent = "1 $ = " + fmt(kur.usdTry, 2) + " TL · 1 gr altın = " + fmt(gramAltinTL(), 2) + " TL (" +
+      fmt(gramAltinTL() / kur.usdTry, 2) + " $) · " + saat + (kur.onbellek ? " (son kayıtlı kur)" : "");
   }
 
   function depoOku() {
@@ -401,6 +494,8 @@
     $("sol-toplam-lot").textContent = T.lot > 0 ? fmtLot(T.lot) : "-";
     $("sol-toplam-maliyet").textContent = fmtTL(T.maliyet);
     $("sol-toplam-aylik").textContent = fmtTL(T.aylik);
+    toplamlar.sol = { maliyet: T.maliyet, aylik: T.aylik };
+    altSatirlariYaz();
   }
 
   function hesaplaSag() {
@@ -413,6 +508,8 @@
     $("sag-toplam-lot").textContent = T.lot > 0 ? fmtLot(T.lot) : "-";
     $("sag-toplam-maliyet").textContent = fmtTL(T.maliyet);
     $("sag-toplam-aylik").textContent = fmtTL(T.aylik);
+    toplamlar.sag = { maliyet: T.maliyet, aylik: T.aylik };
+    altSatirlariYaz();
   }
 
   function hesaplaHepsi() { hesaplaSol(); hesaplaSag(); }
@@ -504,7 +601,10 @@
   }
   window.addEventListener("resize", ustYukseklik);
 
+  kurOnbellekOku();
   baslat();
+  kurYenile();
+  setInterval(kurYenile, 5 * 60 * 1000);
 })();
 </script>
 </body>
