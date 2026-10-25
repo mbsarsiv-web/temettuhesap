@@ -1,1 +1,2102 @@
-{}
+{
+    "ACSEL": {
+        "tarih": "-62135596800000",
+        "hisse_basi_tl": 0.3,
+        "fiyat": 74.5
+    },
+    "BVSAN": {
+        "tarih": "-62135596800000",
+        "hisse_basi_tl": 0.7265,
+        "fiyat": 51.3
+    },
+    "NTHOL": {
+        "tarih": "-62135596800000",
+        "hisse_basi_tl": 0.7,
+        "fiyat": 33.16
+    },
+    "SDTTR": {
+        "tarih": "-62135596800000",
+        "hisse_basi_tl": 0.0083,
+        "fiyat": 12.43
+    },
+    "VERUS": {
+        "tarih": "-62135596800000",
+        "hisse_basi_tl": 0.1,
+        "fiyat": 485.5
+    },
+    "YIGIT": {
+        "tarih": "-62135596800000",
+        "hisse_basi_tl": 0.1947,
+        "fiyat": 13.04
+    },
+    "ELITE": {
+        "tarih": "-62135596800000",
+        "hisse_basi_tl": 0.1,
+        "fiyat": 16.5
+    },
+    "ETILR": {
+        "tarih": "-62135596800000",
+        "hisse_basi_tl": 0.018,
+        "fiyat": 6.86
+    },
+    "FLAP": {
+        "tarih": "-62135596800000",
+        "hisse_basi_tl": 0.1067,
+        "fiyat": 9.46
+    },
+    "FORTE": {
+        "tarih": "-62135596800000",
+        "hisse_basi_tl": 0.52,
+        "fiyat": 79.5
+    },
+    "GENIL": {
+        "tarih": "-62135596800000",
+        "hisse_basi_tl": 0.0161,
+        "fiyat": 4
+    },
+    "GLYHO": {
+        "tarih": "-62135596800000",
+        "hisse_basi_tl": 0.1026,
+        "fiyat": 15.46
+    },
+    "GWIND": {
+        "tarih": "-62135596800000",
+        "hisse_basi_tl": 0.7407,
+        "fiyat": 16.96
+    },
+    "MEDTR": {
+        "tarih": "-62135596800000",
+        "hisse_basi_tl": 0.1134,
+        "fiyat": 17.14
+    },
+    "MERIT": {
+        "tarih": "-62135596800000",
+        "hisse_basi_tl": 0.5,
+        "fiyat": 12.8
+    },
+    "PETKM": {
+        "tarih": "828572400000",
+        "hisse_basi_tl": 6.688,
+        "fiyat": 18.06
+    },
+    "GUBRF": {
+        "tarih": "833151600000",
+        "hisse_basi_tl": 0.1,
+        "fiyat": 298.5
+    },
+    "BESLR": {
+        "tarih": "833410800000",
+        "hisse_basi_tl": 0.45,
+        "fiyat": 9.55
+    },
+    "EREGL": {
+        "tarih": "835830000000",
+        "hisse_basi_tl": 0.6526,
+        "fiyat": 31.6
+    },
+    "YATAS": {
+        "tarih": "846802800000",
+        "hisse_basi_tl": 0.1,
+        "fiyat": 23.42
+    },
+    "PRKAB": {
+        "tarih": "852246000000",
+        "hisse_basi_tl": 1.73,
+        "fiyat": 17.26
+    },
+    "TRCAS": {
+        "tarih": "856393200000",
+        "hisse_basi_tl": 0.9,
+        "fiyat": 41.98
+    },
+    "FMIZP": {
+        "tarih": "856911600000",
+        "hisse_basi_tl": 2.37,
+        "fiyat": 197
+    },
+    "ICBCT": {
+        "tarih": "857343600000",
+        "hisse_basi_tl": 0.865,
+        "fiyat": 13.09
+    },
+    "ULKER": {
+        "tarih": "859417200000",
+        "hisse_basi_tl": 0.1974,
+        "fiyat": 76.7
+    },
+    "TEHOL": {
+        "tarih": "859503600000",
+        "hisse_basi_tl": 1.05,
+        "fiyat": 2.55
+    },
+    "CRDFA": {
+        "tarih": "859676400000",
+        "hisse_basi_tl": 1.0377,
+        "fiyat": 10.25
+    },
+    "CMENT": {
+        "tarih": "859766400000",
+        "hisse_basi_tl": 0.4,
+        "fiyat": 217.4
+    },
+    "BTCIM": {
+        "tarih": "859766400000",
+        "hisse_basi_tl": 0.62,
+        "fiyat": 1.56
+    },
+    "BRISA": {
+        "tarih": "859766400000",
+        "hisse_basi_tl": 3.22,
+        "fiyat": 66.5
+    },
+    "TSKB": {
+        "tarih": "859766400000",
+        "hisse_basi_tl": 0.9,
+        "fiyat": 8.92
+    },
+    "GARAN": {
+        "tarih": "859852800000",
+        "hisse_basi_tl": 0.7864,
+        "fiyat": 126.5
+    },
+    "AVGYO": {
+        "tarih": "860108400000",
+        "hisse_basi_tl": 0.4,
+        "fiyat": 13.49
+    },
+    "FROTO": {
+        "tarih": "860367600000",
+        "hisse_basi_tl": 4.0108,
+        "fiyat": 65.05
+    },
+    "AKBNK": {
+        "tarih": "860540400000",
+        "hisse_basi_tl": 1.2,
+        "fiyat": 63.35
+    },
+    "AKGRT": {
+        "tarih": "860540400000",
+        "hisse_basi_tl": 0.135,
+        "fiyat": 4.77
+    },
+    "CLEBI": {
+        "tarih": "860972400000",
+        "hisse_basi_tl": 3.0,
+        "fiyat": 1223
+    },
+    "CELHA": {
+        "tarih": "861058800000",
+        "hisse_basi_tl": 0.06,
+        "fiyat": 23.58
+    },
+    "HURGZ": {
+        "tarih": "861922800000",
+        "hisse_basi_tl": 1.0,
+        "fiyat": 3.89
+    },
+    "GOODY": {
+        "tarih": "862182000000",
+        "hisse_basi_tl": 5.0,
+        "fiyat": 1.89
+    },
+    "EGEEN": {
+        "tarih": "862354800000",
+        "hisse_basi_tl": 0.75,
+        "fiyat": 3895
+    },
+    "AKCNS": {
+        "tarih": "862354800000",
+        "hisse_basi_tl": 0.4,
+        "fiyat": 180.5
+    },
+    "ATSYH": {
+        "tarih": "862354800000",
+        "hisse_basi_tl": 0.25,
+        "fiyat": 70.5
+    },
+    "ATLAS": {
+        "tarih": "862354800000",
+        "hisse_basi_tl": 1.0,
+        "fiyat": 4.38
+    },
+    "ISBTR": {
+        "tarih": "862354800000",
+        "hisse_basi_tl": 1.203,
+        "fiyat": 390000
+    },
+    "ISCTR": {
+        "tarih": "862354800000",
+        "hisse_basi_tl": 0.4005,
+        "fiyat": 12.17
+    },
+    "GRNYO": {
+        "tarih": "862441200000",
+        "hisse_basi_tl": 0.1942,
+        "fiyat": 6.79
+    },
+    "KENT": {
+        "tarih": "862786800000",
+        "hisse_basi_tl": 0.8,
+        "fiyat": 232
+    },
+    "SARKY": {
+        "tarih": "863391600000",
+        "hisse_basi_tl": 0.9,
+        "fiyat": 16
+    },
+    "BURCE": {
+        "tarih": "864082800000",
+        "hisse_basi_tl": 1.1,
+        "fiyat": 15.99
+    },
+    "BRMEN": {
+        "tarih": "864082800000",
+        "hisse_basi_tl": 0.25,
+        "fiyat": 4.38
+    },
+    "LUKSK": {
+        "tarih": "864082800000",
+        "hisse_basi_tl": 1.15,
+        "fiyat": 46.8
+    },
+    "KORDS": {
+        "tarih": "864169200000",
+        "hisse_basi_tl": 4.0,
+        "fiyat": 2.55
+    },
+    "VESTL": {
+        "tarih": "864255600000",
+        "hisse_basi_tl": 3.2152,
+        "fiyat": 12.96
+    },
+    "SASA": {
+        "tarih": "864255600000",
+        "hisse_basi_tl": 0.556,
+        "fiyat": 1.6
+    },
+    "BAGFS": {
+        "tarih": "864601200000",
+        "hisse_basi_tl": 1.7,
+        "fiyat": 16.64
+    },
+    "BUCIM": {
+        "tarih": "864601200000",
+        "hisse_basi_tl": 1.0,
+        "fiyat": 4.04
+    },
+    "CIMSA": {
+        "tarih": "864601200000",
+        "hisse_basi_tl": 0.39,
+        "fiyat": 37.44
+    },
+    "EGGUB": {
+        "tarih": "864601200000",
+        "hisse_basi_tl": 0.28,
+        "fiyat": 76.75
+    },
+    "DZGYO": {
+        "tarih": "864601200000",
+        "hisse_basi_tl": 0.3,
+        "fiyat": 6.67
+    },
+    "PARSN": {
+        "tarih": "864601200000",
+        "hisse_basi_tl": 0.9,
+        "fiyat": 50.55
+    },
+    "PINSU": {
+        "tarih": "864601200000",
+        "hisse_basi_tl": 0.06,
+        "fiyat": 7.03
+    },
+    "SONME": {
+        "tarih": "864601200000",
+        "hisse_basi_tl": 1.5,
+        "fiyat": 94.5
+    },
+    "RALYH": {
+        "tarih": "864601200000",
+        "hisse_basi_tl": 0.1,
+        "fiyat": 15.89
+    },
+    "VKING": {
+        "tarih": "864601200000",
+        "hisse_basi_tl": 1.49,
+        "fiyat": 11.06
+    },
+    "YUNSA": {
+        "tarih": "864601200000",
+        "hisse_basi_tl": 0.18,
+        "fiyat": 5.14
+    },
+    "KCHOL": {
+        "tarih": "864601200000",
+        "hisse_basi_tl": 0.15,
+        "fiyat": 197.5
+    },
+    "DYOBY": {
+        "tarih": "864774000000",
+        "hisse_basi_tl": 2.32,
+        "fiyat": 7.99
+    },
+    "BRYAT": {
+        "tarih": "864774000000",
+        "hisse_basi_tl": 0.256,
+        "fiyat": 1181
+    },
+    "BRSAN": {
+        "tarih": "864774000000",
+        "hisse_basi_tl": 0.5,
+        "fiyat": 632
+    },
+    "PNSUT": {
+        "tarih": "864774000000",
+        "hisse_basi_tl": 0.56,
+        "fiyat": 8.72
+    },
+    "PETUN": {
+        "tarih": "864774000000",
+        "hisse_basi_tl": 0.25,
+        "fiyat": 8.45
+    },
+    "EGSER": {
+        "tarih": "864774000000",
+        "hisse_basi_tl": 0.21,
+        "fiyat": 2.04
+    },
+    "AYGAZ": {
+        "tarih": "864946800000",
+        "hisse_basi_tl": 1.0,
+        "fiyat": 269
+    },
+    "AKSA": {
+        "tarih": "864946800000",
+        "hisse_basi_tl": 0.85,
+        "fiyat": 10.3
+    },
+    "ALCTL": {
+        "tarih": "864946800000",
+        "hisse_basi_tl": 0.3,
+        "fiyat": 62.65
+    },
+    "ALARK": {
+        "tarih": "864946800000",
+        "hisse_basi_tl": 0.4,
+        "fiyat": 101.3
+    },
+    "ALCAR": {
+        "tarih": "864946800000",
+        "hisse_basi_tl": 0.83,
+        "fiyat": 574.5
+    },
+    "ADEL": {
+        "tarih": "864946800000",
+        "hisse_basi_tl": 0.4,
+        "fiyat": 22.9
+    },
+    "DOKTA": {
+        "tarih": "864946800000",
+        "hisse_basi_tl": 0.5,
+        "fiyat": 13.23
+    },
+    "EGPRO": {
+        "tarih": "864946800000",
+        "hisse_basi_tl": 0.5,
+        "fiyat": 26.52
+    },
+    "DMSAS": {
+        "tarih": "864946800000",
+        "hisse_basi_tl": 0.6,
+        "fiyat": 5.48
+    },
+    "DITAS": {
+        "tarih": "864946800000",
+        "hisse_basi_tl": 0.5,
+        "fiyat": 6.99
+    },
+    "COSMO": {
+        "tarih": "864946800000",
+        "hisse_basi_tl": 0.5,
+        "fiyat": 70.35
+    },
+    "DERIM": {
+        "tarih": "864946800000",
+        "hisse_basi_tl": 0.4361,
+        "fiyat": 19.02
+    },
+    "RAYSG": {
+        "tarih": "864946800000",
+        "hisse_basi_tl": 0.66,
+        "fiyat": 97.55
+    },
+    "SKTAS": {
+        "tarih": "864946800000",
+        "hisse_basi_tl": 0.4,
+        "fiyat": 1.53
+    },
+    "VKGYO": {
+        "tarih": "864946800000",
+        "hisse_basi_tl": 0.3,
+        "fiyat": 1.45
+    },
+    "VKFYO": {
+        "tarih": "864946800000",
+        "hisse_basi_tl": 0.6752,
+        "fiyat": 16.49
+    },
+    "VAKFN": {
+        "tarih": "864946800000",
+        "hisse_basi_tl": 0.85,
+        "fiyat": 0.86
+    },
+    "TOASO": {
+        "tarih": "864946800000",
+        "hisse_basi_tl": 0.143,
+        "fiyat": 222.6
+    },
+    "EMNIS": {
+        "tarih": "864946800000",
+        "hisse_basi_tl": 0.65,
+        "fiyat": 119.2
+    },
+    "EPLAS": {
+        "tarih": "864946800000",
+        "hisse_basi_tl": 0.5,
+        "fiyat": 4.37
+    },
+    "GOLTS": {
+        "tarih": "864946800000",
+        "hisse_basi_tl": 2.0,
+        "fiyat": 219.2
+    },
+    "HEKTS": {
+        "tarih": "864946800000",
+        "hisse_basi_tl": 0.482,
+        "fiyat": 1.75
+    },
+    "MRSHL": {
+        "tarih": "864946800000",
+        "hisse_basi_tl": 0.87,
+        "fiyat": 1082
+    },
+    "MARTI": {
+        "tarih": "864946800000",
+        "hisse_basi_tl": 0.2,
+        "fiyat": 1.21
+    },
+    "KONYA": {
+        "tarih": "864946800000",
+        "hisse_basi_tl": 0.6,
+        "fiyat": 2760
+    },
+    "AFYON": {
+        "tarih": "865033200000",
+        "hisse_basi_tl": 0.2,
+        "fiyat": 10.96
+    },
+    "SNPAM": {
+        "tarih": "865033200000",
+        "hisse_basi_tl": 0.67,
+        "fiyat": 16.18
+    },
+    "CMBTN": {
+        "tarih": "875574000000",
+        "hisse_basi_tl": 0.5,
+        "fiyat": 1049
+    },
+    "VAKKO": {
+        "tarih": "890348400000",
+        "hisse_basi_tl": 0.4,
+        "fiyat": 46.62
+    },
+    "SISE": {
+        "tarih": "891302400000",
+        "hisse_basi_tl": 0.194,
+        "fiyat": 33.88
+    },
+    "BAKAB": {
+        "tarih": "892508400000",
+        "hisse_basi_tl": 0.33,
+        "fiyat": 25.5
+    },
+    "OZGYO": {
+        "tarih": "893026800000",
+        "hisse_basi_tl": 0.1,
+        "fiyat": 1.29
+    },
+    "EMKEL": {
+        "tarih": "893890800000",
+        "hisse_basi_tl": 0.2983,
+        "fiyat": 5.48
+    },
+    "SAHOL": {
+        "tarih": "895705200000",
+        "hisse_basi_tl": 0.13,
+        "fiyat": 87
+    },
+    "KARTN": {
+        "tarih": "896050800000",
+        "hisse_basi_tl": 1.3,
+        "fiyat": 84.5
+    },
+    "KLMSN": {
+        "tarih": "896050800000",
+        "hisse_basi_tl": 1.0,
+        "fiyat": 18.03
+    },
+    "QNBTR": {
+        "tarih": "896137200000",
+        "hisse_basi_tl": 0.7,
+        "fiyat": 119
+    },
+    "MZHLD": {
+        "tarih": "896223600000",
+        "hisse_basi_tl": 0.0705,
+        "fiyat": 3.35
+    },
+    "ASUZU": {
+        "tarih": "896310000000",
+        "hisse_basi_tl": 0.3,
+        "fiyat": 38.22
+    },
+    "BANVT": {
+        "tarih": "896396400000",
+        "hisse_basi_tl": 1.3,
+        "fiyat": 112.5
+    },
+    "BOSSA": {
+        "tarih": "896396400000",
+        "hisse_basi_tl": 0.17,
+        "fiyat": 5.15
+    },
+    "TRHOL": {
+        "tarih": "896396400000",
+        "hisse_basi_tl": 1.0,
+        "fiyat": 237
+    },
+    "OYAKC": {
+        "tarih": "896396400000",
+        "hisse_basi_tl": 1.019,
+        "fiyat": 18.26
+    },
+    "KAPLM": {
+        "tarih": "896396400000",
+        "hisse_basi_tl": 0.135,
+        "fiyat": 85.5
+    },
+    "MGROS": {
+        "tarih": "896396400000",
+        "hisse_basi_tl": 1.0,
+        "fiyat": 431.5
+    },
+    "MNDTR": {
+        "tarih": "901753200000",
+        "hisse_basi_tl": 0.1,
+        "fiyat": 3.33
+    },
+    "DOHOL": {
+        "tarih": "904777200000",
+        "hisse_basi_tl": 0.2,
+        "fiyat": 16.38
+    },
+    "INVEO": {
+        "tarih": "922402800000",
+        "hisse_basi_tl": 0.1724,
+        "fiyat": 3.82
+    },
+    "TUPRS": {
+        "tarih": "923266800000",
+        "hisse_basi_tl": 0.4426,
+        "fiyat": 360.75
+    },
+    "NETAS": {
+        "tarih": "927154800000",
+        "hisse_basi_tl": 0.135,
+        "fiyat": 65.8
+    },
+    "KRTEK": {
+        "tarih": "927154800000",
+        "hisse_basi_tl": 0.1,
+        "fiyat": 4.53
+    },
+    "DGNMO": {
+        "tarih": "928105200000",
+        "hisse_basi_tl": 0.075,
+        "fiyat": 5
+    },
+    "OTKAR": {
+        "tarih": "928105200000",
+        "hisse_basi_tl": 0.5,
+        "fiyat": 304.75
+    },
+    "TBORG": {
+        "tarih": "929919600000",
+        "hisse_basi_tl": 0.05,
+        "fiyat": 111.3
+    },
+    "AKSUE": {
+        "tarih": "953506800000",
+        "hisse_basi_tl": 1.266,
+        "fiyat": 11.31
+    },
+    "DGGYO": {
+        "tarih": "954374400000",
+        "hisse_basi_tl": 0.05,
+        "fiyat": 25.1
+    },
+    "ALKIM": {
+        "tarih": "954716400000",
+        "hisse_basi_tl": 0.087,
+        "fiyat": 9.5
+    },
+    "ZOREN": {
+        "tarih": "955753200000",
+        "hisse_basi_tl": 0.05,
+        "fiyat": 1.36
+    },
+    "ERBOS": {
+        "tarih": "956790000000",
+        "hisse_basi_tl": 0.4,
+        "fiyat": 93.75
+    },
+    "GENTS": {
+        "tarih": "958345200000",
+        "hisse_basi_tl": 0.1,
+        "fiyat": 3.3
+    },
+    "BIGTK": {
+        "tarih": "958950000000",
+        "hisse_basi_tl": 3.1919,
+        "fiyat": 43.22
+    },
+    "ARCLK": {
+        "tarih": "959554800000",
+        "hisse_basi_tl": 0.4,
+        "fiyat": 71.35
+    },
+    "ALGYO": {
+        "tarih": "959554800000",
+        "hisse_basi_tl": 0.15,
+        "fiyat": 2.52
+    },
+    "ANHYT": {
+        "tarih": "959727600000",
+        "hisse_basi_tl": 1.0,
+        "fiyat": 93.2
+    },
+    "ALKA": {
+        "tarih": "959727600000",
+        "hisse_basi_tl": 3.337,
+        "fiyat": 4.81
+    },
+    "TATGD": {
+        "tarih": "959727600000",
+        "hisse_basi_tl": 0.075,
+        "fiyat": 13.94
+    },
+    "MERKO": {
+        "tarih": "959727600000",
+        "hisse_basi_tl": 0.17,
+        "fiyat": 0.91
+    },
+    "KRSTL": {
+        "tarih": "959727600000",
+        "hisse_basi_tl": 0.5118,
+        "fiyat": 6.1
+    },
+    "KARSN": {
+        "tarih": "959727600000",
+        "hisse_basi_tl": 0.7863,
+        "fiyat": 6.76
+    },
+    "BFREN": {
+        "tarih": "966812400000",
+        "hisse_basi_tl": 53.19,
+        "fiyat": 88.8
+    },
+    "LOGO": {
+        "tarih": "971654400000",
+        "hisse_basi_tl": 1.0,
+        "fiyat": 114.5
+    },
+    "RUZYE": {
+        "tarih": "983314800000",
+        "hisse_basi_tl": 0.095,
+        "fiyat": 3.48
+    },
+    "LINK": {
+        "tarih": "985564800000",
+        "hisse_basi_tl": 0.5816,
+        "fiyat": 2.83
+    },
+    "ANSGR": {
+        "tarih": "985910400000",
+        "hisse_basi_tl": 0.045,
+        "fiyat": 20.82
+    },
+    "AYEN": {
+        "tarih": "988758000000",
+        "hisse_basi_tl": 3.999,
+        "fiyat": 23.1
+    },
+    "AYCES": {
+        "tarih": "989881200000",
+        "hisse_basi_tl": 0.0298,
+        "fiyat": 286
+    },
+    "ASELS": {
+        "tarih": "991263600000",
+        "hisse_basi_tl": 0.1,
+        "fiyat": 338
+    },
+    "AEFES": {
+        "tarih": "991263600000",
+        "hisse_basi_tl": 0.2007,
+        "fiyat": 16.22
+    },
+    "NUHCM": {
+        "tarih": "991263600000",
+        "hisse_basi_tl": 0.3015,
+        "fiyat": 204.9
+    },
+    "KLNMA": {
+        "tarih": "994028400000",
+        "hisse_basi_tl": 0.05,
+        "fiyat": 7.07
+    },
+    "BSOKE": {
+        "tarih": "1017183600000",
+        "hisse_basi_tl": 0.27,
+        "fiyat": 4.59
+    },
+    "ICUGS": {
+        "tarih": "1017270000000",
+        "hisse_basi_tl": 0.55,
+        "fiyat": 1.15
+    },
+    "ATAGY": {
+        "tarih": "1019602800000",
+        "hisse_basi_tl": 1.0,
+        "fiyat": 6.82
+    },
+    "MAALT": {
+        "tarih": "1021849200000",
+        "hisse_basi_tl": 0.25,
+        "fiyat": 661
+    },
+    "AGYO": {
+        "tarih": "1022799600000",
+        "hisse_basi_tl": 0.1292,
+        "fiyat": 6.26
+    },
+    "EDIP": {
+        "tarih": "1022799600000",
+        "hisse_basi_tl": 0.1,
+        "fiyat": 22.38
+    },
+    "GSRAY": {
+        "tarih": "1030489200000",
+        "hisse_basi_tl": 14.471,
+        "fiyat": 0.68
+    },
+    "SANKO": {
+        "tarih": "1031612400000",
+        "hisse_basi_tl": 0.708,
+        "fiyat": 21.3
+    },
+    "BJKAS": {
+        "tarih": "1035504000000",
+        "hisse_basi_tl": 1.0,
+        "fiyat": 1.28
+    },
+    "TURSG": {
+        "tarih": "1052262000000",
+        "hisse_basi_tl": 0.1273,
+        "fiyat": 4.17
+    },
+    "BLUME": {
+        "tarih": "1053558000000",
+        "hisse_basi_tl": 0.0112,
+        "fiyat": 21.8
+    },
+    "ENKAI": {
+        "tarih": "1054076400000",
+        "hisse_basi_tl": 0.35,
+        "fiyat": 74.5
+    },
+    "ARENA": {
+        "tarih": "1054162800000",
+        "hisse_basi_tl": 0.325,
+        "fiyat": 11.82
+    },
+    "AGHOL": {
+        "tarih": "1054249200000",
+        "hisse_basi_tl": 0.3,
+        "fiyat": 28.82
+    },
+    "ECZYT": {
+        "tarih": "1054249200000",
+        "hisse_basi_tl": 0.2235,
+        "fiyat": 168.7
+    },
+    "DOAS": {
+        "tarih": "1079996400000",
+        "hisse_basi_tl": 0.4818,
+        "fiyat": 130.6
+    },
+    "ATEKS": {
+        "tarih": "1080169200000",
+        "hisse_basi_tl": 0.2,
+        "fiyat": 76.95
+    },
+    "TTRAK": {
+        "tarih": "1083106800000",
+        "hisse_basi_tl": 1.06,
+        "fiyat": 353
+    },
+    "ECILC": {
+        "tarih": "1088377200000",
+        "hisse_basi_tl": 0.15,
+        "fiyat": 49.62
+    },
+    "FENER": {
+        "tarih": "1092610800000",
+        "hisse_basi_tl": 0.4483,
+        "fiyat": 2.06
+    },
+    "CEMTS": {
+        "tarih": "1113778800000",
+        "hisse_basi_tl": 0.4,
+        "fiyat": 6.47
+    },
+    "INDES": {
+        "tarih": "1114988400000",
+        "hisse_basi_tl": 0.0522,
+        "fiyat": 10.97
+    },
+    "TCELL": {
+        "tarih": "1116284400000",
+        "hisse_basi_tl": 0.1696,
+        "fiyat": 90.1
+    },
+    "DEVA": {
+        "tarih": "1116975600000",
+        "hisse_basi_tl": 0.12,
+        "fiyat": 72.55
+    },
+    "ISGYO": {
+        "tarih": "1116975600000",
+        "hisse_basi_tl": 0.0536,
+        "fiyat": 18.55
+    },
+    "BIMAS": {
+        "tarih": "1117148400000",
+        "hisse_basi_tl": 0.7946,
+        "fiyat": 373
+    },
+    "QNBFK": {
+        "tarih": "1117494000000",
+        "hisse_basi_tl": 0.5354,
+        "fiyat": 33.9
+    },
+    "GSDHO": {
+        "tarih": "1117494000000",
+        "hisse_basi_tl": 0.0145,
+        "fiyat": 3.75
+    },
+    "IHLAS": {
+        "tarih": "1117494000000",
+        "hisse_basi_tl": 0.0024,
+        "fiyat": 0.73
+    },
+    "TSPOR": {
+        "tarih": "1128902400000",
+        "hisse_basi_tl": 0.2808,
+        "fiyat": 0.74
+    },
+    "MTRYO": {
+        "tarih": "1145228400000",
+        "hisse_basi_tl": 0.08,
+        "fiyat": 6.93
+    },
+    "AKMGY": {
+        "tarih": "1147215600000",
+        "hisse_basi_tl": 2.8367,
+        "fiyat": 176.5
+    },
+    "USHOL": {
+        "tarih": "1148252400000",
+        "hisse_basi_tl": 0.1,
+        "fiyat": 72.75
+    },
+    "DGATE": {
+        "tarih": "1148511600000",
+        "hisse_basi_tl": 0.04,
+        "fiyat": 51.55
+    },
+    "VAKBN": {
+        "tarih": "1149030000000",
+        "hisse_basi_tl": 0.3122,
+        "fiyat": 30.06
+    },
+    "HUBVC": {
+        "tarih": "1173826800000",
+        "hisse_basi_tl": 0.02,
+        "fiyat": 1.94
+    },
+    "SILVR": {
+        "tarih": "1179702000000",
+        "hisse_basi_tl": 0.0842,
+        "fiyat": 1.4
+    },
+    "VESBE": {
+        "tarih": "1179702000000",
+        "hisse_basi_tl": 0.1618,
+        "fiyat": 3.23
+    },
+    "CCOLA": {
+        "tarih": "1179788400000",
+        "hisse_basi_tl": 0.0885,
+        "fiyat": 74.75
+    },
+    "PRKME": {
+        "tarih": "1180566000000",
+        "hisse_basi_tl": 0.13,
+        "fiyat": 11.4
+    },
+    "ALBRK": {
+        "tarih": "1206399600000",
+        "hisse_basi_tl": 0.1198,
+        "fiyat": 8.04
+    },
+    "ISMEN": {
+        "tarih": "1209945600000",
+        "hisse_basi_tl": 0.0796,
+        "fiyat": 26.24
+    },
+    "SKBNK": {
+        "tarih": "1211414400000",
+        "hisse_basi_tl": 0.05,
+        "fiyat": 3.12
+    },
+    "HALKB": {
+        "tarih": "1211500800000",
+        "hisse_basi_tl": 0.6786,
+        "fiyat": 43.1
+    },
+    "SELEC": {
+        "tarih": "1211932800000",
+        "hisse_basi_tl": 0.12,
+        "fiyat": 72.9
+    },
+    "IZMDC": {
+        "tarih": "1211932800000",
+        "hisse_basi_tl": 0.0796,
+        "fiyat": 5.84
+    },
+    "INGRM": {
+        "tarih": "1212019200000",
+        "hisse_basi_tl": 0.08,
+        "fiyat": 206
+    },
+    "TKFEN": {
+        "tarih": "1212105600000",
+        "hisse_basi_tl": 0.065,
+        "fiyat": 174.8
+    },
+    "TTKOM": {
+        "tarih": "1212364800000",
+        "hisse_basi_tl": 0.784,
+        "fiyat": 46.04
+    },
+    "SNGYO": {
+        "tarih": "1240531200000",
+        "hisse_basi_tl": 0.14,
+        "fiyat": 2.4
+    },
+    "CRFSA": {
+        "tarih": "1241049600000",
+        "hisse_basi_tl": 0.37,
+        "fiyat": 180.2
+    },
+    "AKENR": {
+        "tarih": "1241395200000",
+        "hisse_basi_tl": 0.2683,
+        "fiyat": 6.5
+    },
+    "NUGYO": {
+        "tarih": "1242777600000",
+        "hisse_basi_tl": 0.0733,
+        "fiyat": 5.85
+    },
+    "THYAO": {
+        "tarih": "1242864000000",
+        "hisse_basi_tl": 0.5669,
+        "fiyat": 258
+    },
+    "PKART": {
+        "tarih": "1274054400000",
+        "hisse_basi_tl": 0.0442,
+        "fiyat": 68.05
+    },
+    "TRALT": {
+        "tarih": "1274659200000",
+        "hisse_basi_tl": 0.4583,
+        "fiyat": 35.94
+    },
+    "LRSHO": {
+        "tarih": "1275350400000",
+        "hisse_basi_tl": 0.29,
+        "fiyat": 1.61
+    },
+    "EKGYO": {
+        "tarih": "1301529600000",
+        "hisse_basi_tl": 0.0702,
+        "fiyat": 17.02
+    },
+    "DESPC": {
+        "tarih": "1305590400000",
+        "hisse_basi_tl": 0.2695,
+        "fiyat": 21.88
+    },
+    "BIZIM": {
+        "tarih": "1306281600000",
+        "hisse_basi_tl": 0.338,
+        "fiyat": 16.11
+    },
+    "TRGYO": {
+        "tarih": "1306800000000",
+        "hisse_basi_tl": 0.0565,
+        "fiyat": 86.7
+    },
+    "RYGYO": {
+        "tarih": "1306800000000",
+        "hisse_basi_tl": 0.0067,
+        "fiyat": 51.1
+    },
+    "DOCO": {
+        "tarih": "1310083200000",
+        "hisse_basi_tl": 0.8071,
+        "fiyat": 11732.5
+    },
+    "GLBMD": {
+        "tarih": "1314144000000",
+        "hisse_basi_tl": 0.0501,
+        "fiyat": 7.25
+    },
+    "MRGYO": {
+        "tarih": "1314316800000",
+        "hisse_basi_tl": 0.05,
+        "fiyat": 1.08
+    },
+    "TAVHL": {
+        "tarih": "1337040000000",
+        "hisse_basi_tl": 0.25,
+        "fiyat": 265
+    },
+    "KRDMA": {
+        "tarih": "1338249600000",
+        "hisse_basi_tl": 0.0569,
+        "fiyat": 34.3
+    },
+    "KRDMB": {
+        "tarih": "1338249600000",
+        "hisse_basi_tl": 0.0569,
+        "fiyat": 39.8
+    },
+    "KRDMD": {
+        "tarih": "1338249600000",
+        "hisse_basi_tl": 0.0569,
+        "fiyat": 38.6
+    },
+    "EUKYO": {
+        "tarih": "1338422400000",
+        "hisse_basi_tl": 0.0047,
+        "fiyat": 9
+    },
+    "GEDIK": {
+        "tarih": "1338422400000",
+        "hisse_basi_tl": 0.1,
+        "fiyat": 4.66
+    },
+    "HATEK": {
+        "tarih": "1341360000000",
+        "hisse_basi_tl": 0.1071,
+        "fiyat": 6.22
+    },
+    "YONGA": {
+        "tarih": "1364860800000",
+        "hisse_basi_tl": 3.53,
+        "fiyat": 25.7
+    },
+    "POLHO": {
+        "tarih": "1364947200000",
+        "hisse_basi_tl": 0.027,
+        "fiyat": 13.05
+    },
+    "YKBNK": {
+        "tarih": "1365379200000",
+        "hisse_basi_tl": 0.069,
+        "fiyat": 34.68
+    },
+    "SODSN": {
+        "tarih": "1365984000000",
+        "hisse_basi_tl": 0.1198,
+        "fiyat": 5.07
+    },
+    "KSTUR": {
+        "tarih": "1365984000000",
+        "hisse_basi_tl": 535.08,
+        "fiyat": 1455
+    },
+    "BLCYT": {
+        "tarih": "1366934400000",
+        "hisse_basi_tl": 0.0409,
+        "fiyat": 1.42
+    },
+    "ORGE": {
+        "tarih": "1368576000000",
+        "hisse_basi_tl": 0.05,
+        "fiyat": 18.37
+    },
+    "JANTS": {
+        "tarih": "1369267200000",
+        "hisse_basi_tl": 0.55,
+        "fiyat": 10.7
+    },
+    "DESA": {
+        "tarih": "1369699200000",
+        "hisse_basi_tl": 0.0609,
+        "fiyat": 8.07
+    },
+    "AKSGY": {
+        "tarih": "1369699200000",
+        "hisse_basi_tl": 0.1404,
+        "fiyat": 9.19
+    },
+    "BASCM": {
+        "tarih": "1369872000000",
+        "hisse_basi_tl": 0.08,
+        "fiyat": 8.78
+    },
+    "ORMA": {
+        "tarih": "1369872000000",
+        "hisse_basi_tl": 0.2466,
+        "fiyat": 112
+    },
+    "LKMNH": {
+        "tarih": "1369872000000",
+        "hisse_basi_tl": 0.125,
+        "fiyat": 10.97
+    },
+    "OYAYO": {
+        "tarih": "1369958400000",
+        "hisse_basi_tl": 0.0108,
+        "fiyat": 23.06
+    },
+    "OZKGY": {
+        "tarih": "1369958400000",
+        "hisse_basi_tl": 0.0122,
+        "fiyat": 11.3
+    },
+    "SKYLP": {
+        "tarih": "1369958400000",
+        "hisse_basi_tl": 0.03,
+        "fiyat": 61.2
+    },
+    "TGSAS": {
+        "tarih": "1369958400000",
+        "hisse_basi_tl": 0.15,
+        "fiyat": 116.8
+    },
+    "TMSN": {
+        "tarih": "1369958400000",
+        "hisse_basi_tl": 0.2326,
+        "fiyat": 47.52
+    },
+    "YBTAS": {
+        "tarih": "1369958400000",
+        "hisse_basi_tl": 35.5085,
+        "fiyat": 9.3
+    },
+    "ETYAT": {
+        "tarih": "1369958400000",
+        "hisse_basi_tl": 0.0089,
+        "fiyat": 9.99
+    },
+    "EUYO": {
+        "tarih": "1369958400000",
+        "hisse_basi_tl": 0.012,
+        "fiyat": 3.02
+    },
+    "KUYAS": {
+        "tarih": "1369958400000",
+        "hisse_basi_tl": 2.4387,
+        "fiyat": 8.83
+    },
+    "YAPRK": {
+        "tarih": "1370217600000",
+        "hisse_basi_tl": 0.0124,
+        "fiyat": 6.39
+    },
+    "AYES": {
+        "tarih": "1373846400000",
+        "hisse_basi_tl": 0.05,
+        "fiyat": 5.7
+    },
+    "ISBIR": {
+        "tarih": "1377475200000",
+        "hisse_basi_tl": 1.2,
+        "fiyat": 49.5
+    },
+    "KATMR": {
+        "tarih": "1377734400000",
+        "hisse_basi_tl": 0.2,
+        "fiyat": 1.1
+    },
+    "PAGYO": {
+        "tarih": "1395702000000",
+        "hisse_basi_tl": 0.3462,
+        "fiyat": 109.1
+    },
+    "ISFIN": {
+        "tarih": "1395961200000",
+        "hisse_basi_tl": 0.035,
+        "fiyat": 14.54
+    },
+    "TKNSA": {
+        "tarih": "1396396800000",
+        "hisse_basi_tl": 0.402,
+        "fiyat": 11.82
+    },
+    "POLTK": {
+        "tarih": "1396828800000",
+        "hisse_basi_tl": 0.39,
+        "fiyat": 2795
+    },
+    "HLGYO": {
+        "tarih": "1397520000000",
+        "hisse_basi_tl": 0.0046,
+        "fiyat": 3.61
+    },
+    "SANEL": {
+        "tarih": "1398988800000",
+        "hisse_basi_tl": 0.2867,
+        "fiyat": 25.76
+    },
+    "YGGYO": {
+        "tarih": "1401148800000",
+        "hisse_basi_tl": 1.0645,
+        "fiyat": 176.6
+    },
+    "SRVGY": {
+        "tarih": "1405555200000",
+        "hisse_basi_tl": 0.018,
+        "fiyat": 1.85
+    },
+    "AKYHO": {
+        "tarih": "1411430400000",
+        "hisse_basi_tl": 0.1477,
+        "fiyat": 1.44
+    },
+    "KUTPO": {
+        "tarih": "1414710000000",
+        "hisse_basi_tl": 0.0519,
+        "fiyat": 58.7
+    },
+    "AGESA": {
+        "tarih": "1427151600000",
+        "hisse_basi_tl": 1.11,
+        "fiyat": 195.2
+    },
+    "HDFGS": {
+        "tarih": "1428624000000",
+        "hisse_basi_tl": 0.0125,
+        "fiyat": 1.06
+    },
+    "ULUUN": {
+        "tarih": "1430352000000",
+        "hisse_basi_tl": 0.0643,
+        "fiyat": 6.14
+    },
+    "ODAS": {
+        "tarih": "1432857600000",
+        "hisse_basi_tl": 0.119,
+        "fiyat": 4.65
+    },
+    "LIDFA": {
+        "tarih": "1435017600000",
+        "hisse_basi_tl": 0.4,
+        "fiyat": 1.71
+    },
+    "ULUSE": {
+        "tarih": "1435536000000",
+        "hisse_basi_tl": 0.5693,
+        "fiyat": 136.6
+    },
+    "ANELE": {
+        "tarih": "1440374400000",
+        "hisse_basi_tl": 0.0119,
+        "fiyat": 7.6
+    },
+    "PSDTC": {
+        "tarih": "1440547200000",
+        "hisse_basi_tl": 0.3452,
+        "fiyat": 61.65
+    },
+    "MEPET": {
+        "tarih": "1451257200000",
+        "hisse_basi_tl": 0.0855,
+        "fiyat": 14.34
+    },
+    "INFO": {
+        "tarih": "1460937600000",
+        "hisse_basi_tl": 0.0812,
+        "fiyat": 0.89
+    },
+    "OZRDN": {
+        "tarih": "1461542400000",
+        "hisse_basi_tl": 0.1416,
+        "fiyat": 8.72
+    },
+    "CUSAN": {
+        "tarih": "1463529600000",
+        "hisse_basi_tl": 0.1684,
+        "fiyat": 15.01
+    },
+    "ISDMR": {
+        "tarih": "1464134400000",
+        "hisse_basi_tl": 0.17,
+        "fiyat": 52.25
+    },
+    "BNTAS": {
+        "tarih": "1464652800000",
+        "hisse_basi_tl": 0.0822,
+        "fiyat": 4.65
+    },
+    "NIBAS": {
+        "tarih": "1475193600000",
+        "hisse_basi_tl": 0.0177,
+        "fiyat": 2.46
+    },
+    "SEYKM": {
+        "tarih": "1477440000000",
+        "hisse_basi_tl": 0.0693,
+        "fiyat": 2.37
+    },
+    "SEKFK": {
+        "tarih": "1491350400000",
+        "hisse_basi_tl": 0.1,
+        "fiyat": 2.63
+    },
+    "KRONT": {
+        "tarih": "1493942400000",
+        "hisse_basi_tl": 0.166,
+        "fiyat": 16.14
+    },
+    "ENJSA": {
+        "tarih": "1522713600000",
+        "hisse_basi_tl": 0.3,
+        "fiyat": 112.9
+    },
+    "MAVI": {
+        "tarih": "1527552000000",
+        "hisse_basi_tl": 0.522,
+        "fiyat": 35.04
+    },
+    "TLMAN": {
+        "tarih": "1527724800000",
+        "hisse_basi_tl": 1.3284,
+        "fiyat": 50.8
+    },
+    "SUMAS": {
+        "tarih": "1535932800000",
+        "hisse_basi_tl": 0.25,
+        "fiyat": 156.7
+    },
+    "OSMEN": {
+        "tarih": "1543449600000",
+        "hisse_basi_tl": 0.0126,
+        "fiyat": 4.8
+    },
+    "MSGYO": {
+        "tarih": "1543795200000",
+        "hisse_basi_tl": 0.1,
+        "fiyat": 4.01
+    },
+    "KFEIN": {
+        "tarih": "1554163200000",
+        "hisse_basi_tl": 0.0759,
+        "fiyat": 4.79
+    },
+    "SAFKR": {
+        "tarih": "1554854400000",
+        "hisse_basi_tl": 0.1026,
+        "fiyat": 12.54
+    },
+    "GEDZA": {
+        "tarih": "1559001600000",
+        "hisse_basi_tl": 0.1176,
+        "fiyat": 17.5
+    },
+    "FORMT": {
+        "tarih": "1576195200000",
+        "hisse_basi_tl": 0.0138,
+        "fiyat": 0.86
+    },
+    "PAPIL": {
+        "tarih": "1587340800000",
+        "hisse_basi_tl": 0.056,
+        "fiyat": 5.51
+    },
+    "DERHL": {
+        "tarih": "1589155200000",
+        "hisse_basi_tl": 0.0331,
+        "fiyat": 1.25
+    },
+    "BEYAZ": {
+        "tarih": "1592438400000",
+        "hisse_basi_tl": 0.0363,
+        "fiyat": 13.17
+    },
+    "ARDYZ": {
+        "tarih": "1598918400000",
+        "hisse_basi_tl": 0.0649,
+        "fiyat": 54.45
+    },
+    "ISKPL": {
+        "tarih": "1617753600000",
+        "hisse_basi_tl": 0.0367,
+        "fiyat": 2.68
+    },
+    "NATEN": {
+        "tarih": "1618790400000",
+        "hisse_basi_tl": 0.15,
+        "fiyat": 2.92
+    },
+    "ESEN": {
+        "tarih": "1618790400000",
+        "hisse_basi_tl": 0.007,
+        "fiyat": 1.97
+    },
+    "DNISI": {
+        "tarih": "1621296000000",
+        "hisse_basi_tl": 0.0919,
+        "fiyat": 3.66
+    },
+    "IHEVA": {
+        "tarih": "1621987200000",
+        "hisse_basi_tl": 0.01,
+        "fiyat": 1.44
+    },
+    "ARZUM": {
+        "tarih": "1623110400000",
+        "hisse_basi_tl": 0.3654,
+        "fiyat": 0.96
+    },
+    "KRVGD": {
+        "tarih": "1624579200000",
+        "hisse_basi_tl": 0.1333,
+        "fiyat": 2.01
+    },
+    "NTGAZ": {
+        "tarih": "1624838400000",
+        "hisse_basi_tl": 0.2826,
+        "fiyat": 9.68
+    },
+    "SOKM": {
+        "tarih": "1625097600000",
+        "hisse_basi_tl": 0.13,
+        "fiyat": 57.4
+    },
+    "MTRKS": {
+        "tarih": "1625443200000",
+        "hisse_basi_tl": 0.3017,
+        "fiyat": 14.68
+    },
+    "KONTR": {
+        "tarih": "1630022400000",
+        "hisse_basi_tl": 0.1815,
+        "fiyat": 1.27
+    },
+    "ARSAN": {
+        "tarih": "1631664000000",
+        "hisse_basi_tl": 0.0554,
+        "fiyat": 2.92
+    },
+    "YKSLN": {
+        "tarih": "1633564800000",
+        "hisse_basi_tl": 0.0344,
+        "fiyat": 2.1
+    },
+    "MERCN": {
+        "tarih": "1635724800000",
+        "hisse_basi_tl": 0.0141,
+        "fiyat": 8.81
+    },
+    "CASA": {
+        "tarih": "1640908800000",
+        "hisse_basi_tl": 0.2923,
+        "fiyat": 30.9
+    },
+    "BASGZ": {
+        "tarih": "1642118400000",
+        "hisse_basi_tl": 0.25,
+        "fiyat": 34
+    },
+    "BOBET": {
+        "tarih": "1648684800000",
+        "hisse_basi_tl": 0.1447,
+        "fiyat": 14.28
+    },
+    "ESCAR": {
+        "tarih": "1649203200000",
+        "hisse_basi_tl": 0.6446,
+        "fiyat": 9.71
+    },
+    "KLKIM": {
+        "tarih": "1649289600000",
+        "hisse_basi_tl": 0.4348,
+        "fiyat": 18.83
+    },
+    "ULUFA": {
+        "tarih": "1650931200000",
+        "hisse_basi_tl": 0.0275,
+        "fiyat": 1.47
+    },
+    "TEZOL": {
+        "tarih": "1651190400000",
+        "hisse_basi_tl": 0.45,
+        "fiyat": 6.78
+    },
+    "GLCVY": {
+        "tarih": "1651190400000",
+        "hisse_basi_tl": 0.3112,
+        "fiyat": 33.64
+    },
+    "BMSCH": {
+        "tarih": "1651708800000",
+        "hisse_basi_tl": 0.1908,
+        "fiyat": 7.82
+    },
+    "TMPOL": {
+        "tarih": "1652227200000",
+        "hisse_basi_tl": 0.0917,
+        "fiyat": 92.1
+    },
+    "KONKA": {
+        "tarih": "1652227200000",
+        "hisse_basi_tl": 0.2682,
+        "fiyat": 6.63
+    },
+    "YEOTK": {
+        "tarih": "1652659200000",
+        "hisse_basi_tl": 0.3125,
+        "fiyat": 22.02
+    },
+    "GMTAS": {
+        "tarih": "1652745600000",
+        "hisse_basi_tl": 0.1111,
+        "fiyat": 49.6
+    },
+    "ANGEN": {
+        "tarih": "1653264000000",
+        "hisse_basi_tl": 1.3889,
+        "fiyat": 6.39
+    },
+    "PNLSN": {
+        "tarih": "1653264000000",
+        "hisse_basi_tl": 0.2085,
+        "fiyat": 27.16
+    },
+    "VBTYZ": {
+        "tarih": "1653436800000",
+        "hisse_basi_tl": 0.5,
+        "fiyat": 19.28
+    },
+    "OYYAT": {
+        "tarih": "1653955200000",
+        "hisse_basi_tl": 1.0638,
+        "fiyat": 22.02
+    },
+    "ISSEN": {
+        "tarih": "1654560000000",
+        "hisse_basi_tl": 0.1,
+        "fiyat": 4.61
+    },
+    "UNLU": {
+        "tarih": "1654732800000",
+        "hisse_basi_tl": 0.1,
+        "fiyat": 9.03
+    },
+    "BRLSM": {
+        "tarih": "1655078400000",
+        "hisse_basi_tl": 0.044,
+        "fiyat": 7.59
+    },
+    "ATATP": {
+        "tarih": "1655251200000",
+        "hisse_basi_tl": 0.4021,
+        "fiyat": 200.6
+    },
+    "KMPUR": {
+        "tarih": "1655424000000",
+        "hisse_basi_tl": 1.2443,
+        "fiyat": 11.8
+    },
+    "ZRGYO": {
+        "tarih": "1656374400000",
+        "hisse_basi_tl": 0.0032,
+        "fiyat": 17.84
+    },
+    "AKSEN": {
+        "tarih": "1658275200000",
+        "hisse_basi_tl": 0.5708,
+        "fiyat": 60.6
+    },
+    "BERA": {
+        "tarih": "1658275200000",
+        "hisse_basi_tl": 0.1,
+        "fiyat": 9.8
+    },
+    "SUNTK": {
+        "tarih": "1658275200000",
+        "hisse_basi_tl": 0.8376,
+        "fiyat": 18.43
+    },
+    "LIDER": {
+        "tarih": "1658880000000",
+        "hisse_basi_tl": 0.3276,
+        "fiyat": 8.1
+    },
+    "ARASE": {
+        "tarih": "1659312000000",
+        "hisse_basi_tl": 2.4532,
+        "fiyat": 69.95
+    },
+    "MAGEN": {
+        "tarih": "1660089600000",
+        "hisse_basi_tl": 0.17,
+        "fiyat": 5.17
+    },
+    "BRKSN": {
+        "tarih": "1661212800000",
+        "hisse_basi_tl": 0.1111,
+        "fiyat": 4.92
+    },
+    "CEOEM": {
+        "tarih": "1663200000000",
+        "hisse_basi_tl": 0.5,
+        "fiyat": 19.3
+    },
+    "GRSEL": {
+        "tarih": "1664236800000",
+        "hisse_basi_tl": 0.098,
+        "fiyat": 247
+    },
+    "PCILT": {
+        "tarih": "1664323200000",
+        "hisse_basi_tl": 0.0444,
+        "fiyat": 27.06
+    },
+    "DUNYH": {
+        "tarih": "1667174400000",
+        "hisse_basi_tl": 0.01,
+        "fiyat": 14.76
+    },
+    "LYDHO": {
+        "tarih": "1680825600000",
+        "hisse_basi_tl": 0.5347,
+        "fiyat": 26.7
+    },
+    "SOKE": {
+        "tarih": "1682380800000",
+        "hisse_basi_tl": 0.2587,
+        "fiyat": 7.44
+    },
+    "BRKVY": {
+        "tarih": "1682985600000",
+        "hisse_basi_tl": 0.441,
+        "fiyat": 32.4
+    },
+    "ASTOR": {
+        "tarih": "1682985600000",
+        "hisse_basi_tl": 0.529,
+        "fiyat": 142.6
+    },
+    "ALFAS": {
+        "tarih": "1683072000000",
+        "hisse_basi_tl": 4.0,
+        "fiyat": 23.34
+    },
+    "BMSTL": {
+        "tarih": "1683072000000",
+        "hisse_basi_tl": 0.3042,
+        "fiyat": 36.44
+    },
+    "MACKO": {
+        "tarih": "1683504000000",
+        "hisse_basi_tl": 2.3,
+        "fiyat": 23.16
+    },
+    "KCAER": {
+        "tarih": "1685318400000",
+        "hisse_basi_tl": 0.2296,
+        "fiyat": 8.7
+    },
+    "KLSYN": {
+        "tarih": "1686528000000",
+        "hisse_basi_tl": 0.0333,
+        "fiyat": 15
+    },
+    "TNZTP": {
+        "tarih": "1687132800000",
+        "hisse_basi_tl": 0.2831,
+        "fiyat": 20.78
+    },
+    "OZSUB": {
+        "tarih": "1688342400000",
+        "hisse_basi_tl": 0.0497,
+        "fiyat": 26.44
+    },
+    "HKTM": {
+        "tarih": "1688342400000",
+        "hisse_basi_tl": 0.11,
+        "fiyat": 10.37
+    },
+    "AZTEK": {
+        "tarih": "1690761600000",
+        "hisse_basi_tl": 1.0577,
+        "fiyat": 2.85
+    },
+    "SUWEN": {
+        "tarih": "1690761600000",
+        "hisse_basi_tl": 0.125,
+        "fiyat": 4.2
+    },
+    "SANFM": {
+        "tarih": "1690761600000",
+        "hisse_basi_tl": 0.1,
+        "fiyat": 2.99
+    },
+    "DURDO": {
+        "tarih": "1692057600000",
+        "hisse_basi_tl": 0.16,
+        "fiyat": 6.01
+    },
+    "GRTHO": {
+        "tarih": "1692057600000",
+        "hisse_basi_tl": 0.0152,
+        "fiyat": 60.55
+    },
+    "YYLGD": {
+        "tarih": "1693440000000",
+        "hisse_basi_tl": 0.1472,
+        "fiyat": 6.45
+    },
+    "KAYSE": {
+        "tarih": "1695081600000",
+        "hisse_basi_tl": 0.05,
+        "fiyat": 2.43
+    },
+    "PLTUR": {
+        "tarih": "1696896000000",
+        "hisse_basi_tl": 0.0719,
+        "fiyat": 13.77
+    },
+    "MAKIM": {
+        "tarih": "1697587200000",
+        "hisse_basi_tl": 0.1657,
+        "fiyat": 11.78
+    },
+    "ORCAY": {
+        "tarih": "1698278400000",
+        "hisse_basi_tl": 0.1875,
+        "fiyat": 1.91
+    },
+    "ONCSM": {
+        "tarih": "1699401600000",
+        "hisse_basi_tl": 0.4149,
+        "fiyat": 91
+    },
+    "KRPLS": {
+        "tarih": "1700179200000",
+        "hisse_basi_tl": 0.0556,
+        "fiyat": 8.37
+    },
+    "KTSKR": {
+        "tarih": "1703548800000",
+        "hisse_basi_tl": 2.1739,
+        "fiyat": 50.65
+    },
+    "PSGYO": {
+        "tarih": "1703635200000",
+        "hisse_basi_tl": 0.0305,
+        "fiyat": 1.3
+    },
+    "BORLS": {
+        "tarih": "1703721600000",
+        "hisse_basi_tl": 0.5001,
+        "fiyat": 2.46
+    },
+    "KTLEV": {
+        "tarih": "1711411200000",
+        "hisse_basi_tl": 1.6355,
+        "fiyat": 4.07
+    },
+    "SKYMD": {
+        "tarih": "1711497600000",
+        "hisse_basi_tl": 0.1548,
+        "fiyat": 8.87
+    },
+    "AVPGY": {
+        "tarih": "1713312000000",
+        "hisse_basi_tl": 0.7,
+        "fiyat": 47.4
+    },
+    "BIGCH": {
+        "tarih": "1717113600000",
+        "hisse_basi_tl": 0.6379,
+        "fiyat": 3.13
+    },
+    "MARBL": {
+        "tarih": "1717977600000",
+        "hisse_basi_tl": 0.0558,
+        "fiyat": 7.41
+    },
+    "KLSER": {
+        "tarih": "1719273600000",
+        "hisse_basi_tl": 0.1943,
+        "fiyat": 15.36
+    },
+    "KBORU": {
+        "tarih": "1719360000000",
+        "hisse_basi_tl": 0.5275,
+        "fiyat": 8.47
+    },
+    "ASGYO": {
+        "tarih": "1719964800000",
+        "hisse_basi_tl": 0.2,
+        "fiyat": 8.79
+    },
+    "DOFER": {
+        "tarih": "1719964800000",
+        "hisse_basi_tl": 0.6278,
+        "fiyat": 17.66
+    },
+    "GIPTA": {
+        "tarih": "1719964800000",
+        "hisse_basi_tl": 0.2347,
+        "fiyat": 21.32
+    },
+    "ATAKP": {
+        "tarih": "1720396800000",
+        "hisse_basi_tl": 0.8792,
+        "fiyat": 34.72
+    },
+    "TABGD": {
+        "tarih": "1720396800000",
+        "hisse_basi_tl": 0.5607,
+        "fiyat": 191.7
+    },
+    "AHGAZ": {
+        "tarih": "1721779200000",
+        "hisse_basi_tl": 0.0192,
+        "fiyat": 43.8
+    },
+    "ENERY": {
+        "tarih": "1721865600000",
+        "hisse_basi_tl": 0.3448,
+        "fiyat": 12.25
+    },
+    "AYDEM": {
+        "tarih": "1722297600000",
+        "hisse_basi_tl": 0.5458,
+        "fiyat": 21.26
+    },
+    "LILAK": {
+        "tarih": "1722470400000",
+        "hisse_basi_tl": 0.3055,
+        "fiyat": 19.95
+    },
+    "CWENE": {
+        "tarih": "1724889600000",
+        "hisse_basi_tl": 0.7664,
+        "fiyat": 14.64
+    },
+    "EYGYO": {
+        "tarih": "1727654400000",
+        "hisse_basi_tl": 0.0594,
+        "fiyat": 1.8
+    },
+    "EBEBK": {
+        "tarih": "1728950400000",
+        "hisse_basi_tl": 0.25,
+        "fiyat": 81
+    },
+    "OBAMS": {
+        "tarih": "1728950400000",
+        "hisse_basi_tl": 0.6435,
+        "fiyat": 3.38
+    },
+    "GOKNR": {
+        "tarih": "1728950400000",
+        "hisse_basi_tl": 0.3,
+        "fiyat": 11.86
+    },
+    "DCTTR": {
+        "tarih": "1730332800000",
+        "hisse_basi_tl": 0.0114,
+        "fiyat": 4.26
+    },
+    "BORSK": {
+        "tarih": "1733443200000",
+        "hisse_basi_tl": 0.4458,
+        "fiyat": 4.87
+    },
+    "ALKLC": {
+        "tarih": "1734652800000",
+        "hisse_basi_tl": 0.089,
+        "fiyat": 27.42
+    },
+    "SEGMN": {
+        "tarih": "1743638400000",
+        "hisse_basi_tl": 0.6127,
+        "fiyat": 13.12
+    },
+    "BYDNR": {
+        "tarih": "1747180800000",
+        "hisse_basi_tl": 0.713,
+        "fiyat": 17.6
+    },
+    "LMKDC": {
+        "tarih": "1747267200000",
+        "hisse_basi_tl": 1.0,
+        "fiyat": 19.5
+    },
+    "SMRVA": {
+        "tarih": "1750204800000",
+        "hisse_basi_tl": 0.3136,
+        "fiyat": 4.84
+    },
+    "MHRGY": {
+        "tarih": "1751328000000",
+        "hisse_basi_tl": 0.05,
+        "fiyat": 1.72
+    },
+    "DURKN": {
+        "tarih": "1755129600000",
+        "hisse_basi_tl": 0.0327,
+        "fiyat": 8.74
+    },
+    "EFOR": {
+        "tarih": "1755216000000",
+        "hisse_basi_tl": 0.1377,
+        "fiyat": 17.14
+    },
+    "GUNDG": {
+        "tarih": "1758844800000",
+        "hisse_basi_tl": 0.0513,
+        "fiyat": 108.7
+    },
+    "OFSYM": {
+        "tarih": "1759190400000",
+        "hisse_basi_tl": 0.4179,
+        "fiyat": 44.2
+    },
+    "BEGYO": {
+        "tarih": "1760313600000",
+        "hisse_basi_tl": 0.0215,
+        "fiyat": 3.04
+    },
+    "BALSU": {
+        "tarih": "1763078400000",
+        "hisse_basi_tl": 0.1763,
+        "fiyat": 7.23
+    },
+    "VSNMD": {
+        "tarih": "1764547200000",
+        "hisse_basi_tl": 0.3896,
+        "fiyat": 18.81
+    },
+    "RGYAS": {
+        "tarih": "1766016000000",
+        "hisse_basi_tl": 1.6394,
+        "fiyat": 174.7
+    },
+    "NETCD": {
+        "tarih": "1777507200000",
+        "hisse_basi_tl": 4.3796,
+        "fiyat": 79.75
+    },
+    "MCARD": {
+        "tarih": "1778630400000",
+        "hisse_basi_tl": 5.3996,
+        "fiyat": 89.7
+    },
+    "KRGYO": {
+        "tarih": "1778803200000",
+        "hisse_basi_tl": 0.0384,
+        "fiyat": 3.14
+    },
+    "BULGS": {
+        "tarih": "1781481600000",
+        "hisse_basi_tl": 0.0933,
+        "fiyat": 6.95
+    },
+    "AAGYO": {
+        "tarih": "1781654400000",
+        "hisse_basi_tl": 0.428,
+        "fiyat": 7.33
+    },
+    "EMPAE": {
+        "tarih": "1781740800000",
+        "hisse_basi_tl": 0.1,
+        "fiyat": 37.8
+    },
+    "SVGYO": {
+        "tarih": "1782172800000",
+        "hisse_basi_tl": 0.0077,
+        "fiyat": 1.92
+    },
+    "AHSGY": {
+        "tarih": "1782259200000",
+        "hisse_basi_tl": 0.0762,
+        "fiyat": 5.47
+    },
+    "EGEGY": {
+        "tarih": "1782432000000",
+        "hisse_basi_tl": 0.3,
+        "fiyat": 14.73
+    },
+    "KIMMR": {
+        "tarih": "1782777600000",
+        "hisse_basi_tl": 0.2083,
+        "fiyat": 8.9
+    },
+    "MEYSU": {
+        "tarih": "1783382400000",
+        "hisse_basi_tl": 0.05,
+        "fiyat": 6.98
+    },
+    "GENKM": {
+        "tarih": "1783987200000",
+        "hisse_basi_tl": 0.2053,
+        "fiyat": 5.81
+    },
+    "MOPAS": {
+        "tarih": "1785456000000",
+        "hisse_basi_tl": 0.2747,
+        "fiyat": 14.55
+    },
+    "AKFGY": {
+        "tarih": "1789430400000",
+        "hisse_basi_tl": 0.0137,
+        "fiyat": 2.21
+    },
+    "KPEKS": {
+        "tarih": "1791331200000",
+        "hisse_basi_tl": 0.5995,
+        "fiyat": 42.1
+    }
+}
