@@ -82,30 +82,6 @@
   .sekme.sag { background: var(--mavi); }
   .sekme.port { background: var(--altin); }
   .sekme.aktif { opacity: 1; box-shadow: 0 0 0 2px var(--yazi) inset; }
-  .bulut {
-    flex: none; width: 38px; height: 32px; border-radius: 8px; padding: 0;
-    border: 1px solid var(--cizgi); background: #fff; color: var(--soluk); font-size: 16px; cursor: pointer;
-  }
-  .bulut.ok { color: #1e8a4a; border-color: #8cc7a1; }
-  .bulut.hata { color: #b3261e; border-color: #e0a4a0; }
-  .bulut.bekliyor { color: #b07d10; }
-  .modal { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,.45); display: flex; align-items: center; justify-content: center; padding: 12px; }
-  .modal[hidden] { display: none; }
-  .modal-kutu { background: #fff; border-radius: 12px; width: 100%; max-width: 440px; max-height: 92vh; overflow: auto; padding: 14px; }
-  .modal-baslik { display: flex; justify-content: space-between; align-items: center; font-size: 16px; margin-bottom: 6px; }
-  .modal-baslik button { border: 0; background: transparent; font-size: 18px; padding: 4px 8px; cursor: pointer; }
-  .modal-not { font-size: 12.5px; color: var(--soluk); margin: 0 0 10px; line-height: 1.35; }
-  .alan-etiket { display: block; font-size: 11.5px; font-weight: 700; color: var(--soluk); margin: 8px 0 3px; }
-  .modal input, .modal textarea {
-    width: 100%; padding: 8px 10px; border: 1px solid var(--cizgi); border-radius: 8px; font-size: 16px; font-family: inherit;
-  }
-  .modal-satir { display: flex; gap: 8px; margin-top: 10px; }
-  .modal-btn { flex: 1; height: 38px; border-radius: 8px; border: 1px solid var(--cizgi); background: #fff; font-size: 14px; font-weight: 700; cursor: pointer; }
-  .modal-btn.ana { background: var(--yesil); color: #fff; border-color: var(--yesil); }
-  .modal-durum { font-size: 12.5px; margin-top: 8px; min-height: 16px; color: var(--soluk); }
-  .modal-durum.ok { color: #1e8a4a; font-weight: 700; }
-  .modal-durum.hata { color: #b3261e; font-weight: 700; }
-  .modal hr { border: 0; border-top: 1px solid var(--cizgi); margin: 14px 0 4px; }
   .durum { max-width: var(--genislik); margin: 3px auto 0; font-size: 11px; line-height: 1.3; color: var(--soluk); }
   .durum:empty { display: none; }
   .durum.uyari { color: #9b2c2c; font-weight: 700; }
@@ -264,7 +240,6 @@
     <button class="sekme sol aktif" data-hedef="sol" type="button"><span class="u">AYLIK TEMETTÜYE GÖRE</span><span class="k">AYLIK</span></button>
     <button class="sekme sag" data-hedef="sag" type="button"><span class="u">LOT SAYISINA GÖRE</span><span class="k">LOT</span></button>
     <button class="sekme port" data-hedef="port" type="button"><span class="u">PORTFÖY</span><span class="k">PORTFÖY</span></button>
-    <button class="bulut" id="bulut-btn" type="button" title="Cihazlar arası eşitleme">☁</button>
   </div>
   <div class="durum" id="durum"></div>
 </div>
@@ -331,28 +306,6 @@
 </div>
 
 
-<div id="modal" class="modal" hidden>
-  <div class="modal-kutu">
-    <div class="modal-baslik"><b>Cihazlar arası eşitleme</b><button type="button" id="modal-kapat" aria-label="Kapat">✕</button></div>
-    <p class="modal-not">Girdiğiniz değerler her cihazda ayrı saklanır. Telefon ve bilgisayarı eşlemek için aynı adres ve aynı anahtarı iki cihaza da girin.</p>
-    <label class="alan-etiket">Apps Script adresi</label>
-    <input id="bulut-url" type="url" inputmode="url" autocomplete="off" placeholder="https://script.google.com/macros/s/.../exec">
-    <label class="alan-etiket">Gizli anahtar (en az 6 karakter, kendiniz belirleyin)</label>
-    <input id="bulut-anahtar" type="text" autocomplete="off" placeholder="örn. benim-gizli-anahtarim-2026">
-    <div class="modal-satir">
-      <button type="button" id="bulut-kaydet" class="modal-btn ana">Kaydet ve eşitle</button>
-      <button type="button" id="bulut-kaldir" class="modal-btn">Bağlantıyı kaldır</button>
-    </div>
-    <div id="bulut-durum" class="modal-durum"></div>
-    <hr>
-    <label class="alan-etiket">Elle aktarım (kurulum gerektirmez)</label>
-    <textarea id="elle-kod" rows="3" placeholder="Kodu buraya yapıştırın ya da 'Kodu göster'e basın"></textarea>
-    <div class="modal-satir">
-      <button type="button" id="elle-goster" class="modal-btn">Kodu göster</button>
-      <button type="button" id="elle-al" class="modal-btn">İçe aktar</button>
-    </div>
-  </div>
-</div>
 
 <script>
 (function () {
@@ -432,7 +385,7 @@
 
   function bilgiYaz() {
     $("sayi").innerHTML = "<b>" + liste.length + "</b>Hisse";
-    $("sayi").title = veriKaynakNotu;
+    $("sayi").title = veriKaynakNotu + (esitlemeNotu ? " · Eşitleme: " + esitlemeNotu : "");
   }
 
   var KUR_ANAHTAR = "temettuhesap_kur_v1";
@@ -904,43 +857,33 @@
 
 
   // ------------------------------------------------------------------
-  // Cihazlar arası eşitleme (Google Apps Script) + elle aktarım
+  // Cihazlar arası OTOMATİK eşitleme (Google Apps Script) — arayüzü yok, arka planda çalışır.
+  // Telefon ve bilgisayarda aynı adres + aynı anahtar kullanıldığı için girişler iki yerde de görünür.
   // ------------------------------------------------------------------
-  var BULUT_URL = "";                         // İsterseniz Apps Script adresini buraya yapıştırın (her cihazda yalnız anahtar girilir)
-  var BULUT_DEPO = "temettuhesap_bulut_v1";
-  var bulut = { url: "", anahtar: "" };
+  var BULUT_URL = "";        // Apps Script web uygulaması adresi (https://script.google.com/macros/s/.../exec)
+  var BULUT_ANAHTAR = "";    // Kendi belirlediğiniz gizli anahtar (en az 6 karakter)
   var bulutZamanlayici = null;
-  var sonEsitleme = 0;
+  var esitlemeNotu = "";
 
-  function bulutOku() {
-    try {
-      var o = JSON.parse(localStorage.getItem(BULUT_DEPO));
-      if (o) { bulut.url = o.url || ""; bulut.anahtar = o.anahtar || ""; }
-    } catch (e) {}
-    if (!bulut.url && BULUT_URL) bulut.url = BULUT_URL;
-  }
-  function bulutKaydet() {
-    try { localStorage.setItem(BULUT_DEPO, JSON.stringify(bulut)); } catch (e) {}
-  }
-  function bulutHazir() { return /^https:\/\//.test(bulut.url) && bulut.anahtar.length >= 6; }
+  function bulutHazir() { return /^https:\/\//.test(BULUT_URL) && BULUT_ANAHTAR.length >= 6; }
 
-  function bulutDurumAyarla(d, mesaj) {
-    var b = $("bulut-btn");
-    b.className = "bulut" + (d ? " " + d : "");
-    var m = $("bulut-durum");
-    if (m) {
-      m.className = "modal-durum" + (d === "ok" ? " ok" : d === "hata" ? " hata" : "");
-      m.textContent = mesaj || "";
-    }
+  function saatMetni() {
+    return new Date().toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
+  }
+  // Görünür bir şey yazmaz; yalnızca "Hisse" kutusunun ipucuna (basılı tutunca) not düşer
+  function esitlemeYaz(metin) {
+    esitlemeNotu = metin;
+    var el = $("sayi");
+    if (el) el.title = veriKaynakNotu + (metin ? " · Eşitleme: " + metin : "");
   }
 
   function bulutAl() {
-    return jsonAl(bulut.url + "?islem=oku&anahtar=" + encodeURIComponent(bulut.anahtar) + "&t=" + Date.now(), 25000);
+    return jsonAl(BULUT_URL + "?islem=oku&anahtar=" + encodeURIComponent(BULUT_ANAHTAR) + "&t=" + Date.now(), 25000);
   }
   function bulutYaz() {
     var ctrl = (typeof AbortController !== "undefined") ? new AbortController() : null;
     var z = setTimeout(function () { if (ctrl) ctrl.abort(); }, 25000);
-    return fetch(bulut.url + "?anahtar=" + encodeURIComponent(bulut.anahtar), {
+    return fetch(BULUT_URL + "?anahtar=" + encodeURIComponent(BULUT_ANAHTAR), {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify(giris),
@@ -950,20 +893,15 @@
       .catch(function (e) { clearTimeout(z); throw e; });
   }
 
-  function saatMetni() {
-    return new Date().toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
-  }
-
+  // Her değişiklikten ~1 sn sonra buluta yazar
   function bulutPlanla() {
     if (!bulutHazir()) return;
     clearTimeout(bulutZamanlayici);
-    bulutDurumAyarla("bekliyor", "Eşitleniyor…");
     bulutZamanlayici = setTimeout(function () {
       bulutYaz().then(function () {
-        sonEsitleme = Date.now();
-        bulutDurumAyarla("ok", "Eşitlendi (" + saatMetni() + ")");
+        esitlemeYaz("kaydedildi " + saatMetni());
       }).catch(function (e) {
-        bulutDurumAyarla("hata", "Eşitlenemedi: " + (e && e.message ? e.message : "bağlantı hatası"));
+        esitlemeYaz("HATA: " + (e && e.message ? e.message : "bağlantı"));
       });
     }, 900);
   }
@@ -998,10 +936,9 @@
     hesaplaHepsi();
   }
 
-  // Buluttan çek: bulut daha yeniyse uygula, yerel daha yeniyse buluta yaz
+  // Bulut daha yeniyse uygula, yerel daha yeniyse buluta yaz (en son değişiklik kazanır)
   function bulutEsitle() {
-    if (!bulutHazir()) { bulutDurumAyarla("", ""); return Promise.resolve(); }
-    bulutDurumAyarla("bekliyor", "Kontrol ediliyor…");
+    if (!bulutHazir()) return Promise.resolve();
     return bulutAl().then(function (r) {
       if (!r || r.hata) throw new Error((r && r.hata) || "okunamadı");
       var uzak = r.veri;
@@ -1009,71 +946,24 @@
       var yerelZ = giris.zaman || 0;
       if (uzak && uzak.sol && uzak.sag && uzakZ > yerelZ) {
         girisiUygula(uzak);
-        bulutDurumAyarla("ok", "Buluttaki veriler yüklendi (" + saatMetni() + ")");
+        esitlemeYaz("buluttan alındı " + saatMetni());
       } else if (yerelZ > uzakZ) {
-        return bulutYaz().then(function () { bulutDurumAyarla("ok", "Buluta kaydedildi (" + saatMetni() + ")"); });
+        return bulutYaz().then(function () { esitlemeYaz("kaydedildi " + saatMetni()); });
       } else {
-        bulutDurumAyarla("ok", "Güncel (" + saatMetni() + ")");
+        esitlemeYaz("güncel " + saatMetni());
       }
     }).catch(function (e) {
-      bulutDurumAyarla("hata", "Bağlanılamadı: " + (e && e.message ? e.message : "hata"));
+      esitlemeYaz("HATA: " + (e && e.message ? e.message : "bağlantı"));
     });
   }
 
-  function modalAc() {
-    $("bulut-url").value = bulut.url;
-    $("bulut-anahtar").value = bulut.anahtar;
-    $("modal").hidden = false;
-  }
-  function modalKapat() { $("modal").hidden = true; }
-
-  function elleKod() {
-    var json = JSON.stringify(giris);
-    return btoa(unescape(encodeURIComponent(json)));
-  }
-  function elleCoz(kod) {
-    return JSON.parse(decodeURIComponent(escape(atob(kod.replace(/\s+/g, "")))));
-  }
-
-  function bulutOlaylari() {
-    $("bulut-btn").addEventListener("click", modalAc);
-    $("modal-kapat").addEventListener("click", modalKapat);
-    $("modal").addEventListener("click", function (e) { if (e.target === $("modal")) modalKapat(); });
-    $("bulut-kaydet").addEventListener("click", function () {
-      bulut.url = $("bulut-url").value.trim();
-      bulut.anahtar = $("bulut-anahtar").value.trim();
-      if (!bulutHazir()) { bulutDurumAyarla("hata", "Adres https:// ile başlamalı ve anahtar en az 6 karakter olmalı."); return; }
-      bulutKaydet();
-      bulutEsitle();
-    });
-    $("bulut-kaldir").addEventListener("click", function () {
-      bulut.url = ""; bulut.anahtar = "";
-      bulutKaydet();
-      $("bulut-url").value = ""; $("bulut-anahtar").value = "";
-      bulutDurumAyarla("", "Bağlantı kaldırıldı. Veriler bu cihazda kalır.");
-    });
-    $("elle-goster").addEventListener("click", function () {
-      $("elle-kod").value = elleKod();
-      try { $("elle-kod").select(); } catch (e) {}
-    });
-    $("elle-al").addEventListener("click", function () {
-      try {
-        var o = elleCoz($("elle-kod").value);
-        if (!o || !o.sol || !o.sag) throw new Error("geçersiz");
-        if (!window.confirm("Bu cihazdaki girişlerin yerine koddaki veriler yüklensin mi?")) return;
-        o.zaman = Date.now();
-        girisiUygula(o);
-        bulutPlanla();
-        bulutDurumAyarla(bulutHazir() ? "ok" : "", "Kod içe aktarıldı.");
-      } catch (e) {
-        bulutDurumAyarla("hata", "Kod okunamadı. Tamamını kopyaladığınızdan emin olun.");
-      }
-    });
+  function bulutBaslat() {
+    if (!bulutHazir()) return;
     document.addEventListener("visibilitychange", function () {
-      if (document.visibilityState === "visible" && bulutHazir() && liste.length > 0) bulutEsitle();
+      if (document.visibilityState === "visible" && liste.length > 0) bulutEsitle();
     });
     setInterval(function () {
-      if (document.visibilityState === "visible" && bulutHazir() && liste.length > 0) bulutEsitle();
+      if (document.visibilityState === "visible" && liste.length > 0) bulutEsitle();
     }, 60 * 1000);
   }
 
@@ -1312,8 +1202,7 @@
   }
   window.addEventListener("resize", ustYukseklik);
 
-  bulutOku();
-  bulutOlaylari();
+  bulutBaslat();
   kurOnbellekOku();
   baslat();
   kurYenile();
