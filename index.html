@@ -41,12 +41,12 @@
   }
   .ust-satir { display: flex; gap: 6px; align-items: center; flex-wrap: nowrap; max-width: var(--genislik); margin: 0 auto; }
   .ara {
-    flex: 1 1 80px; min-width: 70px;
+    flex: 0 1 84px; min-width: 60px;
     height: 34px; padding: 0 10px;
     border: 1px solid var(--cizgi); border-radius: 8px;
     font-size: 16px; background: #fff; color: var(--yazi);
   }
-  .sag-grup { display: flex; align-items: center; gap: 6px; flex: none; }
+  .sag-grup { display: flex; align-items: center; gap: 6px; flex: none; margin-left: auto; }
   .sayi { flex: none; text-align: center; font-size: 9px; line-height: 1.1; color: var(--soluk); font-weight: 600; }
   .sayi b { display: block; font-size: 14px; color: var(--yazi); font-weight: 800; }
   .stopaj {
@@ -174,7 +174,7 @@
   @media (min-width: 641px) {
     .ust { padding: calc(6px + env(safe-area-inset-top, 0px)) 10px 6px; }
     .ust-satir { gap: 8px; }
-    .ara { flex: 1 1 240px; height: 36px; }
+    .ara { flex: 0 1 170px; height: 36px; }
     .sag-grup { gap: 8px; }
     .stopaj { font-size: 9.5px; }
     .stopaj input { width: 44px; height: 28px; }
@@ -209,7 +209,7 @@
     .toplam .kalem b { font-size: 15px; }
   }
   @media (min-width: 900px) {
-    .ara { flex: 1 1 300px; }
+    .ara { flex: 0 1 170px; }
     .kur { font-size: 12.5px; }
     .kur .ek { display: inline; }
   }
@@ -474,11 +474,14 @@
       var saat = d.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
       var eski = kur.onbellek ? " <span class='soluk'>(eski)</span>" : "";
       k.innerHTML =
-        "<span class='k-tam'>1 $ = <b>" + fmt(kur.usdTry, 2) + " TL</b><br>" +
-        "1 gr altın = <b>" + fmt(gramAltinTL(), 2) + " TL</b>" +
+        // Geniş ekran: "1 $ = 49,79 TL" / "1 GR Altın = 6.429,28 TL"
+        "<span class='k-tam'>1 <b>$</b> = <b>" + fmt(kur.usdTry, 2) + " TL</b><br>" +
+        "1 <b>GR</b> Altın = <b>" + fmt(gramAltinTL(), 2) + " TL</b>" +
         "<span class='soluk ek'> (" + fmt(gramAltinTL() / kur.usdTry, 2) + " $) · " + saat + "</span>" + eski + "</span>" +
-        "<span class='k-kisa'>$ <b>" + fmt(kur.usdTry, 2) + "</b><br>gr <b>" + fmt(gramAltinTL(), 0) + "</b>" + eski + "</span>";
-      k.title = "1 $ = " + fmt(kur.usdTry, 2) + " TL · 1 gr altın = " + fmt(gramAltinTL(), 2) + " TL (" +
+        // Mobil (dar): "$: 49,79 TL" / "GR: 6.429 TL"
+        "<span class='k-kisa'><b>$:</b> <b>" + fmt(kur.usdTry, 2) + " TL</b><br>" +
+        "<b>GR:</b> <b>" + fmt(gramAltinTL(), 0) + " TL</b>" + eski + "</span>";
+      k.title = "1 $ = " + fmt(kur.usdTry, 2) + " TL · 1 GR Altın = " + fmt(gramAltinTL(), 2) + " TL (" +
         fmt(gramAltinTL() / kur.usdTry, 2) + " $) · saat " + saat + (kur.onbellek ? " — son kayıtlı kur" : "");
     }
     portfoyYaz();
