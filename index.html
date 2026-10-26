@@ -18,8 +18,6 @@
     --girdi: #fffde0;
     --girdi-kenar: #c9c27a;
     --genislik: 900px;
-    --altin: #8a6a1c;
-    --altin-koyu: #6b5014;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
@@ -29,62 +27,57 @@
     color: var(--yazi);
     -webkit-text-size-adjust: 100%;
     -webkit-tap-highlight-color: transparent;
-    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px));
   }
 
-  /* ---------- Üst bar (tek satır) ---------- */
+  /* ---------- Üst bar ---------- */
   .ust {
     position: sticky; top: 0; z-index: 30;
     background: var(--zemin);
-    padding: calc(5px + env(safe-area-inset-top, 0px)) 6px 5px;
+    padding: calc(5px + env(safe-area-inset-top, 0px)) 10px 5px;
     border-bottom: 1px solid var(--cizgi);
   }
-  .ust-satir { display: flex; gap: 6px; align-items: center; flex-wrap: nowrap; max-width: var(--genislik); margin: 0 auto; }
+  .ust-satir { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; max-width: var(--genislik); margin: 0 auto; }
   .ara {
-    flex: 1 1 80px; min-width: 70px;
-    height: 34px; padding: 0 10px;
+    flex: 1 1 100%; min-width: 120px;
+    height: 36px; padding: 0 12px;
     border: 1px solid var(--cizgi); border-radius: 8px;
     font-size: 16px; background: #fff; color: var(--yazi);
   }
-  .sag-grup { display: flex; align-items: center; gap: 6px; flex: none; }
-  .sayi { flex: none; text-align: center; font-size: 9px; line-height: 1.1; color: var(--soluk); font-weight: 600; }
-  .sayi b { display: block; font-size: 14px; color: var(--yazi); font-weight: 800; }
+  .sag-grup { display: flex; align-items: center; gap: 8px; flex: none; margin-left: auto; }
+  .sayi { flex: none; text-align: center; font-size: 10px; line-height: 1.15; color: var(--soluk); font-weight: 600; }
+  .sayi b { display: block; font-size: 16px; color: var(--yazi); font-weight: 800; }
   .stopaj {
     display: flex; flex-direction: column; align-items: center; gap: 1px; flex: none;
-    font-size: 8.5px; font-weight: 700; color: var(--soluk); line-height: 1;
+    font-size: 9.5px; font-weight: 700; color: var(--soluk); line-height: 1;
   }
   .stopaj input {
-    width: 40px; height: 26px; padding: 0 2px; text-align: center;
+    width: 46px; height: 26px; padding: 0 2px; text-align: center;
     border: 1px solid var(--girdi-kenar); background: var(--girdi); color: var(--yazi);
     border-radius: 6px; font-size: 16px; font-weight: 700;
   }
   .stopaj input:focus { outline: 2px solid var(--yazi); }
   .kur {
-    flex: none; font-size: 10px; line-height: 1.2; color: var(--yazi);
+    flex: none; font-size: 10.5px; line-height: 1.3; color: var(--yazi);
     font-variant-numeric: tabular-nums; white-space: nowrap;
   }
   .kur b { font-weight: 700; }
   .kur .soluk { color: var(--soluk); }
-  .kur .k-tam, .kur .ek { display: none; }
+  .kur .ek { display: none; }
   .temizle {
-    height: 32px; padding: 0 7px; border-radius: 8px; flex: none;
+    height: 30px; padding: 0 10px; border-radius: 8px; flex: none;
     border: 1px solid var(--cizgi); background: #fff; color: #9b2c2c;
-    font-size: 11.5px; font-weight: 600; white-space: nowrap;
+    font-size: 13px; font-weight: 600; white-space: nowrap;
   }
 
-  .sekmeler { display: flex; margin: 5px auto 0; gap: 5px; max-width: var(--genislik); }
+  .sekmeler { display: flex; margin: 5px auto 0; gap: 6px; max-width: var(--genislik); }
   .sekme {
-    flex: 1; height: 32px; border: 0; border-radius: 8px; padding: 0 4px;
-    font-size: 12.5px; font-weight: 700; color: #fff; opacity: .55; cursor: pointer;
+    flex: 1; height: 34px; border: 0; border-radius: 8px;
+    font-size: 13px; font-weight: 700; color: #fff; opacity: .55; cursor: pointer;
   }
-  .sekme .u { display: none; }
   .sekme.sol { background: var(--yesil); }
   .sekme.sag { background: var(--mavi); }
-  .sekme.port { background: var(--altin); }
   .sekme.aktif { opacity: 1; box-shadow: 0 0 0 2px var(--yazi) inset; }
-  .durum { max-width: var(--genislik); margin: 3px auto 0; font-size: 11px; line-height: 1.3; color: var(--soluk); }
-  .durum:empty { display: none; }
-  .durum.uyari { color: #9b2c2c; font-weight: 700; }
 
   #yukleniyor, #hata {
     margin: 24px 12px; padding: 16px; text-align: center;
@@ -98,67 +91,50 @@
     font-size: 14px; font-weight: 700; cursor: pointer;
   }
 
-  /* ---------- Tablolar ---------- */
-  #alan { display: none; padding: 6px 6px; max-width: var(--genislik); margin: 0 auto; }
+  /* ---------- Tablo (masaüstü) ---------- */
+  #alan { display: none; padding: 10px; max-width: var(--genislik); margin: 0 auto; }
   #alan.goster { display: block; }
   .panel { display: none; background: var(--kart); border: 1px solid var(--cizgi); border-radius: 8px; overflow: clip; }
   .panel.aktif { display: block; }
 
-  table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 15px; text-align: center; }
-  caption { padding: 6px; color: #fff; font-size: 13px; font-weight: 700; letter-spacing: .02em; }
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 16px; text-align: center; }
+  caption { padding: 7px 6px; color: #fff; font-size: 14px; font-weight: 700; letter-spacing: .02em; }
   .p-sol caption { background: var(--yesil); }
   .p-sag caption { background: var(--mavi); }
-  .p-port caption { background: var(--altin); }
-  thead th {
-    color: #fff; font-size: 9.5px; padding: 4px 1px; line-height: 1.15;
-    border: 1px solid rgba(255,255,255,.25); position: sticky; top: var(--ust-yuk, 80px); z-index: 5;
-  }
+  thead th { color: #fff; font-size: 12px; padding: 5px 2px; border: 1px solid rgba(255,255,255,.25); position: sticky; top: var(--ust-yuk, 96px); z-index: 5; }
   .p-sol thead th { background: var(--yesil-koyu); }
   .p-sag thead th { background: var(--mavi-koyu); }
-  .p-port thead th { background: var(--altin-koyu); }
-  tbody td {
-    padding: 2px 2px; border-bottom: 1px solid var(--cizgi); font-size: 12.5px; font-weight: 600;
-    font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.15;
-  }
+  tbody td { padding: 3px 3px; line-height: 1.1; border-bottom: 1px solid var(--cizgi); font-size: 16px; font-weight: 600; font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   tbody tr:nth-child(even) { background: #f8faf9; }
   tbody tr.dolu { background: #e9f4ec; }
   .p-sag tbody tr.dolu { background: #e8eff8; }
-  td.hisse { font-weight: 800; font-size: 13.5px; text-align: left; padding-left: 5px; }
-  td.hisse small.mt { display: block; font-size: 9.5px; font-weight: 500; color: var(--soluk); }
-  td[data-c=tarih] { color: var(--soluk); }
-  td small.brut { display: block; font-size: 9.5px; color: var(--soluk); font-weight: 400; text-decoration: line-through; }
-  td small.esd { display: block; font-size: 10px; font-weight: 800; color: #946c0c; }
-  .tl { display: none; }
+  td.hisse { font-weight: 800; font-size: 18px; text-align: left; padding-left: 8px; line-height: 1.05; }
+  td.hisse small { display: block; font-weight: 500; font-size: 12px; color: var(--soluk); margin-top: 0; }
+  td small.brut { display: block; font-size: 11px; color: var(--soluk); font-weight: 400; margin-top: 0; line-height: 1; text-decoration: line-through; }
+  td::before { content: none; }
 
-  /* Mobil: tarih sütunu gizli (tarih hisse adının altında), TL eki yok */
-  .t7 th:nth-child(4), .t7 td:nth-child(4) { display: none; }
-  .t7 th:nth-child(1), .t7 td:nth-child(1) { width: 17%; }
-  .t7 th:nth-child(2), .t7 td:nth-child(2) { width: 14%; }
-  .t7 th:nth-child(3), .t7 td:nth-child(3) { width: 15%; }
-  .t7 th:nth-child(5), .t7 td:nth-child(5) { width: 17%; }
-  .t7 th:nth-child(6), .t7 td:nth-child(6) { width: 19%; }
-  .t7 th:nth-child(7), .t7 td:nth-child(7) { width: 18%; }
-  .t4 th:nth-child(1), .t4 td:nth-child(1) { width: 20%; }
-  .t4 th:nth-child(2), .t4 td:nth-child(2) { width: 18%; }
-  .t4 th:nth-child(3), .t4 td:nth-child(3) { width: 31%; }
-  .t4 th:nth-child(4), .t4 td:nth-child(4) { width: 31%; }
-  caption { display: none; }
+  @media (min-width: 641px) {
+    th:nth-child(1), td:nth-child(1) { width: 19%; }
+    th:nth-child(2), td:nth-child(2) { width: 13%; }
+    th:nth-child(3), td:nth-child(3) { width: 15%; }
+    th:nth-child(4), td:nth-child(4) { width: 15%; }
+    th:nth-child(5), td:nth-child(5) { width: 18%; }
+    th:nth-child(6), td:nth-child(6) { width: 20%; }
+  }
 
   input.girdi {
-    width: 100%; height: 30px; padding: 0 1px;
-    text-align: center; font-size: 16px; font-weight: 800;
+    width: 100%; height: 34px; padding: 0 4px;
+    text-align: center; font-size: 18px; font-weight: 800;
     border: 1px solid var(--girdi-kenar); background: var(--girdi); color: var(--yazi);
     border-radius: 6px;
   }
   input.girdi:focus { outline: 2px solid var(--yazi); outline-offset: 0; }
-  input.girdi { scroll-margin-top: calc(var(--ust-yuk, 80px) + 40px); scroll-margin-bottom: 96px; }
-  button, input, .sekme { touch-action: manipulation; }
-  .bos-sonuc { padding: 18px; color: var(--soluk); font-size: 14px; display: none; text-align: center; }
+  .bos-sonuc { padding: 18px; color: var(--soluk); font-size: 15px; display: none; }
 
   /* ---------- Alt toplam çubuğu ---------- */
   .toplam {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
-    padding: 4px 8px calc(4px + env(safe-area-inset-bottom, 0px));
+    padding: 5px 8px calc(5px + env(safe-area-inset-bottom, 0px));
     background: var(--yazi); color: #fff;
     font-variant-numeric: tabular-nums; line-height: 1.1;
   }
@@ -167,56 +143,63 @@
   .toplam .blok.aktif { display: flex; }
   .toplam .kalem { text-align: center; flex: 1; min-width: 0; }
   .toplam .kalem span { display: block; font-size: 10px; opacity: .7; }
-  .toplam .kalem b { display: block; font-size: 14.5px; white-space: nowrap; }
-  .toplam .kalem small { display: block; font-size: 10.5px; font-weight: 800; color: #f0cc5a; white-space: nowrap; min-height: 12px; }
+  .toplam .kalem b { display: block; font-size: 15px; white-space: nowrap; }
+  .toplam .kalem small { display: block; font-size: 11px; font-weight: 800; color: #f0cc5a; white-space: nowrap; min-height: 12px; }
+  .toplam .etiket { display: none; }
 
-  /* ---------- Geniş ekran ---------- */
-  @media (min-width: 641px) {
-    .ust { padding: calc(6px + env(safe-area-inset-top, 0px)) 10px 6px; }
-    .ust-satir { gap: 8px; }
-    .ara { flex: 1 1 240px; height: 36px; }
-    .sag-grup { gap: 8px; }
-    .stopaj { font-size: 9.5px; }
-    .stopaj input { width: 44px; height: 28px; }
-    .kur { font-size: 11.5px; }
-    .kur .k-tam { display: inline; }
-    .kur .k-kisa { display: none; }
-    .temizle { height: 34px; padding: 0 10px; font-size: 13px; }
-    .sayi { font-size: 10px; }
-    .sayi b { font-size: 15px; }
-    .sekme { font-size: 13px; }
-    .sekme .u { display: inline; }
-    .sekme .k { display: none; }
-    #alan { padding: 8px 10px; }
-    caption { display: table-caption; }
-    table { font-size: 15px; }
-    thead th { font-size: 11.5px; padding: 5px 2px; }
-    tbody td { font-size: 15px; padding: 3px 3px; }
-    td.hisse { font-size: 16px; padding-left: 6px; }
-    td.hisse small.mt { display: none; }
-    td[data-c=tarih] { font-size: 13px; }
-    td small.brut { font-size: 10.5px; }
-    .tl { display: inline; }
-    .t7 th:nth-child(4), .t7 td:nth-child(4) { display: table-cell; }
-    .t7 th:nth-child(1), .t7 td:nth-child(1) { width: 12%; }
-    .t7 th:nth-child(2), .t7 td:nth-child(2) { width: 12%; }
-    .t7 th:nth-child(3), .t7 td:nth-child(3) { width: 14%; }
-    .t7 th:nth-child(4), .t7 td:nth-child(4) { width: 15%; }
-    .t7 th:nth-child(5), .t7 td:nth-child(5) { width: 14%; }
-    .t7 th:nth-child(6), .t7 td:nth-child(6) { width: 18%; }
-    .t7 th:nth-child(7), .t7 td:nth-child(7) { width: 15%; }
-    input.girdi { height: 32px; font-size: 17px; }
-    .toplam .kalem b { font-size: 15px; }
-  }
   @media (min-width: 900px) {
+    .ust-satir { flex-wrap: nowrap; }
     .ara { flex: 1 1 300px; }
     .kur { font-size: 12.5px; }
     .kur .ek { display: inline; }
+    .toplam .etiket { display: block; font-size: 10px; font-weight: 700; align-self: center; flex: .7; text-align: left; }
+    .toplam .sol-r { color: #7fd69f; }
+    .toplam .sag-r { color: #8db8f2; }
+  }
+
+  /* ---------- Mobil: her hisse bir kart ---------- */
+  @media (max-width: 640px) {
+    .ust { padding: calc(4px + env(safe-area-inset-top, 0px)) 8px 4px; }
+    .ara { height: 36px; font-size: 16px; }
+    .sekmeler { margin-top: 5px; }
+    .sekme { height: 34px; font-size: 13px; }
+    .temizle { height: 30px; }
+
+    #alan { padding: 8px; }
+    .panel { background: transparent; border: 0; overflow: visible; }
+    caption { display: block; border-radius: 8px; margin-bottom: 6px; padding: 7px 6px; }
+    table, tbody { display: block; width: 100%; }
+    thead { display: none; }
+
+    tbody tr {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3px 8px; align-items: end;
+      margin: 0 0 5px; padding: 6px 10px;
+      background: #fff; border: 1px solid var(--cizgi); border-radius: 12px;
+    }
+    tbody tr:nth-child(even) { background: #fff; }
+    tbody tr.dolu { background: #e9f4ec; border-color: #b7d9c2; }
+    .p-sag tbody tr.dolu { background: #e8eff8; border-color: #b9cde8; }
+
+    tbody td {
+      display: block; width: auto !important; padding: 0; border: 0;
+      text-align: left; font-size: 16px; font-weight: 700; overflow: visible;
+    }
+    tbody td::before {
+      content: attr(data-l); display: block; margin-bottom: 0;
+      font-size: 9.5px; font-weight: 700; letter-spacing: .03em; color: var(--soluk);
+    }
+    td.hisse { font-size: 20px; padding-left: 0; }
+    td.hisse::before { content: none; }
+    td.hisse small { font-size: 12px; }
+    td small.brut { font-size: 11px; }
+    td.c-in { grid-column: 1; grid-row: 2; }
+    input.girdi { height: 38px; font-size: 20px; }
+
+    .toplam .kalem b { font-size: 14.5px; }
   }
   @media (max-width: 360px) {
-    tbody td { font-size: 12px; }
-    td.hisse { font-size: 13px; }
-    thead th { font-size: 9px; }
+    tbody td { font-size: 15px; }
+    td.hisse { font-size: 18px; }
     .toplam .kalem b { font-size: 13.5px; }
   }
 </style>
@@ -225,23 +208,21 @@
 
 <div class="ust" id="ust">
   <div class="ust-satir">
-    <input class="ara" id="ara" type="search" placeholder="Hisse ara…" autocomplete="off" autocapitalize="characters">
+    <input class="ara" id="ara" type="search" placeholder="Hisse ara (örn. AKSA)" autocomplete="off" autocapitalize="characters">
     <div class="sag-grup">
       <label class="stopaj" title="Temettüden kesilen stopaj oranı (kodunda GY geçen hisselerde uygulanmaz)">
         <span>Stopaj %</span>
         <input id="stopaj" type="text" inputmode="decimal" autocomplete="off" value="15">
       </label>
-      <div class="kur" id="kur">Kurlar…</div>
+      <div class="kur" id="kur">Kurlar yükleniyor…</div>
       <div class="sayi" id="sayi"><b>0</b>Hisse</div>
       <button class="temizle" id="temizle" type="button">Temizle</button>
     </div>
   </div>
   <div class="sekmeler" id="sekmeler">
-    <button class="sekme sol aktif" data-hedef="sol" type="button"><span class="u">AYLIK TEMETTÜYE GÖRE</span><span class="k">AYLIK</span></button>
-    <button class="sekme sag" data-hedef="sag" type="button"><span class="u">LOT SAYISINA GÖRE</span><span class="k">LOT</span></button>
-    <button class="sekme port" data-hedef="port" type="button"><span class="u">PORTFÖY</span><span class="k">PORTFÖY</span></button>
+    <button class="sekme sol aktif" data-hedef="sol" type="button">AYLIK TEMETTÜYE GÖRE</button>
+    <button class="sekme sag" data-hedef="sag" type="button">LOT SAYISINA GÖRE</button>
   </div>
-  <div class="durum" id="durum"></div>
 </div>
 
 <div id="yukleniyor">Veriler yükleniyor…</div>
@@ -249,10 +230,10 @@
 
 <div id="alan">
   <div class="panel p-sol aktif" id="panel-sol">
-    <table class="t7">
+    <table>
       <caption>AYLIK TEMETTÜ GİRİLECEK</caption>
       <thead>
-        <tr><th>HİSSE</th><th>FİYAT</th><th>TEMETTÜ</th><th>SON TEMETTÜ TARİHİ</th><th>LOT</th><th>MALİYET</th><th>AYLIK TEMETTÜ</th></tr>
+        <tr><th>HİSSE</th><th>FİYAT</th><th>TEMETTÜ</th><th>LOT</th><th>MALİYET</th><th>AYLIK TEMETTÜ</th></tr>
       </thead>
       <tbody id="sol-body"></tbody>
     </table>
@@ -260,25 +241,14 @@
   </div>
 
   <div class="panel p-sag" id="panel-sag">
-    <table class="t7">
+    <table>
       <caption>LOT GİRİLECEK</caption>
       <thead>
-        <tr><th>HİSSE</th><th>FİYAT</th><th>TEMETTÜ</th><th>SON TEMETTÜ TARİHİ</th><th>LOT</th><th>MALİYET</th><th>AYLIK TEMETTÜ</th></tr>
+        <tr><th>HİSSE</th><th>FİYAT</th><th>TEMETTÜ</th><th>LOT</th><th>MALİYET</th><th>AYLIK TEMETTÜ</th></tr>
       </thead>
       <tbody id="sag-body"></tbody>
     </table>
     <div class="bos-sonuc" id="sag-bos">Aramaya uyan hisse yok.</div>
-  </div>
-
-  <div class="panel p-port" id="panel-port">
-    <table class="t4">
-      <caption>PORTFÖY (iki sekmedeki girişlerin toplamı)</caption>
-      <thead>
-        <tr><th>HİSSE</th><th>LOT</th><th>MALİYET</th><th>AYLIK TEMETTÜ</th></tr>
-      </thead>
-      <tbody id="port-body"></tbody>
-    </table>
-    <div class="bos-sonuc" id="port-bos">Henüz giriş yok. Diğer sekmelerde aylık temettü veya lot girin.</div>
   </div>
 </div>
 
@@ -294,11 +264,6 @@
       <div class="kalem"><span>Maliyet</span><b id="sag-toplam-maliyet">0 TL</b><small id="sag-alt-maliyet"></small></div>
       <div class="kalem"><span>Aylık temettü</span><b id="sag-toplam-aylik">0 TL</b><small id="sag-alt-aylik"></small></div>
     </div>
-    <div class="blok" id="blok-port">
-      <div class="kalem"><span>Lot</span><b id="port-toplam-lot">-</b></div>
-      <div class="kalem"><span>Maliyet</span><b id="port-toplam-maliyet">0 TL</b><small id="port-alt-maliyet"></small></div>
-      <div class="kalem"><span>Aylık temettü</span><b id="port-toplam-aylik">0 TL</b><small id="port-alt-aylik"></small></div>
-    </div>
   </div>
 </div>
 
@@ -312,10 +277,10 @@
 
   // Hisse LİSTESİ ve filtreler: "TEMETTÜ ANALİZ" uygulamasının kullandığı kaynak (aynı adres)
   var GAS_URL = "https://script.google.com/macros/s/AKfycbxo9u41oj1aXxgkuE7gTnHdeG_mzT41o3WmaYhhqNNUJi_NTDzLOmSBSnHAhfsvhOiK/exec";
-  var GAS_ANAHTAR = "temettuhesap_gas_v1";
+  var GAS_ANAHTAR = "temettuhesap_gas_v2";
 
   // Diğer uygulamadaki 3 filtre (sabit):
-  var FILTRE_DONEM = 10;         // Dönem: Son 10 Yıl
+  var FILTRE_DONEM = 0;          // Dönem: Tümü  (0 = Tümü, 10 = Son 10 Yıl, 5 = Son 5 Yıl ...)
   var FILTRE_YOGUNLUK = 0.5;     // Yoğunluk >= 0,50
   var FILTRE_VERIM = 3;          // Ortalama verim >= %3
 
@@ -358,7 +323,6 @@
   function fmtFiyat(n) { return fmt(n, 4); }
   function fmtLot(n)   { return fmt(Math.round(n), 0); }
   function fmtTL(n)    { return fmt(Math.round(n), 0) + " TL"; }
-  function fmtTLh(n)   { return fmt(Math.round(n), 0) + "<span class='tl'> TL</span>"; }
 
   function stopajOrani() {
     var n = parseFloat(String(giris.stopaj === undefined ? "15" : giris.stopaj).replace(",", "."));
@@ -460,52 +424,18 @@
     });
     var k = $("kur");
     if (!kurHazir()) {
-      k.textContent = "Kur yok";
+      k.textContent = "Kur alınamadı";
       k.title = "Dolar ve altın karşılığı gösterilemiyor";
     } else {
       var d = new Date(kur.zaman);
       var saat = d.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
-      var eski = kur.onbellek ? " <span class='soluk'>(eski)</span>" : "";
-      k.innerHTML =
-        "<span class='k-tam'>1 $ = <b>" + fmt(kur.usdTry, 2) + " TL</b><br>" +
+      k.innerHTML = "1 $ = <b>" + fmt(kur.usdTry, 2) + " TL</b><br>" +
         "1 gr altın = <b>" + fmt(gramAltinTL(), 2) + " TL</b>" +
-        "<span class='soluk ek'> (" + fmt(gramAltinTL() / kur.usdTry, 2) + " $) · " + saat + "</span>" + eski + "</span>" +
-        "<span class='k-kisa'>$ <b>" + fmt(kur.usdTry, 2) + "</b><br>gr <b>" + fmt(gramAltinTL(), 0) + "</b>" + eski + "</span>";
-      k.title = "1 $ = " + fmt(kur.usdTry, 2) + " TL · 1 gr altın = " + fmt(gramAltinTL(), 2) + " TL (" +
-        fmt(gramAltinTL() / kur.usdTry, 2) + " $) · saat " + saat + (kur.onbellek ? " — son kayıtlı kur" : "");
+        "<span class='soluk ek'> (" + fmt(gramAltinTL() / kur.usdTry, 2) + " $) · " + saat + "</span>" +
+        (kur.onbellek ? " <span class='soluk'>(eski)</span>" : "");
+      k.title = "Kur saati: " + saat + (kur.onbellek ? " — son kayıtlı kur kullanılıyor" : "");
     }
-    portfoyYaz();
     ustYukseklik();
-  }
-
-  // PORTFÖY: iki sekmedeki girişlerin toplamı (aylık hedeften hesaplanan lot + elle girilen lot)
-  var aramaQ = "";
-  function portfoyYaz() {
-    if (!$("port-body")) return;
-    var html = [], T = { lot: 0, maliyet: 0, aylik: 0 }, gorunen = 0;
-    liste.forEach(function (k) {
-      var d = veri[k];
-      var nt = net(d);
-      var solAylik = sayi(giris.sol[k]);
-      var lot = ((solAylik > 0 && nt > 0) ? (solAylik * 12) / nt : 0) + sayi(giris.sag[k]);
-      if (!(lot > 0)) return;
-      var maliyet = lot * d.fiyat;
-      var aylik = (lot * nt) / 12;
-      T.lot += lot; T.maliyet += maliyet; T.aylik += aylik;
-      if (aramaQ && k.indexOf(aramaQ) === -1) return;
-      gorunen++;
-      html.push("<tr><td class='hisse'>" + k + "</td><td>" + fmtLot(lot) + "</td>" +
-        "<td>" + fmtTL(maliyet) + "<small class='esd'>" + esdegerMetin(maliyet) + "</small></td>" +
-        "<td>" + fmtTL(aylik) + "<small class='esd'>" + esdegerMetin(aylik) + "</small></td></tr>");
-    });
-    $("port-body").innerHTML = html.join("");
-    $("port-bos").style.display = gorunen === 0 ? "block" : "none";
-    $("port-bos").textContent = T.lot > 0 ? "Aramaya uyan hisse yok." : "Henüz giriş yok. Diğer sekmelerde aylık temettü veya lot girin.";
-    $("port-toplam-lot").textContent = T.lot > 0 ? fmtLot(T.lot) : "-";
-    $("port-toplam-maliyet").textContent = fmtTL(T.maliyet);
-    $("port-toplam-aylik").textContent = fmtTL(T.aylik);
-    $("port-alt-maliyet").textContent = esdegerMetin(T.maliyet);
-    $("port-alt-aylik").textContent = esdegerMetin(T.aylik);
   }
 
   function depoOku() {
@@ -612,7 +542,7 @@
       if (!isNaN(yn)) yillar.push(yn);
     }
     var guncelYil = yillar.length > 0 ? Math.max.apply(null, yillar) : new Date().getFullYear();
-    var minYil = guncelYil - (FILTRE_DONEM - 1);
+    var minYil = FILTRE_DONEM > 0 ? guncelYil - (FILTRE_DONEM - 1) : 1990;
 
     var goruldu = {};
     var tumu = [];
@@ -634,7 +564,14 @@
         }
       }
       var ortVerim = odemeYil > 0 ? (toplamVerim / odemeYil) : 0;
-      var yogunluk = odemeYil / FILTRE_DONEM;
+      var yogunluk;
+      if (FILTRE_DONEM > 0) {
+        yogunluk = odemeYil / FILTRE_DONEM;
+      } else {
+        // Dönem: Tümü -> Temettü Analiz'deki YOĞUNLUK sütununun değeri
+        var hamYog = anaTablo[i][idxYog];
+        yogunluk = parseFloat(hamYog ? hamYog.toString().replace(",", ".") : 0) || 0;
+      }
 
       // Yedek: en son temettü verilen yılın hisse başı toplamı
       var sonYil = 0, sonToplam = 0;
@@ -703,7 +640,7 @@
     // Alfabetik sıralama (A → Z)
     liste.sort(function (a, b) { return a < b ? -1 : (a > b ? 1 : 0); });
 
-    veriKaynakNotu = "Filtre: Yoğunluk ≥ 0,50 · Son 10 Yıl · Ort. verim ≥ %3 (Temettü Analiz kaynağı, " +
+    veriKaynakNotu = "Filtre: Yoğunluk ≥ " + FILTRE_YOGUNLUK + " · Dönem: " + (FILTRE_DONEM > 0 ? "Son " + FILTRE_DONEM + " Yıl" : "Tümü") + " · Ort. verim ≥ %" + FILTRE_VERIM + " (Temettü Analiz kaynağı, " +
       gas.toplamHisse + " hisse içinden)" +
       (gas.onbellek ? " — son kayıtlı liste kullanılıyor" : "");
   }
@@ -775,20 +712,10 @@
     for (var i = 0; i < hucreler.length; i++) hucreler[i].textContent = fmtFiyat(fiyat);
   }
 
-  // Yalnızca sorun varsa (fiyatı alınamayan hisse) uyarı gösterir; normalde hiçbir metin yazmaz
+  // Ekranda metin gösterilmez; fiyatı alınamayan hisseler yalnızca "Hisse" sayacının ipucunda yer alır
   function durumYaz() {
-    var el = $("durum");
-    if (!el) return;
-    var eksik = [];
-    liste.forEach(function (k) { if (!(veri[k].fiyat > 0)) eksik.push(k); });
-    if (eksik.length > 0) {
-      el.className = "durum uyari";
-      el.textContent = "⚠ " + eksik.length + " hissenin fiyatı alınamadı: " + eksik.join(", ");
-    } else {
-      el.className = "durum";
-      el.textContent = "";
-    }
-    ustYukseklik();
+    var eksik = liste.filter(function (k) { return !(veri[k].fiyat > 0); });
+    $("sayi").title = veriKaynakNotu + (eksik.length > 0 ? " — fiyatı alınamayan: " + eksik.join(", ") : "");
   }
 
   function canliFiyatlariYukle() {
@@ -858,19 +785,19 @@
     var sol = [], sag = [];
     liste.forEach(function (k) {
       var d = veri[k];
+      var tarihHtml = d.tarih ? "<small>" + d.tarih + "</small>" : "";
       var fiyatMetni = d.fiyat > 0 ? fmtFiyat(d.fiyat) : "-";
-      var ortak = "<td class='hisse'>" + k + (d.tarih ? "<small class='mt'>" + d.tarih + "</small>" : "") + "</td>" +
+      var ortak = "<td class='hisse'>" + k + tarihHtml + "</td>" +
                   "<td data-c='fiyat' data-l='FİYAT'>" + fiyatMetni + "</td>" +
-                  "<td data-c='temettu' data-l='TEMETTÜ'>" + temettuHucre(d) + "</td>" +
-                  "<td data-c='tarih' data-l='SON TEMETTÜ'>" + (d.tarih || "-") + "</td>";
+                  "<td data-c='temettu' data-l='TEMETTÜ'>" + temettuHucre(d) + "</td>";
 
       sol.push("<tr data-kod='" + k + "'>" + ortak +
         "<td data-c='lot' data-l='LOT'>0</td>" +
         "<td data-c='maliyet' data-l='MALİYET'>0 TL</td>" +
-        "<td class='c-in' data-l='AYLIK TEMETTÜ (TL)'><input class='girdi' inputmode='decimal' autocomplete='off' placeholder='0' enterkeyhint='next' data-t='sol' data-kod='" + k + "' value='" + (giris.sol[k] || "") + "'></td></tr>");
+        "<td class='c-in' data-l='AYLIK TEMETTÜ (TL)'><input class='girdi' inputmode='decimal' autocomplete='off' placeholder='0' data-t='sol' data-kod='" + k + "' value='" + (giris.sol[k] || "") + "'></td></tr>");
 
       sag.push("<tr data-kod='" + k + "'>" + ortak +
-        "<td class='c-in' data-l='LOT'><input class='girdi' inputmode='decimal' autocomplete='off' placeholder='0' enterkeyhint='next' data-t='sag' data-kod='" + k + "' value='" + (giris.sag[k] || "") + "'></td>" +
+        "<td class='c-in' data-l='LOT'><input class='girdi' inputmode='decimal' autocomplete='off' placeholder='0' data-t='sag' data-kod='" + k + "' value='" + (giris.sag[k] || "") + "'></td>" +
         "<td data-c='maliyet' data-l='MALİYET'>0 TL</td>" +
         "<td data-c='aylik' data-l='AYLIK TEMETTÜ'>0 TL</td></tr>");
     });
@@ -889,7 +816,7 @@
       maliyet = lot * d.fiyat;
     }
     tr.querySelector("[data-c=lot]").textContent = fmtLot(lot);
-    tr.querySelector("[data-c=maliyet]").innerHTML = fmtTLh(maliyet);
+    tr.querySelector("[data-c=maliyet]").textContent = fmtTL(maliyet);
     tr.className = aylik > 0 ? "dolu" : "";
     return { lot: lot, maliyet: maliyet, aylik: aylik };
   }
@@ -899,8 +826,8 @@
     var lot = sayi(giris.sag[kod]);
     var maliyet = lot * d.fiyat;
     var aylik = (lot * net(d)) / 12;
-    tr.querySelector("[data-c=maliyet]").innerHTML = fmtTLh(maliyet);
-    tr.querySelector("[data-c=aylik]").innerHTML = fmtTLh(aylik);
+    tr.querySelector("[data-c=maliyet]").textContent = fmtTL(maliyet);
+    tr.querySelector("[data-c=aylik]").textContent = fmtTL(aylik);
     tr.className = lot > 0 ? "dolu" : "";
     return { lot: lot, maliyet: maliyet, aylik: aylik };
   }
@@ -959,25 +886,6 @@
   $("sol-body").addEventListener("focusin", girdiOdak);
   $("sag-body").addEventListener("focusin", girdiOdak);
 
-  // Enter / "İleri" tuşu: bir sonraki görünen kutuya geç (mobilde hızlı giriş)
-  function girdiEnter(e) {
-    if (e.key !== "Enter") return;
-    var el = e.target;
-    if (!el.classList || !el.classList.contains("girdi")) return;
-    e.preventDefault();
-    var tr = el.closest("tr");
-    var sonraki = tr ? tr.nextElementSibling : null;
-    while (sonraki && sonraki.style.display === "none") sonraki = sonraki.nextElementSibling;
-    if (sonraki) {
-      var kutu = sonraki.querySelector("input.girdi");
-      if (kutu) kutu.focus();
-    } else {
-      el.blur();
-    }
-  }
-  $("sol-body").addEventListener("keydown", girdiEnter);
-  $("sag-body").addEventListener("keydown", girdiEnter);
-
   $("stopaj").addEventListener("input", function () {
     var t = this.value.replace(/[^0-9.,]/g, "");
     if (t !== this.value) this.value = t;
@@ -996,7 +904,6 @@
 
   $("ara").addEventListener("input", function () {
     var q = this.value.trim().toLocaleUpperCase("tr");
-    aramaQ = q;
     ["sol", "sag"].forEach(function (t) {
       var satirlar = $(t + "-body").children, gorunen = 0;
       for (var i = 0; i < satirlar.length; i++) {
@@ -1006,19 +913,13 @@
       }
       $(t + "-bos").style.display = gorunen === 0 ? "block" : "none";
     });
-    portfoyYaz();
   });
 
   $("temizle").addEventListener("click", function () {
-    var hedefler, mesaj;
-    if (aktifSekme === "port") {
-      hedefler = ["sol", "sag"];
-      mesaj = "Her iki sekmedeki tüm girişler silinsin mi? (Portföy boşalır)";
-    } else {
-      hedefler = [aktifSekme];
-      mesaj = (aktifSekme === "sol" ? "Aylık temettü" : "Lot") + " sütunundaki tüm değerler silinsin mi?";
-    }
+    var ad = aktifSekme === "sol" ? "Aylık temettü" : "Lot";
+    var mesaj = ad + " sütunundaki tüm değerler silinsin mi?";
     if (!window.confirm(mesaj)) return;
+    var hedefler = [aktifSekme];
     hedefler.forEach(function (t) {
       giris[t] = {};
       var inputs = $(t + "-body").querySelectorAll("input.girdi");
@@ -1030,10 +931,10 @@
 
   function sekmeAyarla(hedef) {
     aktifSekme = hedef;
-    ["sol", "sag", "port"].forEach(function (t) {
-      $("panel-" + t).classList.toggle("aktif", hedef === t);
-      $("blok-" + t).classList.toggle("aktif", hedef === t);
-    });
+    $("panel-sol").classList.toggle("aktif", hedef === "sol");
+    $("panel-sag").classList.toggle("aktif", hedef === "sag");
+    $("blok-sol").classList.toggle("aktif", hedef === "sol");
+    $("blok-sag").classList.toggle("aktif", hedef === "sag");
     var b = $("sekmeler").children;
     for (var i = 0; i < b.length; i++) {
       b[i].classList.toggle("aktif", b[i].getAttribute("data-hedef") === hedef);
@@ -1042,8 +943,8 @@
   }
 
   $("sekmeler").addEventListener("click", function (e) {
-    var btn = e.target.closest ? e.target.closest("[data-hedef]") : null;
-    if (btn) sekmeAyarla(btn.getAttribute("data-hedef"));
+    var h = e.target.getAttribute && e.target.getAttribute("data-hedef");
+    if (h) sekmeAyarla(h);
   });
 
   function ustYukseklik() {
