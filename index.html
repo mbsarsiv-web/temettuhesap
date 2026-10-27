@@ -63,8 +63,8 @@
     flex: none; font-size: 10px; line-height: 1.2; color: var(--yazi);
     font-variant-numeric: tabular-nums; white-space: nowrap;
   }
-  .kur b { font-weight: 800; }
-  .kur .soluk { color: var(--soluk); }
+  .kur b { font-weight: 900; }
+  .kur .soluk { color: var(--soluk); font-weight: 600; }
   .kur .k-tam, .kur .ek { display: none; }
   .temizle {
     height: 32px; padding: 0 7px; border-radius: 8px; flex: none;
@@ -130,7 +130,17 @@
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
   td.hisse small.sk:empty { display: none; }
-  td[data-c=tarih] { color: var(--soluk); }
+  
+  /* Seçili Sütunların Fontunu Kalınlaştırma */
+  td[data-c='fiyat'], 
+  td[data-c='temettu'], 
+  td[data-c='tarih'], 
+  td[data-c='lot'], 
+  td[data-c='maliyet'] { 
+    font-weight: 800; 
+  }
+  td[data-c='tarih'] { color: var(--yazi); }
+  
   td small.brut { display: block; font-size: 9.5px; color: var(--soluk); font-weight: 400; text-decoration: line-through; }
   td small.esd { display: block; font-size: 10px; font-weight: 800; color: #946c0c; }
   .tl { display: none; }
@@ -180,11 +190,24 @@
   .toplam .k-adet span, .toplam .k-lot span { font-size: 11px; opacity: .8; }
   .toplam .k-adet b, .toplam .k-lot b { font-size: 20px; font-weight: 800; line-height: 1.15; }
 
+  /* Portföy Sektör Analiz Bölümü */
+  .sektor-ozet {
+    width: 100%;
+    font-size: 11px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    text-align: left;
+    color: #d9dfdb;
+    line-height: 1.6;
+    display: none;
+  }
+
   /* ---------- Geniş ekran ---------- */
   @media (min-width: 641px) {
     .ust { padding: calc(6px + env(safe-area-inset-top, 0px)) 10px 6px; }
     .ust-satir { gap: 8px; }
-    .ara { flex: 0 1 220px; height: 36px; }
+    .ara { flex: 1 1 350px; max-width: 450px; height: 36px; }
     .sag-grup { gap: 8px; }
     .stopaj { font-size: 9.5px; }
     .stopaj input { width: 44px; height: 28px; }
@@ -221,7 +244,7 @@
     .toplam .k-adet b, .toplam .k-lot b { font-size: 21px; }
   }
   @media (min-width: 900px) {
-    .ara { flex: 0 1 220px; }
+    .ara { flex: 1 1 400px; max-width: 600px; }
     .kur { font-size: 12.5px; }
     .kur .ek { display: inline; }
   }
@@ -240,7 +263,7 @@
   <div class="ust-satir">
     <input class="ara" id="ara" type="search" placeholder="Hisse / sektör…" autocomplete="off" autocapitalize="characters">
     <div class="sag-grup">
-      <label class="stopaj" title="Temettüden kesilen stopaj oranı (kodunda GY geçen hisselerde uygulanmaz)">
+      <label class="stopaj" title="Temettüden kesilen stopaj oranı (kodunda GY, sektöründe GYO/Gayrimenkul geçen hisselerde uygulanmaz)">
         <span>Stopaj %</span>
         <input id="stopaj" type="text" inputmode="decimal" autocomplete="off" value="15">
       </label>
@@ -309,39 +332,34 @@
       <div class="kalem"><span>Maliyet</span><b id="sag-toplam-maliyet">0 TL</b><small id="sag-alt-maliyet"></small></div>
       <div class="kalem"><span>Aylık temettü</span><b id="sag-toplam-aylik">0 TL</b><small id="sag-alt-aylik"></small></div>
     </div>
-    <div class="blok" id="blok-port">
-      <div class="kalem k-adet"><span>Hisse</span><b id="port-toplam-adet">0</b></div>
-      <div class="kalem k-lot"><span>Lot</span><b id="port-toplam-lot">-</b></div>
-      <div class="kalem"><span>Maliyet</span><b id="port-toplam-maliyet">0 TL</b><small id="port-alt-maliyet"></small></div>
-      <div class="kalem"><span>Aylık temettü</span><b id="port-toplam-aylik">0 TL</b><small id="port-alt-aylik"></small></div>
+    <div class="blok" id="blok-port" style="flex-wrap: wrap;">
+      <div style="display: flex; gap: 6px; justify-content: space-between; width: 100%;">
+        <div class="kalem k-adet"><span>Hisse</span><b id="port-toplam-adet">0</b></div>
+        <div class="kalem k-lot"><span>Lot</span><b id="port-toplam-lot">-</b></div>
+        <div class="kalem"><span>Maliyet</span><b id="port-toplam-maliyet">0 TL</b><small id="port-alt-maliyet"></small></div>
+        <div class="kalem"><span>Aylık temettü</span><b id="port-toplam-aylik">0 TL</b><small id="port-alt-aylik"></small></div>
+      </div>
+      <div class="sektor-ozet" id="port-sektor-ozet"></div>
     </div>
   </div>
 </div>
-
-
 
 <script>
 (function () {
   "use strict";
 
-  // Fiyat, hisse başı temettü ve sektör verisi (bot): temettu_veri.json
   var JSON_YEREL = "temettu_veri.json";
   var JSON_RAW   = "https://raw.githubusercontent.com/mbsarsiv-web/temettu-bot/main/temettu_veri.json";
 
-  // Hisse LİSTESİ ve filtreler: "TEMETTÜ ANALİZ" uygulamasının kullandığı kaynak (aynı adres)
   var GAS_URL = "https://script.google.com/macros/s/AKfycbxo9u41oj1aXxgkuE7gTnHdeG_mzT41o3WmaYhhqNNUJi_NTDzLOmSBSnHAhfsvhOiK/exec";
   var GAS_ANAHTAR = "temettuhesap_gas_v3";
 
-  // "TEMETTÜ ANALİZ" uygulamasındaki filtre seçimleri (aynen):
-  //   Yoğunluk: ≥ 0,50 (Orta) · Artış Trendi: Tümü · Dönem: Tümü · Ort. Verim: burada ≥ %2
-  var FILTRE_DONEM = 0;          // 0 = Dönem: Tümü  (10 = Son 10 Yıl, 5 = Son 5 Yıl ...)
-  var FILTRE_YOGUNLUK = 0.5;     // Yoğunluk >= 0,50
-  var FILTRE_VERIM = 2;          // Ortalama verim >= %2  (bu uygulamada serbestçe değiştirilebilir)
-  // Artış Trendi: Tümü (filtre yok)
+  var FILTRE_DONEM = 0;
+  var FILTRE_YOGUNLUK = 0.5;
+  var FILTRE_VERIM = 2;
 
   var DEPO_ANAHTAR = "temettuhesap_v2";
 
-  // Canlı fiyat ve sektör kaynakları (tarayıcıdan, botu beklemeden)
   var TV_URL = "https://scanner.tradingview.com/turkey/scan";
   var FIYAT_ANAHTAR = "temettuhesap_fiyat_v1";
   var SEKTOR_ANAHTAR = "temettuhesap_sektor_v1";
@@ -353,7 +371,6 @@
   var sektorOnbellek = {};
   var canliZaman = 0;
 
-  // TradingView sektör adları -> Türkçe
   var SEKTOR_TR = {
     "Commercial Services": "Ticari Hizmetler",
     "Communications": "İletişim",
@@ -376,7 +393,6 @@
     "Transportation": "Ulaşım",
     "Utilities": "Kamu Hizmetleri"
   };
-  // Daha ayrıntılı (alt sektör) karşılıkları bilinenler: varsa sektör yerine bunlar gösterilir
   var SANAYI_TR = {
     "Major Banks": "Bankacılık",
     "Regional Banks": "Bankacılık",
@@ -457,7 +473,6 @@
     return n;
   }
 
-  function stopajUygulanir(kod) { return String(kod).toUpperCase().indexOf("GY") === -1; }
   function net(d) { return d.temettu * (1 - (d.stopajsiz ? 0 : stopajOrani()) / 100); }
 
   function temettuHucre(d) {
@@ -466,7 +481,6 @@
     return fmtFiyat(net(d)) + brut;
   }
 
-  // ---------- Sektör ----------
   function sektorMetni(d) {
     if (!d) return "";
     if (d.sanayi && SANAYI_TR[d.sanayi]) return SANAYI_TR[d.sanayi];
@@ -574,11 +588,9 @@
       var saat = d.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
       var eski = kur.onbellek ? " <span class='soluk'>(eski)</span>" : "";
       k.innerHTML =
-        // Geniş ekran: "1 $ = 49,79 TL" / "1 GR Altın = 6.429,28 TL"
         "<span class='k-tam'><b>1 $</b> = <b>" + fmt(kur.usdTry, 2) + " TL</b><br>" +
         "<b>1 GR</b> Altın = <b>" + fmt(gramAltinTL(), 2) + " TL</b>" +
         "<span class='soluk ek'> (" + fmt(gramAltinTL() / kur.usdTry, 2) + " $) · " + saat + "</span>" + eski + "</span>" +
-        // Mobil (dar): "$: 49,79 TL" / "GR: 6.429 TL"
         "<span class='k-kisa'><b>$:</b> <b>" + fmt(kur.usdTry, 2) + " TL</b><br>" +
         "<b>GR:</b> <b>" + fmt(gramAltinTL(), 0) + " TL</b>" + eski + "</span>";
       k.title = "1 $ = " + fmt(kur.usdTry, 2) + " TL · 1 GR Altın = " + fmt(gramAltinTL(), 2) + " TL (" +
@@ -588,7 +600,6 @@
     ustYukseklik();
   }
 
-  // Arama: hisse kodu ya da (en az 3 harfle) sektör adı
   var aramaQ = "";
   function aramaEslesir(kod) {
     if (aramaQ === "") return true;
@@ -597,10 +608,11 @@
     return aramaQ.length >= 3 && !!d && !!d.skArama && d.skArama.indexOf(aramaQ) > -1;
   }
 
-  // PORTFÖY: iki sekmedeki girişlerin toplamı (aylık hedeften hesaplanan lot + elle girilen lot)
   function portfoyYaz() {
     if (!$("port-body")) return;
     var html = [], T = { lot: 0, maliyet: 0, aylik: 0, adet: 0 }, gorunen = 0;
+    var sektorDagilim = {}; // Sektör dağılım verilerini tutmak için
+
     liste.forEach(function (k) {
       var d = veri[k];
       var nt = net(d);
@@ -610,10 +622,14 @@
       var maliyet = lot * d.fiyat;
       var aylik = (lot * nt) / 12;
       T.lot += lot; T.maliyet += maliyet; T.aylik += aylik; T.adet++;
+      
+      var sAd = d.sanayi ? SANAYI_TR[d.sanayi] || d.sanayi : (SEKTOR_TR[d.sektor] || d.sektor || "Diğer");
+      sektorDagilim[sAd] = (sektorDagilim[sAd] || 0) + maliyet;
+
       if (!aramaEslesir(k)) return;
       gorunen++;
-      html.push("<tr><td class='hisse'>" + k + "</td><td>" + fmtLot(lot) + "</td>" +
-        "<td>" + fmtTL(maliyet) + "<small class='esd'>" + esdegerMetin(maliyet) + "</small></td>" +
+      html.push("<tr><td class='hisse'>" + k + "</td><td data-c='lot'>" + fmtLot(lot) + "</td>" +
+        "<td data-c='maliyet'>" + fmtTL(maliyet) + "<small class='esd'>" + esdegerMetin(maliyet) + "</small></td>" +
         "<td>" + fmtTL(aylik) + "<small class='esd'>" + esdegerMetin(aylik) + "</small></td></tr>");
     });
     $("port-body").innerHTML = html.join("");
@@ -625,6 +641,26 @@
     $("port-toplam-aylik").textContent = fmtTL(T.aylik);
     $("port-alt-maliyet").textContent = esdegerMetin(T.maliyet);
     $("port-alt-aylik").textContent = esdegerMetin(T.aylik);
+
+    // Sektör Analiz Çıktısını Oluşturma
+    var sArr = [];
+    for (var key in sektorDagilim) {
+      if (sektorDagilim[key] > 0) sArr.push({ s: key, v: sektorDagilim[key] });
+    }
+    sArr.sort(function(a, b) { return b.v - a.v; });
+    var sHTML = sArr.map(function(x) {
+      var yuzde = T.maliyet > 0 ? ((x.v / T.maliyet) * 100).toFixed(1) : 0;
+      return "<span style='white-space:nowrap'><b>" + x.s + ":</b> " + fmtTL(x.v) + " <span style='opacity:.7'>(%" + yuzde + ")</span></span>";
+    }).join(" &nbsp;|&nbsp; ");
+
+    var ozetDiv = $("port-sektor-ozet");
+    if (sArr.length > 0) {
+      ozetDiv.style.display = "block";
+      ozetDiv.innerHTML = sHTML;
+    } else {
+      ozetDiv.style.display = "none";
+      ozetDiv.innerHTML = "";
+    }
   }
 
   function depoOku() {
@@ -654,9 +690,6 @@
     });
   }
 
-  // ------------------------------------------------------------------
-  // "TEMETTÜ ANALİZ" uygulamasındaki hesabın birebir kopyası
-  // ------------------------------------------------------------------
   function verimSayisiCoz(ham) {
     if (ham === undefined || ham === null || ham === "") return NaN;
     if (typeof ham === "number") return ham;
@@ -675,7 +708,6 @@
     return isNaN(n) ? NaN : n;
   }
 
-  // GAS verisinden: filtreyi geçen hisseler + yedek hisse başı temettü bilgisi
   function gasIsle(payload) {
     if (!payload || !payload.anaTablo || payload.anaTablo.length <= 1) {
       throw new Error("gas-bos");
@@ -683,8 +715,8 @@
     var anaTablo = payload.anaTablo;
     var verimVerisi = payload.verimTablo;
 
-    var verimMap = {};   // KOD_YIL -> toplam verim %
-    var hbMap = {};      // KOD_YIL -> toplam hisse başı TL (yedek)
+    var verimMap = {};
+    var hbMap = {};
 
     if (verimVerisi && verimVerisi.length > 1) {
       var bas = verimVerisi[0];
@@ -734,7 +766,6 @@
       if (!isNaN(yn)) yillar.push(yn);
     }
     var guncelYil = yillar.length > 0 ? Math.max.apply(null, yillar) : new Date().getFullYear();
-    // Dönem: Tümü -> tüm yıllar; aksi halde son N yıl
     var minYil = FILTRE_DONEM > 0 ? guncelYil - (FILTRE_DONEM - 1) : 0;
     var sayfaYillari = yillar.length > 0 ? yillar.length : 1;
 
@@ -763,12 +794,10 @@
       if (FILTRE_DONEM > 0) {
         yogunluk = odemeYil / FILTRE_DONEM;
       } else {
-        // Dönem: Tümü -> tablodaki hazır YOĞUNLUK sütunu (hissenin kendi geçmişine göre)
         var hazir = verimSayisiCoz(anaTablo[i][idxYog]);
         if (!isNaN(hazir)) {
-          yogunluk = hazir > 1.0001 ? hazir / 100 : hazir;   // 85 veya %85 gelirse 0,85'e çevir
+          yogunluk = hazir > 1.0001 ? hazir / 100 : hazir;
         } else {
-          // Yedek: ilk temettü yılından bugüne kadarki yıllara göre
           var ilkYil = 0;
           for (var y3 = 1990; y3 <= guncelYil; y3++) {
             var v3 = verimMap[hKod + "_" + y3];
@@ -779,7 +808,6 @@
         }
       }
 
-      // Yedek: en son temettü verilen yılın hisse başı toplamı
       var sonYil = 0, sonToplam = 0;
       for (var y2 = guncelYil; y2 >= 1990; y2--) {
         var h = hbMap[hKod + "_" + y2];
@@ -834,20 +862,27 @@
       var fiyat = Number(b.fiyat) || (fiyatOnbellek[kod] || 0);
       var so = sektorOnbellek[kod] || {};
 
+      var sektorStr = b.sektor || so.s || "";
+      var sanayiStr = b.sanayi || so.i || "";
+      var tamSektor = (sektorStr + " " + sanayiStr).toLocaleUpperCase("tr");
+      
+      // Stopajsızlık mantığı: GYO hisselerini kodundan, sektöründen veya sanayisinden tespit etme.
+      var isGyoHisse = String(kod).toUpperCase().indexOf("GY") > -1;
+      var isGyoSektor = tamSektor.indexOf("GYO") > -1 || tamSektor.indexOf("GAYRİMENKUL") > -1 || tamSektor.indexOf("REAL ESTATE") > -1;
+
       veri[kod] = {
         temettu: t,
         fiyat: fiyat,
         tarih: tarih,
-        stopajsiz: !stopajUygulanir(kod),
+        stopajsiz: (isGyoHisse || isGyoSektor),
         ortalama_verim: g.ort,
-        sektor: b.sektor || so.s || "",
-        sanayi: b.sanayi || so.i || ""
+        sektor: sektorStr,
+        sanayi: sanayiStr
       };
       sektorAramaYaz(veri[kod]);
       liste.push(kod);
     });
 
-    // Alfabetik sıralama (A → Z)
     liste.sort(function (a, b) { return a < b ? -1 : (a > b ? 1 : 0); });
 
     veriKaynakNotu = "Filtre: Yoğunluk ≥ " + String(FILTRE_YOGUNLUK).replace(".", ",") +
@@ -857,9 +892,6 @@
       (gas.onbellek ? " — son kayıtlı liste kullanılıyor" : "");
   }
 
-  // ------------------------------------------------------------------
-  // Canlı fiyatlar ve sektörler: sayfa açılınca tarayıcıdan çekilir (bot verisi yedek)
-  // ------------------------------------------------------------------
   function fiyatOnbellekOku() {
     try {
       var o = JSON.parse(localStorage.getItem(FIYAT_ANAHTAR));
@@ -869,7 +901,6 @@
   function fiyatOnbellekYaz() {
     var f = {};
     liste.forEach(function (k) { if (veri[k].canli && veri[k].fiyat > 0) f[k] = veri[k].fiyat; });
-    // Daha önce kayıtlı olup bu sefer alınamayanları da koru
     Object.keys(fiyatOnbellek).forEach(function (k) { if (!(k in f)) f[k] = fiyatOnbellek[k]; });
     fiyatOnbellek = f;
     try { localStorage.setItem(FIYAT_ANAHTAR, JSON.stringify({ zaman: canliZaman, f: f })); } catch (e) {}
@@ -889,7 +920,6 @@
     try { localStorage.setItem(SEKTOR_ANAHTAR, JSON.stringify({ zaman: Date.now(), m: m })); } catch (e) {}
   }
 
-  // TradingView tarayıcı isteği (önce basit istek, olmazsa JSON başlığıyla)
   function tvIstek(kodlar, kolonlar) {
     var govde = JSON.stringify({
       symbols: { tickers: kodlar.map(function (k) { return "BIST:" + k; }), query: { types: [] } },
@@ -966,7 +996,6 @@
     for (var i = 0; i < el.length; i++) { el[i].textContent = metin; el[i].title = baslik; }
   }
 
-  // Yalnızca sorun varsa (fiyatı alınamayan hisse) uyarı gösterir; normalde hiçbir metin yazmaz
   function durumYaz() {
     var el = $("durum");
     if (!el) return;
@@ -991,7 +1020,6 @@
       hesaplaHepsi();
       durumYaz();
 
-      // Hâlâ fiyatı olmayanlar için yedek kaynak
       var eksik = liste.filter(function (k) { return !(veri[k].fiyat > 0); });
       if (eksik.length === 0) return;
       var sira = 0;
@@ -1012,7 +1040,6 @@
     }).catch(function () { durumYaz(); });
   }
 
-  // Sektör bilgisi eksik hisseler için bir kez çekilir ve telefona kaydedilir
   function sektorleriYukle() {
     var eksik = liste.filter(function (k) { return !veri[k].sektor; });
     if (eksik.length === 0) return;
@@ -1029,13 +1056,8 @@
     }).catch(function () {});
   }
 
-
-  // ------------------------------------------------------------------
-  // Cihazlar arası OTOMATİK eşitleme (Google Apps Script) — arayüzü yok, arka planda çalışır.
-  // Telefon ve bilgisayarda aynı adres + aynı anahtar kullanıldığı için girişler iki yerde de görünür.
-  // ------------------------------------------------------------------
-  var BULUT_URL = "";        // Apps Script web uygulaması adresi (https://script.google.com/macros/s/.../exec)
-  var BULUT_ANAHTAR = "";    // Kendi belirlediğiniz gizli anahtar (en az 6 karakter)
+  var BULUT_URL = "";
+  var BULUT_ANAHTAR = "";
   var bulutZamanlayici = null;
   var esitlemeNotu = "";
 
@@ -1044,7 +1066,6 @@
   function saatMetni() {
     return new Date().toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
   }
-  // Görünür bir şey yazmaz; yalnızca "Hisse" kutusunun ipucuna (basılı tutunca) not düşer
   function esitlemeYaz(metin) {
     esitlemeNotu = metin;
     var el = $("sayi");
@@ -1067,7 +1088,6 @@
       .catch(function (e) { clearTimeout(z); throw e; });
   }
 
-  // Her değişiklikten ~1 sn sonra buluta yazar
   function bulutPlanla() {
     if (!bulutHazir()) return;
     clearTimeout(bulutZamanlayici);
@@ -1110,7 +1130,6 @@
     hesaplaHepsi();
   }
 
-  // Bulut daha yeniyse uygula, yerel daha yeniyse buluta yaz (en son değişiklik kazanır)
   function bulutEsitle() {
     if (!bulutHazir()) return Promise.resolve();
     return bulutAl().then(function (r) {
@@ -1277,7 +1296,6 @@
   $("sol-body").addEventListener("input", girdiOlayi);
   $("sag-body").addEventListener("input", girdiOlayi);
 
-  // Kutuya dokununca içeriği seç: mobilde üzerine yazmak kolaylaşır
   function girdiOdak(e) {
     var el = e.target;
     if (el.classList && el.classList.contains("girdi")) {
@@ -1287,7 +1305,6 @@
   $("sol-body").addEventListener("focusin", girdiOdak);
   $("sag-body").addEventListener("focusin", girdiOdak);
 
-  // Enter / "İleri" tuşu: bir sonraki görünen kutuya geç (mobilde hızlı giriş)
   function girdiEnter(e) {
     if (e.key !== "Enter") return;
     var el = e.target;
