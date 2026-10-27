@@ -193,14 +193,14 @@
   /* Portföy Sektör Analiz Bölümü */
   .sektor-ozet {
     width: 100%;
-    font-size: 11px;
-    margin-top: 8px;
-    padding-top: 8px;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 13px;
+    padding: 12px;
+    border-top: 1px solid var(--cizgi);
     text-align: left;
-    color: #d9dfdb;
+    color: var(--yazi);
     line-height: 1.6;
     display: none;
+    background: #f8faf9;
   }
 
   /* ---------- Geniş ekran ---------- */
@@ -315,6 +315,8 @@
       <tbody id="port-body"></tbody>
     </table>
     <div class="bos-sonuc" id="port-bos">Henüz giriş yok. Diğer sekmelerde aylık temettü veya lot girin.</div>
+    <!-- Portföy verilerinin hemen altına eklenen sektör analiz divi -->
+    <div class="sektor-ozet" id="port-sektor-ozet"></div>
   </div>
 </div>
 
@@ -332,14 +334,12 @@
       <div class="kalem"><span>Maliyet</span><b id="sag-toplam-maliyet">0 TL</b><small id="sag-alt-maliyet"></small></div>
       <div class="kalem"><span>Aylık temettü</span><b id="sag-toplam-aylik">0 TL</b><small id="sag-alt-aylik"></small></div>
     </div>
-    <div class="blok" id="blok-port" style="flex-wrap: wrap;">
-      <div style="display: flex; gap: 6px; justify-content: space-between; width: 100%;">
-        <div class="kalem k-adet"><span>Hisse</span><b id="port-toplam-adet">0</b></div>
-        <div class="kalem k-lot"><span>Lot</span><b id="port-toplam-lot">-</b></div>
-        <div class="kalem"><span>Maliyet</span><b id="port-toplam-maliyet">0 TL</b><small id="port-alt-maliyet"></small></div>
-        <div class="kalem"><span>Aylık temettü</span><b id="port-toplam-aylik">0 TL</b><small id="port-alt-aylik"></small></div>
-      </div>
-      <div class="sektor-ozet" id="port-sektor-ozet"></div>
+    <!-- Sektör analizi buradan portföy sekmesinin içine taşındı -->
+    <div class="blok" id="blok-port">
+      <div class="kalem k-adet"><span>Hisse</span><b id="port-toplam-adet">0</b></div>
+      <div class="kalem k-lot"><span>Lot</span><b id="port-toplam-lot">-</b></div>
+      <div class="kalem"><span>Maliyet</span><b id="port-toplam-maliyet">0 TL</b><small id="port-alt-maliyet"></small></div>
+      <div class="kalem"><span>Aylık temettü</span><b id="port-toplam-aylik">0 TL</b><small id="port-alt-aylik"></small></div>
     </div>
   </div>
 </div>
@@ -434,7 +434,28 @@
     "Information Technology Services": "Bilişim",
     "Pharmaceuticals: Major": "İlaç",
     "Pharmaceuticals: Generic": "İlaç",
-    "Pharmaceuticals: Other": "İlaç"
+    "Pharmaceuticals: Other": "İlaç",
+    // İngilizce görünmesini engellemek için yeni eklenenler
+    "Textiles": "Tekstil",
+    "Other Transportation": "Diğer Ulaşım",
+    "Apparel/Footwear": "Giyim / Ayakkabı",
+    "Specialty Stores": "Özel Mağazalar",
+    "Wholesale Distributors": "Toptan Dağıtım",
+    "Chemicals: Major Diversified": "Kimya",
+    "Chemicals: Specialty": "Kimya",
+    "Chemicals: Agricultural": "Kimya",
+    "Marine Shipping": "Deniz Taşımacılığı",
+    "Electronics/Appliance Stores": "Elektronik Mağazacılık",
+    "Homebuilding": "Konut İnşaatı",
+    "Food Distributors": "Gıda Dağıtım",
+    "Building Products": "Yapı Ürünleri",
+    "Containers/Packaging": "Ambalaj",
+    "Paper/Packaging": "Ambalaj",
+    "Metal Fabrication": "Metal İşleme",
+    "Auto Parts: Aftermarket": "Otomotiv Yan Sanayi",
+    "Hotels/Resorts/Cruiselines": "Otel / Turizm",
+    "Broadcasting": "Yayıncılık",
+    "Publishing: Books/Magazines": "Yayıncılık"
   };
 
   var veri = {};
@@ -587,12 +608,14 @@
       var d = new Date(kur.zaman);
       var saat = d.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
       var eski = kur.onbellek ? " <span class='soluk'>(eski)</span>" : "";
+      
+      // Döviz değerlerini normal (ince) fonta çekmek için <b> etiketleri kaldırıldı.
       k.innerHTML =
-        "<span class='k-tam'><b>1 $</b> = <b>" + fmt(kur.usdTry, 2) + " TL</b><br>" +
-        "<b>1 GR</b> Altın = <b>" + fmt(gramAltinTL(), 2) + " TL</b>" +
+        "<span class='k-tam'><b>1 $</b> = " + fmt(kur.usdTry, 2) + " TL<br>" +
+        "<b>1 GR</b> Altın = " + fmt(gramAltinTL(), 2) + " TL" +
         "<span class='soluk ek'> (" + fmt(gramAltinTL() / kur.usdTry, 2) + " $) · " + saat + "</span>" + eski + "</span>" +
-        "<span class='k-kisa'><b>$:</b> <b>" + fmt(kur.usdTry, 2) + " TL</b><br>" +
-        "<b>GR:</b> <b>" + fmt(gramAltinTL(), 0) + " TL</b>" + eski + "</span>";
+        "<span class='k-kisa'><b>$:</b> " + fmt(kur.usdTry, 2) + " TL<br>" +
+        "<b>GR:</b> " + fmt(gramAltinTL(), 0) + " TL" + eski + "</span>";
       k.title = "1 $ = " + fmt(kur.usdTry, 2) + " TL · 1 GR Altın = " + fmt(gramAltinTL(), 2) + " TL (" +
         fmt(gramAltinTL() / kur.usdTry, 2) + " $) · saat " + saat + (kur.onbellek ? " — son kayıtlı kur" : "");
     }
@@ -611,7 +634,7 @@
   function portfoyYaz() {
     if (!$("port-body")) return;
     var html = [], T = { lot: 0, maliyet: 0, aylik: 0, adet: 0 }, gorunen = 0;
-    var sektorDagilim = {}; // Sektör dağılım verilerini tutmak için
+    var sektorDagilim = {}; 
 
     liste.forEach(function (k) {
       var d = veri[k];
@@ -623,7 +646,8 @@
       var aylik = (lot * nt) / 12;
       T.lot += lot; T.maliyet += maliyet; T.aylik += aylik; T.adet++;
       
-      var sAd = d.sanayi ? SANAYI_TR[d.sanayi] || d.sanayi : (SEKTOR_TR[d.sektor] || d.sektor || "Diğer");
+      // Sektör Analizinde hissenin altında görünen Türkçe ismin BİREBİR aynısını çekiyoruz.
+      var sAd = sektorMetni(d) || "Diğer";
       sektorDagilim[sAd] = (sektorDagilim[sAd] || 0) + maliyet;
 
       if (!aramaEslesir(k)) return;
@@ -866,7 +890,6 @@
       var sanayiStr = b.sanayi || so.i || "";
       var tamSektor = (sektorStr + " " + sanayiStr).toLocaleUpperCase("tr");
       
-      // Stopajsızlık mantığı: GYO hisselerini kodundan, sektöründen veya sanayisinden tespit etme.
       var isGyoHisse = String(kod).toUpperCase().indexOf("GY") > -1;
       var isGyoSektor = tamSektor.indexOf("GYO") > -1 || tamSektor.indexOf("GAYRİMENKUL") > -1 || tamSektor.indexOf("REAL ESTATE") > -1;
 
