@@ -261,7 +261,7 @@
 
 <div class="ust" id="ust">
   <div class="ust-satir">
-    <input class="ara" id="ara" type="search" placeholder="Hisse / sektör…" autocomplete="off" autocapitalize="characters">
+    <input class="ara" id="ara" type="search" placeholder="Hisse / Sektör..." autocomplete="off" autocapitalize="characters">
     <div class="sag-grup">
       <label class="stopaj" title="Temettüden kesilen stopaj oranı (kodunda GY, sektöründe GYO/Gayrimenkul geçen hisselerde uygulanmaz)">
         <span>Stopaj %</span>
@@ -646,13 +646,16 @@
       var aylik = (lot * nt) / 12;
       T.lot += lot; T.maliyet += maliyet; T.aylik += aylik; T.adet++;
       
-      // Sektör analizi için de tekrar güncellenen, alt sektörü önceliklendiren fonksiyonu çağırıyoruz
       var sAd = sektorMetni(d) || "Diğer";
       sektorDagilim[sAd] = (sektorDagilim[sAd] || 0) + maliyet;
 
       if (!aramaEslesir(k)) return;
       gorunen++;
-      html.push("<tr><td class='hisse'>" + k + "</td><td data-c='lot'>" + fmtLot(lot) + "</td>" +
+      
+      // Portföy sekmesinde hisselerin altına da sektörü yazdırıyoruz
+      var hisseHtml = "<td class='hisse'>" + k + "<small class='sk' title='" + sektorBaslik(d) + "'>" + sektorMetni(d) + "</small></td>";
+      
+      html.push("<tr>" + hisseHtml + "<td data-c='lot'>" + fmtLot(lot) + "</td>" +
         "<td data-c='maliyet'>" + fmtTL(maliyet) + "<small class='esd'>" + esdegerMetin(maliyet) + "</small></td>" +
         "<td>" + fmtTL(aylik) + "<small class='esd'>" + esdegerMetin(aylik) + "</small></td></tr>");
     });
