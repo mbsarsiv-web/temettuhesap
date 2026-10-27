@@ -438,7 +438,7 @@
     "Textiles": "Tekstil",
     "Other Transportation": "Diğer Ulaşım",
     "Apparel/Footwear": "Giyim / Ayakkabı",
-    "Specialty Stores": "Özel Mağazalar",
+    "Specialty Stores": "Perakende", // DOAS gibi şirketleri düzeltmek için güncellendi
     "Wholesale Distributors": "Toptan Dağıtım",
     "Chemicals: Major Diversified": "Kimya",
     "Chemicals: Specialty": "Kimya",
@@ -501,11 +501,11 @@
     return fmtFiyat(net(d)) + brut;
   }
 
-  /* Ana sektörü daima öncelikli alacak şekilde düzenlendi */
+  /* Mantıklı görünüm için tekrar "Önce alt sektör, sonra ana sektör" kurgusuna dönüldü */
   function sektorMetni(d) {
     if (!d) return "";
-    if (d.sektor) return SEKTOR_TR[d.sektor] || d.sektor;
     if (d.sanayi && SANAYI_TR[d.sanayi]) return SANAYI_TR[d.sanayi];
+    if (d.sektor) return SEKTOR_TR[d.sektor] || d.sektor;
     return "";
   }
   
@@ -646,7 +646,7 @@
       var aylik = (lot * nt) / 12;
       T.lot += lot; T.maliyet += maliyet; T.aylik += aylik; T.adet++;
       
-      // Sektör Analizi de artık doğrudan hissenin altında görünen ana sektör ismini kullanacak
+      // Sektör analizi için de tekrar güncellenen, alt sektörü önceliklendiren fonksiyonu çağırıyoruz
       var sAd = sektorMetni(d) || "Diğer";
       sektorDagilim[sAd] = (sektorDagilim[sAd] || 0) + maliyet;
 
