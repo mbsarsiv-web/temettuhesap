@@ -128,6 +128,34 @@ def fiyatlari_cek(session):
             log("TradingView ek tur %s: +%d" % (tur[0], yeni))
     return fiyatlar
 
+def sektorleri_cek(session):
+    """TradingView'dan sektör (sector) ve alt sektör (industry). Fiyat sorgusundan AYRI yapılır."""
+    sonuc = {}
+    for kolonlar in (["name", "sector", "industry"], ["name", "sector"]):
+        payload = {
+            "columns": kolonlar,
+            "filter": [{"left": "type", "operation": "in_range", "right": ["stock"]}],
+            "range": [0, 1500],
+        }
+        try:
+            r = session.post(TV_URL, json=payload, timeout=20)
+            if r.status_code != 200:
+                log("TradingView sektor HTTP:", r.status_code, kolonlar)
+                continue
+            for item in r.json().get("data", []):
+                d = item["d"]
+                kod = str(d[0]).replace("BIST:", "").strip().upper()
+                sektor = d[1] if len(d) > 1 else None
+                sanayi = d[2] if len(d) > 2 else None
+                if sektor:
+                    sonuc[kod] = {"sektor": str(sektor), "sanayi": str(sanayi) if sanayi else ""}
+            if sonuc:
+                break
+        except Exception as e:
+            log("TradingView sektor HATA:", repr(e))
+    log("Sektor bilgisi alinan hisse sayisi:", len(sonuc))
+    return sonuc
+
 def yahoo_fiyat(kod):
     url = "https://query2.finance.yahoo.com/v8/finance/chart/%s.IS?interval=1d&range=5d" % kod
     try:
@@ -316,7 +344,8 @@ def temettu_kayitlari(satirlar):
         ham.setdefault(kod, {})[(t_int, round(hb, 6))] = t_str
     return ham
 
-def veriyi_hazirla(ham, fiyatlar, gas):
+def veriyi_hazirla(ham, fiyatlar, gas, sektorler=None):
+    sektorler = sektorler or {}
     sonuc = {}
     atlanan = 0
 
@@ -341,6 +370,8 @@ def veriyi_hazirla(ham, fiyatlar, gas):
             "yil": son_yil,
             "odeme_sayisi": len(odemeler),
             "tarihler": [o[2] for o in odemeler],
+            "sektor": sektorler.get(kod, {}).get("sektor", ""),
+            "sanayi": sektorler.get(kod, {}).get("sanayi", ""),
         }
 
     # Temettü kaydı olmayan ama Temettü Analiz listesinde bulunan hisseler (yalnızca fiyat)
@@ -357,6 +388,8 @@ def veriyi_hazirla(ham, fiyatlar, gas):
                 "yil": 0,
                 "odeme_sayisi": 0,
                 "tarihler": [],
+                "sektor": sektorler.get(kod, {}).get("sektor", ""),
+                "sanayi": sektorler.get(kod, {}).get("sanayi", ""),
             }
             sadece_fiyat += 1
 
@@ -406,7 +439,9 @@ def main():
     hedef = set(ham.keys()) | gas
     eksik_fiyatlari_tamamla(hedef, fiyatlar, gas)
 
-    veri = veriyi_hazirla(ham, fiyatlar, gas)
+    sektorler = sektorleri_cek(session)
+
+    veri = veriyi_hazirla(ham, fiyatlar, gas, sektorler)
     log("Hazirlanan hisse sayisi:", len(veri))
 
     if not veri:
