@@ -29,7 +29,7 @@
     color: var(--yazi);
     -webkit-text-size-adjust: 100%;
     -webkit-tap-highlight-color: transparent;
-    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px));
   }
 
   /* ---------- Üst bar (tek satır) ---------- */
@@ -41,7 +41,7 @@
   }
   .ust-satir { display: flex; gap: 6px; align-items: center; flex-wrap: nowrap; max-width: var(--genislik); margin: 0 auto; }
   .ara {
-    flex: 0 1 150px; min-width: 110px;
+    flex: 0 1 190px; min-width: 110px;
     height: 34px; padding: 0 10px;
     border: 1px solid var(--cizgi); border-radius: 8px;
     font-size: 16px; background: #fff; color: var(--yazi);
@@ -63,7 +63,7 @@
     flex: none; font-size: 10px; line-height: 1.2; color: var(--yazi);
     font-variant-numeric: tabular-nums; white-space: nowrap;
   }
-  .kur b { font-weight: 700; }
+  .kur b { font-weight: 800; }
   .kur .soluk { color: var(--soluk); }
   .kur .k-tam, .kur .ek { display: none; }
   .temizle {
@@ -125,6 +125,11 @@
   .p-sag tbody tr.dolu { background: #e8eff8; }
   td.hisse { font-weight: 800; font-size: 13.5px; text-align: left; padding-left: 5px; }
   td.hisse small.mt { display: block; font-size: 9.5px; font-weight: 500; color: var(--soluk); }
+  td.hisse small.sk {
+    display: block; font-size: 9px; font-weight: 600; color: var(--altin); line-height: 1.1;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  td.hisse small.sk:empty { display: none; }
   td[data-c=tarih] { color: var(--soluk); }
   td small.brut { display: block; font-size: 9.5px; color: var(--soluk); font-weight: 400; text-decoration: line-through; }
   td small.esd { display: block; font-size: 10px; font-weight: 800; color: #946c0c; }
@@ -169,6 +174,11 @@
   .toplam .kalem span { display: block; font-size: 10px; opacity: .7; }
   .toplam .kalem b { display: block; font-size: 14.5px; white-space: nowrap; }
   .toplam .kalem small { display: block; font-size: 10.5px; font-weight: 800; color: #f0cc5a; white-space: nowrap; min-height: 12px; }
+  /* Hisse ve Lot değerleri daha büyük */
+  .toplam .k-adet { flex: .8; }
+  .toplam .k-lot { flex: 1.05; }
+  .toplam .k-adet span, .toplam .k-lot span { font-size: 11px; opacity: .8; }
+  .toplam .k-adet b, .toplam .k-lot b { font-size: 20px; font-weight: 800; line-height: 1.15; }
 
   /* ---------- Geniş ekran ---------- */
   @media (min-width: 641px) {
@@ -194,19 +204,21 @@
     tbody td { font-size: 15px; padding: 3px 3px; }
     td.hisse { font-size: 16px; padding-left: 6px; }
     td.hisse small.mt { display: none; }
+    td.hisse small.sk { font-size: 10px; }
     td[data-c=tarih] { font-size: 13px; }
     td small.brut { font-size: 10.5px; }
     .tl { display: inline; }
     .t7 th:nth-child(4), .t7 td:nth-child(4) { display: table-cell; }
-    .t7 th:nth-child(1), .t7 td:nth-child(1) { width: 12%; }
-    .t7 th:nth-child(2), .t7 td:nth-child(2) { width: 12%; }
+    .t7 th:nth-child(1), .t7 td:nth-child(1) { width: 14%; }
+    .t7 th:nth-child(2), .t7 td:nth-child(2) { width: 11%; }
     .t7 th:nth-child(3), .t7 td:nth-child(3) { width: 14%; }
-    .t7 th:nth-child(4), .t7 td:nth-child(4) { width: 15%; }
-    .t7 th:nth-child(5), .t7 td:nth-child(5) { width: 14%; }
+    .t7 th:nth-child(4), .t7 td:nth-child(4) { width: 14%; }
+    .t7 th:nth-child(5), .t7 td:nth-child(5) { width: 13%; }
     .t7 th:nth-child(6), .t7 td:nth-child(6) { width: 18%; }
-    .t7 th:nth-child(7), .t7 td:nth-child(7) { width: 15%; }
+    .t7 th:nth-child(7), .t7 td:nth-child(7) { width: 16%; }
     input.girdi { height: 32px; font-size: 17px; }
     .toplam .kalem b { font-size: 15px; }
+    .toplam .k-adet b, .toplam .k-lot b { font-size: 21px; }
   }
   @media (min-width: 900px) {
     .ara { flex: 0 1 220px; }
@@ -218,6 +230,7 @@
     td.hisse { font-size: 13px; }
     thead th { font-size: 9px; }
     .toplam .kalem b { font-size: 13.5px; }
+    .toplam .k-adet b, .toplam .k-lot b { font-size: 17px; }
   }
 </style>
 </head>
@@ -225,7 +238,7 @@
 
 <div class="ust" id="ust">
   <div class="ust-satir">
-    <input class="ara" id="ara" type="search" placeholder="Hisse ara…" autocomplete="off" autocapitalize="characters">
+    <input class="ara" id="ara" type="search" placeholder="Hisse / sektör…" autocomplete="off" autocapitalize="characters">
     <div class="sag-grup">
       <label class="stopaj" title="Temettüden kesilen stopaj oranı (kodunda GY geçen hisselerde uygulanmaz)">
         <span>Stopaj %</span>
@@ -285,20 +298,20 @@
 <div class="toplam" id="toplam">
   <div class="bloklar">
     <div class="blok aktif" id="blok-sol">
-      <div class="kalem"><span>Hisse</span><b id="sol-toplam-adet">0</b></div>
-      <div class="kalem"><span>Lot</span><b id="sol-toplam-lot">-</b></div>
+      <div class="kalem k-adet"><span>Hisse</span><b id="sol-toplam-adet">0</b></div>
+      <div class="kalem k-lot"><span>Lot</span><b id="sol-toplam-lot">-</b></div>
       <div class="kalem"><span>Maliyet</span><b id="sol-toplam-maliyet">0 TL</b><small id="sol-alt-maliyet"></small></div>
       <div class="kalem"><span>Aylık temettü</span><b id="sol-toplam-aylik">0 TL</b><small id="sol-alt-aylik"></small></div>
     </div>
     <div class="blok" id="blok-sag">
-      <div class="kalem"><span>Hisse</span><b id="sag-toplam-adet">0</b></div>
-      <div class="kalem"><span>Lot</span><b id="sag-toplam-lot">-</b></div>
+      <div class="kalem k-adet"><span>Hisse</span><b id="sag-toplam-adet">0</b></div>
+      <div class="kalem k-lot"><span>Lot</span><b id="sag-toplam-lot">-</b></div>
       <div class="kalem"><span>Maliyet</span><b id="sag-toplam-maliyet">0 TL</b><small id="sag-alt-maliyet"></small></div>
       <div class="kalem"><span>Aylık temettü</span><b id="sag-toplam-aylik">0 TL</b><small id="sag-alt-aylik"></small></div>
     </div>
     <div class="blok" id="blok-port">
-      <div class="kalem"><span>Hisse</span><b id="port-toplam-adet">0</b></div>
-      <div class="kalem"><span>Lot</span><b id="port-toplam-lot">-</b></div>
+      <div class="kalem k-adet"><span>Hisse</span><b id="port-toplam-adet">0</b></div>
+      <div class="kalem k-lot"><span>Lot</span><b id="port-toplam-lot">-</b></div>
       <div class="kalem"><span>Maliyet</span><b id="port-toplam-maliyet">0 TL</b><small id="port-alt-maliyet"></small></div>
       <div class="kalem"><span>Aylık temettü</span><b id="port-toplam-aylik">0 TL</b><small id="port-alt-aylik"></small></div>
     </div>
@@ -311,7 +324,7 @@
 (function () {
   "use strict";
 
-  // Fiyat ve hisse başı temettü verisi (bot): temettu_veri.json
+  // Fiyat, hisse başı temettü ve sektör verisi (bot): temettu_veri.json
   var JSON_YEREL = "temettu_veri.json";
   var JSON_RAW   = "https://raw.githubusercontent.com/mbsarsiv-web/temettu-bot/main/temettu_veri.json";
 
@@ -328,15 +341,85 @@
 
   var DEPO_ANAHTAR = "temettuhesap_v2";
 
-  // Canlı fiyat kaynakları (tarayıcıdan, botu beklemeden)
+  // Canlı fiyat ve sektör kaynakları (tarayıcıdan, botu beklemeden)
   var TV_URL = "https://scanner.tradingview.com/turkey/scan";
   var FIYAT_ANAHTAR = "temettuhesap_fiyat_v1";
+  var SEKTOR_ANAHTAR = "temettuhesap_sektor_v1";
   var PROXYLER = [
     function (u) { return "https://api.allorigins.win/raw?url=" + encodeURIComponent(u); },
     function (u) { return "https://corsproxy.io/?url=" + encodeURIComponent(u); }
   ];
   var fiyatOnbellek = {};
+  var sektorOnbellek = {};
   var canliZaman = 0;
+
+  // TradingView sektör adları -> Türkçe
+  var SEKTOR_TR = {
+    "Commercial Services": "Ticari Hizmetler",
+    "Communications": "İletişim",
+    "Consumer Durables": "Dayanıklı Tüketim",
+    "Consumer Non-Durables": "Tüketim Ürünleri",
+    "Consumer Services": "Tüketici Hizmetleri",
+    "Distribution Services": "Dağıtım Hizmetleri",
+    "Electronic Technology": "Elektronik Teknoloji",
+    "Energy Minerals": "Enerji Madenleri",
+    "Finance": "Finans",
+    "Health Services": "Sağlık Hizmetleri",
+    "Health Technology": "Sağlık Teknolojisi",
+    "Industrial Services": "Endüstriyel Hizmetler",
+    "Miscellaneous": "Çeşitli",
+    "Non-Energy Minerals": "Enerji Dışı Mineraller",
+    "Process Industries": "Proses Sanayi",
+    "Producer Manufacturing": "Üretici İmalat",
+    "Retail Trade": "Perakende",
+    "Technology Services": "Teknoloji Hizmetleri",
+    "Transportation": "Ulaşım",
+    "Utilities": "Kamu Hizmetleri"
+  };
+  // Daha ayrıntılı (alt sektör) karşılıkları bilinenler: varsa sektör yerine bunlar gösterilir
+  var SANAYI_TR = {
+    "Major Banks": "Bankacılık",
+    "Regional Banks": "Bankacılık",
+    "Financial Conglomerates": "Holding",
+    "Real Estate Investment Trusts": "GYO",
+    "Real Estate Development": "Gayrimenkul",
+    "Life/Health Insurance": "Sigorta",
+    "Property/Casualty Insurance": "Sigorta",
+    "Multi-Line Insurance": "Sigorta",
+    "Specialty Insurance": "Sigorta",
+    "Insurance Brokers/Services": "Sigorta",
+    "Investment Banks/Brokers": "Aracı Kurum",
+    "Investment Managers": "Varlık Yönetimi",
+    "Finance/Rental/Leasing": "Finansal Kiralama",
+    "Electric Utilities": "Elektrik",
+    "Gas Distributors": "Doğalgaz",
+    "Alternative Power Generation": "Yenilenebilir Enerji",
+    "Water Utilities": "Su",
+    "Oil Refining/Marketing": "Petrol Rafineri",
+    "Integrated Oil": "Petrol",
+    "Steel": "Çelik",
+    "Aluminum": "Alüminyum",
+    "Construction Materials": "Çimento / Yapı Malz.",
+    "Engineering & Construction": "İnşaat / Taahhüt",
+    "Auto Parts: OEM": "Otomotiv Yan Sanayi",
+    "Motor Vehicles": "Otomotiv",
+    "Trucks/Construction/Farm Machinery": "Makine",
+    "Aerospace & Defense": "Savunma",
+    "Airlines": "Havayolu",
+    "Major Telecommunications": "Telekomünikasyon",
+    "Wireless Telecommunications": "Telekomünikasyon",
+    "Food Retail": "Gıda Perakende",
+    "Food: Major Diversified": "Gıda",
+    "Food: Specialty/Candy": "Gıda",
+    "Food: Meat/Fish/Dairy": "Gıda",
+    "Beverages: Non-Alcoholic": "İçecek",
+    "Beverages: Alcoholic": "İçecek",
+    "Packaged Software": "Yazılım",
+    "Information Technology Services": "Bilişim",
+    "Pharmaceuticals: Major": "İlaç",
+    "Pharmaceuticals: Generic": "İlaç",
+    "Pharmaceuticals: Other": "İlaç"
+  };
 
   var veri = {};
   var liste = [];
@@ -381,6 +464,23 @@
     var n = d.stopajsiz ? 0 : stopajOrani();
     var brut = (n > 0 && d.temettu > 0) ? "<small class='brut'>" + fmtFiyat(d.temettu) + "</small>" : "";
     return fmtFiyat(net(d)) + brut;
+  }
+
+  // ---------- Sektör ----------
+  function sektorMetni(d) {
+    if (!d) return "";
+    if (d.sanayi && SANAYI_TR[d.sanayi]) return SANAYI_TR[d.sanayi];
+    if (d.sektor) return SEKTOR_TR[d.sektor] || d.sektor;
+    return "";
+  }
+  function sektorBaslik(d) {
+    var s = "";
+    if (d.sektor) s += "Sektör: " + (SEKTOR_TR[d.sektor] || d.sektor);
+    if (d.sanayi) s += (s ? " · " : "") + "Alt sektör: " + d.sanayi;
+    return s.replace(/'/g, "");
+  }
+  function sektorAramaYaz(d) {
+    d.skArama = (sektorMetni(d) + " " + (SEKTOR_TR[d.sektor] || "")).toLocaleUpperCase("tr");
   }
 
   function bilgiYaz() {
@@ -475,8 +575,8 @@
       var eski = kur.onbellek ? " <span class='soluk'>(eski)</span>" : "";
       k.innerHTML =
         // Geniş ekran: "1 $ = 49,79 TL" / "1 GR Altın = 6.429,28 TL"
-        "<span class='k-tam'>1 <b>$</b> = <b>" + fmt(kur.usdTry, 2) + " TL</b><br>" +
-        "1 <b>GR</b> Altın = <b>" + fmt(gramAltinTL(), 2) + " TL</b>" +
+        "<span class='k-tam'><b>1 $</b> = <b>" + fmt(kur.usdTry, 2) + " TL</b><br>" +
+        "<b>1 GR</b> Altın = <b>" + fmt(gramAltinTL(), 2) + " TL</b>" +
         "<span class='soluk ek'> (" + fmt(gramAltinTL() / kur.usdTry, 2) + " $) · " + saat + "</span>" + eski + "</span>" +
         // Mobil (dar): "$: 49,79 TL" / "GR: 6.429 TL"
         "<span class='k-kisa'><b>$:</b> <b>" + fmt(kur.usdTry, 2) + " TL</b><br>" +
@@ -488,8 +588,16 @@
     ustYukseklik();
   }
 
-  // PORTFÖY: iki sekmedeki girişlerin toplamı (aylık hedeften hesaplanan lot + elle girilen lot)
+  // Arama: hisse kodu ya da (en az 3 harfle) sektör adı
   var aramaQ = "";
+  function aramaEslesir(kod) {
+    if (aramaQ === "") return true;
+    if (kod.indexOf(aramaQ) > -1) return true;
+    var d = veri[kod];
+    return aramaQ.length >= 3 && !!d && !!d.skArama && d.skArama.indexOf(aramaQ) > -1;
+  }
+
+  // PORTFÖY: iki sekmedeki girişlerin toplamı (aylık hedeften hesaplanan lot + elle girilen lot)
   function portfoyYaz() {
     if (!$("port-body")) return;
     var html = [], T = { lot: 0, maliyet: 0, aylik: 0, adet: 0 }, gorunen = 0;
@@ -502,7 +610,7 @@
       var maliyet = lot * d.fiyat;
       var aylik = (lot * nt) / 12;
       T.lot += lot; T.maliyet += maliyet; T.aylik += aylik; T.adet++;
-      if (aramaQ && k.indexOf(aramaQ) === -1) return;
+      if (!aramaEslesir(k)) return;
       gorunen++;
       html.push("<tr><td class='hisse'>" + k + "</td><td>" + fmtLot(lot) + "</td>" +
         "<td>" + fmtTL(maliyet) + "<small class='esd'>" + esdegerMetin(maliyet) + "</small></td>" +
@@ -724,14 +832,18 @@
         tarih = String(g.hbYil);
       }
       var fiyat = Number(b.fiyat) || (fiyatOnbellek[kod] || 0);
+      var so = sektorOnbellek[kod] || {};
 
       veri[kod] = {
         temettu: t,
         fiyat: fiyat,
         tarih: tarih,
         stopajsiz: !stopajUygulanir(kod),
-        ortalama_verim: g.ort
+        ortalama_verim: g.ort,
+        sektor: b.sektor || so.s || "",
+        sanayi: b.sanayi || so.i || ""
       };
+      sektorAramaYaz(veri[kod]);
       liste.push(kod);
     });
 
@@ -746,7 +858,7 @@
   }
 
   // ------------------------------------------------------------------
-  // Canlı fiyatlar: sayfa açılınca tarayıcıdan çekilir (bot fiyatı yedek)
+  // Canlı fiyatlar ve sektörler: sayfa açılınca tarayıcıdan çekilir (bot verisi yedek)
   // ------------------------------------------------------------------
   function fiyatOnbellekOku() {
     try {
@@ -763,10 +875,25 @@
     try { localStorage.setItem(FIYAT_ANAHTAR, JSON.stringify({ zaman: canliZaman, f: f })); } catch (e) {}
   }
 
-  function tvFiyatlar(kodlar) {
+  function sektorOnbellekOku() {
+    try {
+      var o = JSON.parse(localStorage.getItem(SEKTOR_ANAHTAR));
+      if (o && o.m) sektorOnbellek = o.m;
+    } catch (e) {}
+  }
+  function sektorOnbellekYaz() {
+    var m = {};
+    Object.keys(sektorOnbellek).forEach(function (k) { m[k] = sektorOnbellek[k]; });
+    liste.forEach(function (k) { if (veri[k].sektor) m[k] = { s: veri[k].sektor, i: veri[k].sanayi || "" }; });
+    sektorOnbellek = m;
+    try { localStorage.setItem(SEKTOR_ANAHTAR, JSON.stringify({ zaman: Date.now(), m: m })); } catch (e) {}
+  }
+
+  // TradingView tarayıcı isteği (önce basit istek, olmazsa JSON başlığıyla)
+  function tvIstek(kodlar, kolonlar) {
     var govde = JSON.stringify({
       symbols: { tickers: kodlar.map(function (k) { return "BIST:" + k; }), query: { types: [] } },
-      columns: ["name", "close"]
+      columns: kolonlar
     });
     function dene(tip) {
       var ctrl = (typeof AbortController !== "undefined") ? new AbortController() : null;
@@ -775,14 +902,31 @@
         .then(function (r) { clearTimeout(z); if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
         .catch(function (e) { clearTimeout(z); throw e; });
     }
-    return dene("text/plain;charset=UTF-8")
-      .catch(function () { return dene("application/json"); })
+    return dene("text/plain;charset=UTF-8").catch(function () { return dene("application/json"); });
+  }
+
+  function tvFiyatlar(kodlar) {
+    return tvIstek(kodlar, ["name", "close"]).then(function (js) {
+      var o = {};
+      (js.data || []).forEach(function (it) {
+        var kod = String(it.d[0]).replace("BIST:", "").trim().toUpperCase();
+        var f = Number(it.d[1]);
+        if (f > 0) o[kod] = f;
+      });
+      return o;
+    });
+  }
+
+  function tvSektorler(kodlar) {
+    return tvIstek(kodlar, ["name", "sector", "industry"])
+      .catch(function () { return tvIstek(kodlar, ["name", "sector"]); })
       .then(function (js) {
         var o = {};
         (js.data || []).forEach(function (it) {
           var kod = String(it.d[0]).replace("BIST:", "").trim().toUpperCase();
-          var f = Number(it.d[1]);
-          if (f > 0) o[kod] = f;
+          var s = it.d[1];
+          var i = it.d.length > 2 ? it.d[2] : "";
+          if (s) o[kod] = { s: String(s), i: i ? String(i) : "" };
         });
         return o;
       });
@@ -810,6 +954,16 @@
     d.canli = true;
     var hucreler = document.querySelectorAll("tr[data-kod='" + kod + "'] [data-c=fiyat]");
     for (var i = 0; i < hucreler.length; i++) hucreler[i].textContent = fmtFiyat(fiyat);
+  }
+
+  function sektorUygula(kod) {
+    var d = veri[kod];
+    if (!d) return;
+    sektorAramaYaz(d);
+    var metin = sektorMetni(d);
+    var baslik = sektorBaslik(d);
+    var el = document.querySelectorAll("tr[data-kod='" + kod + "'] small.sk");
+    for (var i = 0; i < el.length; i++) { el[i].textContent = metin; el[i].title = baslik; }
   }
 
   // Yalnızca sorun varsa (fiyatı alınamayan hisse) uyarı gösterir; normalde hiçbir metin yazmaz
@@ -856,6 +1010,23 @@
       hesaplaHepsi();
       durumYaz();
     }).catch(function () { durumYaz(); });
+  }
+
+  // Sektör bilgisi eksik hisseler için bir kez çekilir ve telefona kaydedilir
+  function sektorleriYukle() {
+    var eksik = liste.filter(function (k) { return !veri[k].sektor; });
+    if (eksik.length === 0) return;
+    tvSektorler(liste).then(function (o) {
+      Object.keys(o).forEach(function (k) {
+        if (veri[k] && !veri[k].sektor) {
+          veri[k].sektor = o[k].s;
+          veri[k].sanayi = o[k].i;
+          sektorUygula(k);
+        }
+      });
+      sektorOnbellekYaz();
+      if (aramaQ !== "") aramaUygula();
+    }).catch(function () {});
   }
 
 
@@ -981,6 +1152,7 @@
   function baslat() {
     depoOku();
     fiyatOnbellekOku();
+    sektorOnbellekOku();
     Promise.all([botVerisiGetir(), gasGetir()])
       .then(function (sonuc) {
         var bot = sonuc[0], gas = sonuc[1];
@@ -997,6 +1169,7 @@
         sekmeAyarla(aktifSekme);
         durumYaz();
         canliFiyatlariYukle();
+        sektorleriYukle();
         bulutEsitle();
       })
       .catch(function (e) {
@@ -1009,7 +1182,8 @@
     liste.forEach(function (k) {
       var d = veri[k];
       var fiyatMetni = d.fiyat > 0 ? fmtFiyat(d.fiyat) : "-";
-      var ortak = "<td class='hisse'>" + k + (d.tarih ? "<small class='mt'>" + d.tarih + "</small>" : "") + "</td>" +
+      var ortak = "<td class='hisse'>" + k + (d.tarih ? "<small class='mt'>" + d.tarih + "</small>" : "") +
+                  "<small class='sk' title='" + sektorBaslik(d) + "'>" + sektorMetni(d) + "</small></td>" +
                   "<td data-c='fiyat' data-l='FİYAT'>" + fiyatMetni + "</td>" +
                   "<td data-c='temettu' data-l='TEMETTÜ'>" + temettuHucre(d) + "</td>" +
                   "<td data-c='tarih' data-l='SON TEMETTÜ'>" + (d.tarih || "-") + "</td>";
@@ -1148,19 +1322,22 @@
     hesaplaHepsi();
   });
 
-  $("ara").addEventListener("input", function () {
-    var q = this.value.trim().toLocaleUpperCase("tr");
-    aramaQ = q;
+  function aramaUygula() {
     ["sol", "sag"].forEach(function (t) {
       var satirlar = $(t + "-body").children, gorunen = 0;
       for (var i = 0; i < satirlar.length; i++) {
-        var eslesir = q === "" || satirlar[i].getAttribute("data-kod").indexOf(q) > -1;
+        var eslesir = aramaEslesir(satirlar[i].getAttribute("data-kod"));
         satirlar[i].style.display = eslesir ? "" : "none";
         if (eslesir) gorunen++;
       }
       $(t + "-bos").style.display = gorunen === 0 ? "block" : "none";
     });
     portfoyYaz();
+  }
+
+  $("ara").addEventListener("input", function () {
+    aramaQ = this.value.trim().toLocaleUpperCase("tr");
+    aramaUygula();
   });
 
   $("temizle").addEventListener("click", function () {
