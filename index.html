@@ -435,7 +435,6 @@
     "Pharmaceuticals: Major": "İlaç",
     "Pharmaceuticals: Generic": "İlaç",
     "Pharmaceuticals: Other": "İlaç",
-    // İngilizce görünmesini engellemek için yeni eklenenler
     "Textiles": "Tekstil",
     "Other Transportation": "Diğer Ulaşım",
     "Apparel/Footwear": "Giyim / Ayakkabı",
@@ -502,16 +501,18 @@
     return fmtFiyat(net(d)) + brut;
   }
 
+  /* Ana sektörü daima öncelikli alacak şekilde düzenlendi */
   function sektorMetni(d) {
     if (!d) return "";
-    if (d.sanayi && SANAYI_TR[d.sanayi]) return SANAYI_TR[d.sanayi];
     if (d.sektor) return SEKTOR_TR[d.sektor] || d.sektor;
+    if (d.sanayi && SANAYI_TR[d.sanayi]) return SANAYI_TR[d.sanayi];
     return "";
   }
+  
   function sektorBaslik(d) {
     var s = "";
     if (d.sektor) s += "Sektör: " + (SEKTOR_TR[d.sektor] || d.sektor);
-    if (d.sanayi) s += (s ? " · " : "") + "Alt sektör: " + d.sanayi;
+    if (d.sanayi) s += (s ? " · " : "") + "Alt sektör: " + (SANAYI_TR[d.sanayi] || d.sanayi);
     return s.replace(/'/g, "");
   }
   function sektorAramaYaz(d) {
@@ -609,7 +610,6 @@
       var saat = d.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
       var eski = kur.onbellek ? " <span class='soluk'>(eski)</span>" : "";
       
-      // Döviz değerlerini normal (ince) fonta çekmek için <b> etiketleri kaldırıldı.
       k.innerHTML =
         "<span class='k-tam'><b>1 $</b> = " + fmt(kur.usdTry, 2) + " TL<br>" +
         "<b>1 GR</b> Altın = " + fmt(gramAltinTL(), 2) + " TL" +
@@ -646,7 +646,7 @@
       var aylik = (lot * nt) / 12;
       T.lot += lot; T.maliyet += maliyet; T.aylik += aylik; T.adet++;
       
-      // Sektör Analizinde hissenin altında görünen Türkçe ismin BİREBİR aynısını çekiyoruz.
+      // Sektör Analizi de artık doğrudan hissenin altında görünen ana sektör ismini kullanacak
       var sAd = sektorMetni(d) || "Diğer";
       sektorDagilim[sAd] = (sektorDagilim[sAd] || 0) + maliyet;
 
