@@ -83,28 +83,42 @@
   .sekme.port { background: var(--altin); }
   .sekme.aktif { opacity: 1; box-shadow: 0 0 0 2px var(--yazi) inset; }
 
-  /* ---------- Hisse seçim filtreleri (sekmelerin altında) ---------- */
+  /* ---------- Hisse seçim filtreleri (tek satır) ---------- */
   .filtre {
-    display: flex; gap: 6px; margin: 0 0 6px; padding: 1px 0 4px;
-    overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin;
+    display: flex; flex-wrap: nowrap; align-items: flex-end; gap: 5px;
+    margin: 0 0 6px; padding: 2px 1px 4px;
+    overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
   }
+  .filtre::-webkit-scrollbar { display: none; }
+
+  /* Hisse adedi: üstte sayı, altta "Hisse" (üst çubuktaki eski görünümle aynı) */
   .f-sayi {
-    flex: none; display: flex; align-items: center; height: 34px; padding: 0 12px;
-    border-radius: 999px; background: #e6effa; border: 1px solid #c9daf2;
-    color: var(--mavi-koyu); font-size: 13px; font-weight: 700; white-space: nowrap;
+    width: 38px; height: 34px; display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
   }
-  .f-sayi b { font-size: 15px; font-weight: 800; margin-left: 4px; }
+
+  .f-kutu { flex: 1 1 0; min-width: 60px; display: flex; flex-direction: column; gap: 2px; margin: 0; }
+  .f-kutu > span {
+    font-size: 8.5px; font-weight: 700; color: var(--soluk); line-height: 1;
+    text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
   .filtre select {
-    flex: none; width: 178px; height: 34px; padding: 0 6px;
-    border: 1px solid var(--cizgi); border-radius: 8px; background: #fff; color: var(--yazi);
-    font-size: 16px; font-weight: 600; text-overflow: ellipsis; cursor: pointer;
+    width: 100%; height: 34px; padding: 0 14px 0 3px; margin: 0;
+    border: 1px solid var(--cizgi); border-radius: 8px; color: var(--yazi);
+    background-color: #fff;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%236a766f' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 4px center; background-size: 8px 5px;
+    -webkit-appearance: none; appearance: none;
+    font-size: 16px; font-weight: 700; text-align: center; text-align-last: center;
+    text-overflow: ellipsis; white-space: nowrap; cursor: pointer;
   }
-  .filtre select.aktif { border-color: var(--mavi); background: #f1f6fd; color: var(--mavi-koyu); }
+  .filtre select.aktif { border-color: var(--mavi); background-color: #f1f6fd; color: var(--mavi-koyu); }
   .filtre select:focus { outline: 2px solid var(--mavi); outline-offset: 0; }
   .f-temizle {
-    flex: none; height: 34px; padding: 0 12px; border: 1px solid #e4b4b4; border-radius: 8px;
-    background: #fff; color: #b3261e; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer;
+    flex: none; width: 34px; height: 34px; padding: 0; border: 1px solid #e4b4b4; border-radius: 8px;
+    background: #fff; color: #b3261e; font-size: 15px; font-weight: 700; white-space: nowrap; cursor: pointer;
   }
+  .f-temizle .yz { display: none; }
 
   .durum { max-width: var(--genislik); margin: 3px auto 0; font-size: 11px; line-height: 1.3; color: var(--soluk); }
   .durum:empty { display: none; }
@@ -215,7 +229,7 @@
   }
   input.girdi:focus { outline: 2px solid var(--yazi); outline-offset: 0; }
   input.girdi { scroll-margin-top: calc(var(--ust-yuk, 80px) + 40px); scroll-margin-bottom: 96px; }
-  button, input, .sekme { touch-action: manipulation; }
+  button, input, select, .sekme { touch-action: manipulation; }
   .bos-sonuc { padding: 18px; color: var(--soluk); font-size: 14px; display: none; text-align: center; }
 
   /* ---------- Alt toplam çubuğu ---------- */
@@ -268,8 +282,13 @@
     .sekme { font-size: 13px; }
     .sekme .u { display: inline; }
     .sekme .k { display: none; }
-    .filtre { flex-wrap: wrap; overflow-x: visible; }
-    .filtre select { flex: 1 1 150px; width: auto; min-width: 150px; font-size: 14px; }
+    .filtre { gap: 8px; overflow-x: visible; }
+    .f-sayi { width: 46px; }
+    .f-kutu { min-width: 0; }
+    .f-kutu > span { font-size: 10px; }
+    .filtre select { font-size: 14px; padding: 0 18px 0 6px; background-position: right 7px center; }
+    .f-temizle { width: auto; padding: 0 12px; font-size: 13px; font-weight: 600; }
+    .f-temizle .yz { display: inline; }
     #alan { padding: 8px 10px; max-width: calc(var(--genislik) + 20px); }
     table { font-size: 15px; }
     thead th { font-size: 11.5px; padding: 5px 2px; }
@@ -307,6 +326,8 @@
     thead th { font-size: 9px; }
     .toplam .kalem b { font-size: 13.5px; }
     .toplam .k-adet b, .toplam .k-lot b { font-size: 17px; }
+    .f-kutu { min-width: 56px; }
+    .filtre select { font-size: 15px; }
   }
 </style>
 </head>
@@ -321,7 +342,6 @@
         <input id="stopaj" type="text" inputmode="decimal" autocomplete="off" value="15">
       </label>
       <div class="kur" id="kur">Kurlar…</div>
-      <div class="sayi" id="sayi"><b>0</b>Hisse</div>
       <button class="temizle" id="temizle" type="button">Temizle</button>
     </div>
   </div>
@@ -338,13 +358,12 @@
 
 <div id="alan">
   <div class="filtre" id="filtre">
-    <div class="f-sayi" id="f-sayi">📊 Gösterilen: <b>0</b></div>
-    <select id="f-yog" title="Yoğunluk" aria-label="Yoğunluk"></select>
-    <select id="f-artis" title="Artış Trendi" aria-label="Artış Trendi"></select>
-    <select id="f-donem" title="Dönem" aria-label="Dönem"></select>
-    <select id="f-verim" title="Ortalama Verim" aria-label="Ortalama Verim"></select>
-    <select id="f-sirala" title="Sırala" aria-label="Sırala"></select>
-    <button class="f-temizle" id="f-temizle" type="button">✕ Filtreleri Temizle</button>
+    <div class="sayi f-sayi" id="f-sayi"><b>0</b>Hisse</div>
+    <label class="f-kutu"><span>Yoğunluk</span><select id="f-yog" title="Yoğunluk" aria-label="Yoğunluk"></select></label>
+    <label class="f-kutu"><span>Artış Trendi</span><select id="f-artis" title="Artış Trendi" aria-label="Artış Trendi"></select></label>
+    <label class="f-kutu"><span>Dönem</span><select id="f-donem" title="Dönem" aria-label="Dönem"></select></label>
+    <label class="f-kutu"><span>Ort. Verim</span><select id="f-verim" title="Ortalama Verim" aria-label="Ortalama Verim"></select></label>
+    <button class="f-temizle" id="f-temizle" type="button" title="Filtreleri Temizle" aria-label="Filtreleri Temizle"><span class="x">✕</span><span class="yz"> Filtreleri Temizle</span></button>
   </div>
   <div class="panel p-sol aktif" id="panel-sol">
     <table class="t7">
@@ -412,14 +431,15 @@
   var GAS_URL = "https://script.google.com/macros/s/AKfycbxo9u41oj1aXxgkuE7gTnHdeG_mzT41o3WmaYhhqNNUJi_NTDzLOmSBSnHAhfsvhOiK/exec";
   var GAS_ANAHTAR = "temettuhesap_gas_v4";
 
-  var FILTRE_ANAHTAR = "temettuhesap_filtre_v1";
-  var FILTRE_VARSAYILAN = { yog: "0.5", artis: "0", donem: "0", verim: "2", sirala: "kod" };
-  var FILTRE_BOS = { yog: "tum", artis: "0", donem: "0", verim: "0", sirala: "varsayilan" };
-  var FILTRE_ID = { yog: "f-yog", artis: "f-artis", donem: "f-donem", verim: "f-verim", sirala: "f-sirala" };
-  var F = { yog: "0.5", artis: "0", donem: "0", verim: "2", sirala: "kod" };
+  var FILTRE_ANAHTAR = "temettuhesap_filtre_v2";
+  var FILTRE_VARSAYILAN = { yog: "0.5", artis: "0", donem: "0", verim: "2" };
+  var FILTRE_BOS = { yog: "tum", artis: "0", donem: "0", verim: "0" };
+  var FILTRE_ID = { yog: "f-yog", artis: "f-artis", donem: "f-donem", verim: "f-verim" };
+  var FILTRE_AD = { yog: "Yoğunluk", artis: "Artış Trendi", donem: "Dönem", verim: "Ort. Verim" };
+  var F = { yog: "0.5", artis: "0", donem: "0", verim: "2" };
   var GAS = null;          // Temettü Analiz kaynağından gelen ham seri verisi
   var gecen = {};          // filtreden geçen hisseler
-  var sirali = [];         // seçili sıralamaya göre tüm hisseler
+  var sirali = [];         // hisse koduna göre (A → Z) sıralı tüm hisseler
   var satir = { sol: {}, sag: {} };
   var gosterilen = 0;
   var kaynakNotu = "";
@@ -644,10 +664,11 @@
   $("port-body").addEventListener("click", satirTikla);
 
   function bilgiYaz() {
-    $("sayi").innerHTML = "<b>" + gosterilen + "</b>Hisse";
-    $("sayi").title = veriKaynakNotu + (esitlemeNotu ? " · Eşitleme: " + esitlemeNotu : "");
     var fs = $("f-sayi");
-    if (fs) fs.innerHTML = "📊 Gösterilen: <b>" + gosterilen + "</b>";
+    if (fs) {
+      fs.innerHTML = "<b>" + gosterilen + "</b>Hisse";
+      fs.title = veriKaynakNotu + (esitlemeNotu ? " · Eşitleme: " + esitlemeNotu : "");
+    }
     ustYukseklik();
   }
 
@@ -655,28 +676,21 @@
   function secenekUret() {
     var o = {};
     o.yog = [
-      ["tum", "Yoğunluk: Tümü"],
-      ["1", "Yoğunluk: 1,00 (Kusursuz)"],
-      ["0.9", "Yoğunluk: ≥ 0,90 (Çok Yüksek)"],
-      ["0.8", "Yoğunluk: ≥ 0,80 (Yüksek)"],
-      ["0.7", "Yoğunluk: ≥ 0,70 (Orta-Yüksek)"],
-      ["0.5", "Yoğunluk: ≥ 0,50 (Orta)"],
-      ["veren", "Yoğunluk: Sadece Verenler (> 0)"],
-      ["vermeyen", "Yoğunluk: Hiç Vermeyenler (0,00)"]
+      ["tum", "Tümü"],
+      ["1", "1,00"],
+      ["0.9", "≥ 0,90"],
+      ["0.8", "≥ 0,80"],
+      ["0.7", "≥ 0,70"],
+      ["0.5", "≥ 0,50"],
+      ["veren", "Veren"],
+      ["vermeyen", "Vermez"]
     ];
-    o.artis = [["0", "Artış Trendi: Tümü"]];
-    for (var n = 3; n <= 10; n++) o.artis.push([String(n), "Artış Trendi: ≥ " + n + " Yıl Aralıksız Artıran"]);
-    o.donem = [["0", "Dönem: Tümü"]];
-    [3, 5, 10, 15, 20, 25].forEach(function (n) { o.donem.push([String(n), "Dönem: Son " + n + " Yıl"]); });
-    o.verim = [["0", "Ort. Verim: Tümü"]];
-    [1, 2, 3, 4, 5, 6, 7, 8, 10].forEach(function (n) { o.verim.push([String(n), "Ort. Verim: ≥ %" + n]); });
-    o.sirala = [
-      ["varsayilan", "Sırala: Varsayılan"],
-      ["yog", "Sırala: Yoğunluk (Yüksek → Düşük)"],
-      ["verim", "Sırala: Ortalama Verim (Yüksek → Düşük)"],
-      ["buyume", "Sırala: Temettü Büyüme Hızı (Yüksek → Düşük)"],
-      ["kod", "Sırala: Hisse Kodu (A → Z)"]
-    ];
+    o.artis = [["0", "Tümü"]];
+    for (var n = 3; n <= 10; n++) o.artis.push([String(n), n + "+ Yıl"]);
+    o.donem = [["0", "Tümü"]];
+    [3, 5, 10, 15, 20, 25].forEach(function (n) { o.donem.push([String(n), n + " Yıl"]); });
+    o.verim = [["0", "Tümü"]];
+    [1, 2, 3, 4, 5, 6, 7, 8, 10].forEach(function (n) { o.verim.push([String(n), "≥ %" + n]); });
     return o;
   }
   var SECENEK = secenekUret();
@@ -716,7 +730,9 @@
   }
 
   function secimMetni(a) {
-    for (var i = 0; i < SECENEK[a].length; i++) if (SECENEK[a][i][0] === F[a]) return SECENEK[a][i][1];
+    for (var i = 0; i < SECENEK[a].length; i++) {
+      if (SECENEK[a][i][0] === F[a]) return FILTRE_AD[a] + ": " + SECENEK[a][i][1];
+    }
     return "";
   }
 
@@ -774,16 +790,8 @@
     return true;
   }
 
+  /* Sıralama sabit: Hisse Kodu (A → Z) */
   function karsilastir(a, b) {
-    var s = F.sirala;
-    if (s === "kod") return a.localeCompare(b, "tr");
-    if (s === "varsayilan") return veri[a].g.idx - veri[b].g.idx;
-    var key = (s === "yog") ? "yog" : (s === "verim" ? "ort" : "buyume");
-    var x = veri[a].m[key], y = veri[b].m[key];
-    if (x === null || x === undefined) x = -Infinity;
-    if (y === null || y === undefined) y = -Infinity;
-    if (x > y) return -1;
-    if (x < y) return 1;
     return a.localeCompare(b, "tr");
   }
 
@@ -795,7 +803,7 @@
     });
   }
 
-  /* Satırları seçili sıralamaya göre yeniden dizer (açık bilgi kartları satırlarıyla birlikte taşınır) */
+  /* Satırları sıralamaya göre yeniden dizer (açık bilgi kartları satırlarıyla birlikte taşınır) */
   function domSirala() {
     ["sol", "sag"].forEach(function (t) {
       var body = $(t + "-body"), dm = {};
@@ -854,7 +862,7 @@
       if (td) td.innerHTML = bilgiKartHtml(det[i].getAttribute("data-detay"));
     }
 
-    veriKaynakNotu = kaynakNotu + " · " + ["yog", "artis", "donem", "verim", "sirala"].map(secimMetni).join(" · ");
+    veriKaynakNotu = kaynakNotu + " · " + ["yog", "artis", "donem", "verim"].map(secimMetni).join(" · ");
     ekranYenile();
     durumYaz();
     if (tvBitti) yedekFiyatTamamla();
@@ -1434,7 +1442,7 @@
   }
   function esitlemeYaz(metin) {
     esitlemeNotu = metin;
-    var el = $("sayi");
+    var el = $("f-sayi");
     if (el) el.title = veriKaynakNotu + (metin ? " · Eşitleme: " + metin : "");
   }
 
