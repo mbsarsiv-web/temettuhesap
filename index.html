@@ -74,14 +74,24 @@
 
   .sekmeler { display: flex; margin: 5px auto 0; gap: 5px; max-width: var(--genislik); }
   .sekme {
-    flex: 1; height: 32px; border: 0; border-radius: 8px; padding: 0 4px;
-    font-size: 12.5px; font-weight: 700; color: #fff; opacity: .55; cursor: pointer;
+    flex: 1; height: 26px; border: 0; border-radius: 8px; padding: 0 4px;
+    font-size: 12px; font-weight: 700; color: #fff; opacity: .55; cursor: pointer;
   }
   .sekme .u { display: none; }
   .sekme.sol { background: var(--yesil); }
   .sekme.sag { background: var(--mavi); }
   .sekme.port { background: var(--altin); }
   .sekme.aktif { opacity: 1; box-shadow: 0 0 0 2px var(--yazi) inset; }
+
+  /* Hisse seçim kriteri satırı */
+  .kriter {
+    max-width: var(--genislik); margin: 4px auto 0;
+    font-size: 11px; line-height: 1.3; color: var(--soluk);
+    cursor: help;
+  }
+  .kriter b { color: var(--yazi); font-weight: 800; }
+  .kriter .k-uzun { display: none; }
+
   .durum { max-width: var(--genislik); margin: 3px auto 0; font-size: 11px; line-height: 1.3; color: var(--soluk); }
   .durum:empty { display: none; }
   .durum.uyari { color: #9b2c2c; font-weight: 700; }
@@ -105,10 +115,6 @@
   .panel.aktif { display: block; }
 
   table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 15px; text-align: center; }
-  caption { padding: 6px; color: #fff; font-size: 13px; font-weight: 700; letter-spacing: .02em; }
-  .p-sol caption { background: var(--yesil); }
-  .p-sag caption { background: var(--mavi); }
-  .p-port caption { background: var(--altin); }
   thead th {
     color: #fff; font-size: 9.5px; padding: 4px 1px; line-height: 1.15;
     border: 1px solid rgba(255,255,255,.25); position: sticky; top: var(--ust-yuk, 80px); z-index: 5;
@@ -130,17 +136,17 @@
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
   td.hisse small.sk:empty { display: none; }
-  
+
   /* Seçili Sütunların Fontunu Kalınlaştırma */
-  td[data-c='fiyat'], 
-  td[data-c='temettu'], 
-  td[data-c='tarih'], 
-  td[data-c='lot'], 
-  td[data-c='maliyet'] { 
-    font-weight: 800; 
+  td[data-c='fiyat'],
+  td[data-c='temettu'],
+  td[data-c='tarih'],
+  td[data-c='lot'],
+  td[data-c='maliyet'] {
+    font-weight: 800;
   }
   td[data-c='tarih'] { color: var(--yazi); }
-  
+
   td small.brut { display: block; font-size: 9.5px; color: var(--soluk); font-weight: 400; text-decoration: line-through; }
   td small.esd { display: block; font-size: 10px; font-weight: 800; color: #946c0c; }
   .tl { display: none; }
@@ -157,7 +163,6 @@
   .t4 th:nth-child(2), .t4 td:nth-child(2) { width: 18%; }
   .t4 th:nth-child(3), .t4 td:nth-child(3) { width: 31%; }
   .t4 th:nth-child(4), .t4 td:nth-child(4) { width: 31%; }
-  caption { display: none; }
 
   input.girdi {
     width: 100%; height: 30px; padding: 0 1px;
@@ -220,8 +225,10 @@
     .sekme { font-size: 13px; }
     .sekme .u { display: inline; }
     .sekme .k { display: none; }
+    .kriter { font-size: 12px; }
+    .kriter .k-uzun { display: inline; }
+    .kriter .k-dar { display: none; }
     #alan { padding: 8px 10px; }
-    caption { display: table-caption; }
     table { font-size: 15px; }
     thead th { font-size: 11.5px; padding: 5px 2px; }
     tbody td { font-size: 15px; padding: 3px 3px; }
@@ -277,6 +284,7 @@
     <button class="sekme sag" data-hedef="sag" type="button"><span class="u">LOT SAYISINA GÖRE</span><span class="k">LOT</span></button>
     <button class="sekme port" data-hedef="port" type="button"><span class="u">PORTFÖY</span><span class="k">PORTFÖY</span></button>
   </div>
+  <div class="kriter" id="kriter"></div>
   <div class="durum" id="durum"></div>
 </div>
 
@@ -286,7 +294,6 @@
 <div id="alan">
   <div class="panel p-sol aktif" id="panel-sol">
     <table class="t7">
-      <caption>AYLIK TEMETTÜ GİRİLECEK</caption>
       <thead>
         <tr><th>HİSSE</th><th>FİYAT</th><th>TEMETTÜ</th><th>SON TEMETTÜ TARİHİ</th><th>LOT</th><th>MALİYET</th><th>AYLIK TEMETTÜ</th></tr>
       </thead>
@@ -297,7 +304,6 @@
 
   <div class="panel p-sag" id="panel-sag">
     <table class="t7">
-      <caption>LOT GİRİLECEK</caption>
       <thead>
         <tr><th>HİSSE</th><th>FİYAT</th><th>TEMETTÜ</th><th>SON TEMETTÜ TARİHİ</th><th>LOT</th><th>MALİYET</th><th>AYLIK TEMETTÜ</th></tr>
       </thead>
@@ -308,7 +314,6 @@
 
   <div class="panel p-port" id="panel-port">
     <table class="t4">
-      <caption>PORTFÖY (iki sekmedeki girişlerin toplamı)</caption>
       <thead>
         <tr><th>HİSSE</th><th>LOT</th><th>MALİYET</th><th>AYLIK TEMETTÜ</th></tr>
       </thead>
@@ -334,7 +339,6 @@
       <div class="kalem"><span>Maliyet</span><b id="sag-toplam-maliyet">0 TL</b><small id="sag-alt-maliyet"></small></div>
       <div class="kalem"><span>Aylık temettü</span><b id="sag-toplam-aylik">0 TL</b><small id="sag-alt-aylik"></small></div>
     </div>
-    <!-- Sektör analizi buradan portföy sekmesinin içine taşındı -->
     <div class="blok" id="blok-port">
       <div class="kalem k-adet"><span>Hisse</span><b id="port-toplam-adet">0</b></div>
       <div class="kalem k-lot"><span>Lot</span><b id="port-toplam-lot">-</b></div>
@@ -501,14 +505,14 @@
     return fmtFiyat(net(d)) + brut;
   }
 
-  /* Mantıklı görünüm için tekrar "Önce alt sektör, sonra ana sektör" kurgusuna dönüldü */
+  /* Önce alt sektör, sonra ana sektör */
   function sektorMetni(d) {
     if (!d) return "";
     if (d.sanayi && SANAYI_TR[d.sanayi]) return SANAYI_TR[d.sanayi];
     if (d.sektor) return SEKTOR_TR[d.sektor] || d.sektor;
     return "";
   }
-  
+
   function sektorBaslik(d) {
     var s = "";
     if (d.sektor) s += "Sektör: " + (SEKTOR_TR[d.sektor] || d.sektor);
@@ -519,9 +523,31 @@
     d.skArama = (sektorMetni(d) + " " + (SEKTOR_TR[d.sektor] || "")).toLocaleUpperCase("tr");
   }
 
+  /* Hisse seçim kriteri satırı: değerler FILTRE_* değişkenlerinden ve liste.length'ten otomatik gelir */
+  function kriterYaz() {
+    var el = $("kriter");
+    if (!el) return;
+    var yog = String(FILTRE_YOGUNLUK).replace(".", ",");
+    var verim = String(FILTRE_VERIM).replace(".", ",");
+    var donem = FILTRE_DONEM > 0 ? "Son " + FILTRE_DONEM + " Yıl" : "Tüm Yıllar";
+    var sayiB = "<b>" + liste.length + " Hisse</b>";
+
+    el.innerHTML =
+      "<span class='k-uzun'>" + sayiB + " · Kriter: Temettü Ödeme Yoğunluğu ≥ " + yog +
+      " ve Ortalama Temettü Verimi ≥ %" + verim + " · Dönem: " + donem + "</span>" +
+      "<span class='k-dar'>" + sayiB + " · Yoğunluk ≥ " + yog +
+      " · Ort. Verim ≥ %" + verim + " · " + donem + "</span>";
+
+    el.title = "Yoğunluk: Şirketin incelenen yıllar içinde kaç yılda temettü ödediğinin oranıdır. " +
+      yog + " = yılların en az " + (FILTRE_YOGUNLUK >= 0.5 ? "yarısı" : "%" + Math.round(FILTRE_YOGUNLUK * 100) + "'i") +
+      " kadarında temettü ödemiş. Ortalama verim: Temettü ödenen yıllardaki yıllık temettü veriminin ortalamasıdır.";
+  }
+
   function bilgiYaz() {
     $("sayi").innerHTML = "<b>" + liste.length + "</b>Hisse";
     $("sayi").title = veriKaynakNotu + (esitlemeNotu ? " · Eşitleme: " + esitlemeNotu : "");
+    kriterYaz();
+    ustYukseklik();
   }
 
   var KUR_ANAHTAR = "temettuhesap_kur_v1";
@@ -609,7 +635,7 @@
       var d = new Date(kur.zaman);
       var saat = d.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
       var eski = kur.onbellek ? " <span class='soluk'>(eski)</span>" : "";
-      
+
       k.innerHTML =
         "<span class='k-tam'><b>1 $</b> = " + fmt(kur.usdTry, 2) + " TL<br>" +
         "<b>1 GR</b> Altın = " + fmt(gramAltinTL(), 2) + " TL" +
@@ -634,7 +660,7 @@
   function portfoyYaz() {
     if (!$("port-body")) return;
     var html = [], T = { lot: 0, maliyet: 0, aylik: 0, adet: 0 }, gorunen = 0;
-    var sektorDagilim = {}; 
+    var sektorDagilim = {};
 
     liste.forEach(function (k) {
       var d = veri[k];
@@ -645,16 +671,15 @@
       var maliyet = lot * d.fiyat;
       var aylik = (lot * nt) / 12;
       T.lot += lot; T.maliyet += maliyet; T.aylik += aylik; T.adet++;
-      
+
       var sAd = sektorMetni(d) || "Diğer";
       sektorDagilim[sAd] = (sektorDagilim[sAd] || 0) + maliyet;
 
       if (!aramaEslesir(k)) return;
       gorunen++;
-      
-      // Portföy sekmesinde hisselerin altına da sektörü yazdırıyoruz
+
       var hisseHtml = "<td class='hisse'>" + k + "<small class='sk' title='" + sektorBaslik(d) + "'>" + sektorMetni(d) + "</small></td>";
-      
+
       html.push("<tr>" + hisseHtml + "<td data-c='lot'>" + fmtLot(lot) + "</td>" +
         "<td data-c='maliyet'>" + fmtTL(maliyet) + "<small class='esd'>" + esdegerMetin(maliyet) + "</small></td>" +
         "<td>" + fmtTL(aylik) + "<small class='esd'>" + esdegerMetin(aylik) + "</small></td></tr>");
@@ -892,7 +917,7 @@
       var sektorStr = b.sektor || so.s || "";
       var sanayiStr = b.sanayi || so.i || "";
       var tamSektor = (sektorStr + " " + sanayiStr).toLocaleUpperCase("tr");
-      
+
       var isGyoHisse = String(kod).toUpperCase().indexOf("GY") > -1;
       var isGyoSektor = tamSektor.indexOf("GYO") > -1 || tamSektor.indexOf("GAYRİMENKUL") > -1 || tamSektor.indexOf("REAL ESTATE") > -1;
 
