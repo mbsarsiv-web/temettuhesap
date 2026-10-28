@@ -86,22 +86,22 @@
   /* ---------- Hisse seçim filtreleri (tek satır) ---------- */
   .filtre {
     display: flex; flex-wrap: nowrap; align-items: flex-end; gap: 5px;
-    margin: 0 0 6px; padding: 2px 1px 4px;
+    margin: 0 0 6px; padding: 5px 1px 4px;
     overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
   }
   .filtre::-webkit-scrollbar { display: none; }
 
   /* Hisse adedi: üstte sayı, altta "Hisse" (üst çubuktaki eski görünümle aynı) */
   .filtre .f-sayi {
-    width: 48px; align-self: stretch; display: flex; flex-direction: column;
+    width: 54px; align-self: stretch; display: flex; flex-direction: column;
     justify-content: center; align-items: center; line-height: 1;
     font-size: 11px; font-weight: 700; color: var(--soluk);
   }
-  .filtre .f-sayi b { display: block; font-size: 24px; font-weight: 800; line-height: 1.05; color: var(--yazi); }
+  .filtre .f-sayi b { display: block; font-size: 32px; font-weight: 800; line-height: 1.05; color: var(--yazi); }
 
-  .f-kutu { flex: 1 1 0; min-width: 60px; display: flex; flex-direction: column; gap: 2px; margin: 0; }
+  .f-kutu { flex: 1 1 0; min-width: 60px; display: flex; flex-direction: column; gap: 6px; margin: 0; }
   .f-kutu > span {
-    font-size: 12px; font-weight: 800; color: #4a564f; line-height: 1.1;
+    font-size: 14px; font-weight: 800; color: #4a564f; line-height: 1.1;
     text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .f-kutu > span i { font-style: normal; }
@@ -287,10 +287,10 @@
     .sekme .u { display: inline; }
     .sekme .k { display: none; }
     .filtre { gap: 8px; overflow-x: visible; }
-    .filtre .f-sayi { width: 56px; font-size: 12px; }
-    .filtre .f-sayi b { font-size: 28px; }
+    .filtre .f-sayi { width: 64px; font-size: 13px; }
+    .filtre .f-sayi b { font-size: 38px; }
     .f-kutu { min-width: 0; }
-    .f-kutu > span { font-size: 14px; }
+    .f-kutu > span { font-size: 16.5px; }
     .f-kutu > span .u { display: inline; }
     .f-kutu > span .k { display: none; }
     .filtre select { font-size: 13px; padding: 0 18px 0 6px; background-position: right 7px center; }
