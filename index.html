@@ -157,23 +157,25 @@
   /* ---------- Hisseye tıklayınca açılan bilgi kartı ---------- */
   tbody tr.detay { background: #fff; cursor: default; }
   tbody tr.detay td {
-    padding: 4px 8px 12px; white-space: normal; overflow: visible; text-overflow: clip;
+    padding: 3px 5px 6px; white-space: normal; overflow: visible; text-overflow: clip;
     border-bottom: 1px solid var(--cizgi); font-weight: 400;
   }
   .bilgi {
-    max-width: 440px; margin: 0 auto; padding: 14px 12px;
-    background: #eef8f1; border: 1px solid #bfe0cb; border-radius: 14px;
-    text-align: center; animation: bilgiAc .18s ease-out;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
+    margin: 0; padding: 6px 4px;
+    background: var(--zemin-k, #eef6f0);
+    border-left: 4px solid var(--vurgu, #1e6b3e);
+    border-radius: 6px;
+    animation: bilgiAc .18s ease-out;
   }
-  .bilgi .b-baslik { font-size: 12px; font-weight: 800; letter-spacing: .08em; color: #5b6670; }
-  .bilgi .b-deger { font-size: 34px; font-weight: 800; color: #1a9d52; line-height: 1.15; margin: 6px 0 12px; }
-  .bilgi .b-rozetler { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-  .bilgi .rozet {
-    display: inline-block; padding: 6px 12px; background: #fff;
-    border: 1px solid #d5e3da; border-radius: 999px;
-    font-size: 13px; font-weight: 600; color: #2c3a32;
-  }
-  .bilgi .rozet b { color: #1a9d52; font-weight: 800; }
+  .bilgi .b-kutu { text-align: center; padding: 1px 4px; border-right: 1px solid rgba(0,0,0,.09); min-width: 0; }
+  .bilgi .b-kutu:last-child { border-right: 0; }
+  .bilgi .b-etiket { font-size: 9.5px; font-weight: 700; letter-spacing: .03em; color: var(--soluk); line-height: 1.2; text-transform: uppercase; }
+  .bilgi .b-deger { font-size: 17px; font-weight: 800; color: var(--vurgu, #1e6b3e); line-height: 1.2; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .bilgi .b-deger.sifir { color: #9aa3a0; }
+  .p-sol .bilgi { --vurgu: #1e6b3e; --zemin-k: #eaf4ed; }
+  .p-sag .bilgi { --vurgu: #2b5797; --zemin-k: #eaf0f8; }
+  .p-port .bilgi { --vurgu: #8a6a1c; --zemin-k: #f7f1e1; }
   @keyframes bilgiAc { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
 
   /* Mobil: tarih sütunu gizli (tarih hisse adının altında), TL eki yok */
@@ -277,8 +279,9 @@
     input.girdi { height: 32px; font-size: 17px; }
     .toplam .kalem b { font-size: 15px; }
     .toplam .k-adet b, .toplam .k-lot b { font-size: 21px; }
-    .bilgi .b-deger { font-size: 38px; }
-    .bilgi .rozet { font-size: 14px; }
+    .bilgi { padding: 7px 6px; }
+    .bilgi .b-etiket { font-size: 11px; }
+    .bilgi .b-deger { font-size: 20px; }
   }
   @media (min-width: 900px) {
     .ara { flex: 1 1 400px; max-width: 600px; }
@@ -562,16 +565,18 @@
   function bilgiKartHtml(kod) {
     var d = veri[kod];
     if (!d) return "";
-    var ort = d.ortalama_verim > 0 ? "%" + fmtVerim(d.ortalama_verim) : "-";
-    var kes = (typeof d.kesintisiz === "number") ? d.kesintisiz + " Yıl" : "-";
-    var art = (typeof d.artis === "number") ? d.artis + " Yıl" : "-";
+    function kutu(etiket, metin, bos) {
+      return "<div class='b-kutu'><div class='b-etiket'>" + etiket + "</div>" +
+             "<div class='b-deger" + (bos ? " sifir" : "") + "'>" + metin + "</div></div>";
+    }
+    var ortVar = d.ortalama_verim > 0;
+    var kesVar = typeof d.kesintisiz === "number";
+    var artVar = typeof d.artis === "number";
     return "<div class='bilgi'>" +
-      "<div class='b-baslik'>ORTALAMA TEMETTÜ VERİMİ</div>" +
-      "<div class='b-deger'>" + ort + "</div>" +
-      "<div class='b-rozetler'>" +
-        "<span class='rozet'>💸 Kesintisiz Temettü Ödeme: <b>" + kes + "</b></span>" +
-        "<span class='rozet'>📈 Düzenli Temettü Artışı: <b>" + art + "</b></span>" +
-      "</div></div>";
+      kutu("Ortalama Temettü Verimi", ortVar ? "%" + fmtVerim(d.ortalama_verim) : "-", !ortVar) +
+      kutu("Kesintisiz Temettü Ödeme", kesVar ? d.kesintisiz + " Yıl" : "-", !kesVar || d.kesintisiz === 0) +
+      kutu("Düzenli Temettü Artışı", artVar ? d.artis + " Yıl" : "-", !artVar || d.artis === 0) +
+      "</div>";
   }
   function detaySatiri(kod, kolon) {
     return "<tr class='detay' data-detay='" + kod + "'><td colspan='" + kolon + "'>" + bilgiKartHtml(kod) + "</td></tr>";
