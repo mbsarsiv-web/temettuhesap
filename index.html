@@ -41,12 +41,12 @@
   }
   .ust-satir { display: flex; gap: 6px; align-items: center; flex-wrap: nowrap; max-width: var(--genislik); margin: 0 auto; }
   .ara {
-    flex: 0 1 190px; min-width: 110px;
+    flex: 1 1 0; min-width: 0;
     height: 34px; padding: 0 10px;
     border: 1px solid var(--cizgi); border-radius: 8px;
     font-size: 16px; background: #fff; color: var(--yazi);
   }
-  .sag-grup { display: flex; align-items: center; gap: 6px; flex: none; margin-left: auto; }
+  .sag-grup { display: flex; align-items: center; gap: 5px; flex: none; margin-left: auto; }
   .sayi { flex: none; text-align: center; font-size: 9px; line-height: 1.1; color: var(--soluk); font-weight: 600; }
   .sayi b { display: block; font-size: 14px; color: var(--yazi); font-weight: 800; }
   .stopaj {
@@ -54,7 +54,7 @@
     font-size: 8.5px; font-weight: 700; color: var(--soluk); line-height: 1;
   }
   .stopaj input {
-    width: 40px; height: 26px; padding: 0 2px; text-align: center;
+    width: 36px; height: 26px; padding: 0 2px; text-align: center;
     border: 1px solid var(--girdi-kenar); background: var(--girdi); color: var(--yazi);
     border-radius: 6px; font-size: 16px; font-weight: 700;
   }
@@ -67,9 +67,9 @@
   .kur .soluk { color: var(--soluk); font-weight: 600; }
   .kur .k-tam, .kur .ek { display: none; }
   .temizle {
-    height: 32px; padding: 0 7px; border-radius: 8px; flex: none;
+    height: 32px; padding: 0 6px; border-radius: 8px; flex: none;
     border: 1px solid var(--cizgi); background: #fff; color: #9b2c2c;
-    font-size: 11.5px; font-weight: 600; white-space: nowrap;
+    font-size: 11px; font-weight: 600; white-space: nowrap;
   }
 
   .sekmeler { display: flex; margin: 5px auto 0; gap: 5px; max-width: var(--genislik); }
@@ -92,16 +92,20 @@
   .filtre::-webkit-scrollbar { display: none; }
 
   /* Hisse adedi: üstte sayı, altta "Hisse" (üst çubuktaki eski görünümle aynı) */
-  .f-sayi {
-    width: 38px; height: 34px; display: flex; flex-direction: column;
-    justify-content: center; align-items: center;
+  .filtre .f-sayi {
+    width: 48px; align-self: stretch; display: flex; flex-direction: column;
+    justify-content: center; align-items: center; line-height: 1;
+    font-size: 11px; font-weight: 700; color: var(--soluk);
   }
+  .filtre .f-sayi b { display: block; font-size: 24px; font-weight: 800; line-height: 1.05; color: var(--yazi); }
 
   .f-kutu { flex: 1 1 0; min-width: 60px; display: flex; flex-direction: column; gap: 2px; margin: 0; }
   .f-kutu > span {
-    font-size: 8.5px; font-weight: 700; color: var(--soluk); line-height: 1;
+    font-size: 12px; font-weight: 800; color: #4a564f; line-height: 1.1;
     text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
+  .f-kutu > span i { font-style: normal; }
+  .f-kutu > span .u { display: none; }
   .filtre select {
     width: 100%; height: 34px; padding: 0 14px 0 3px; margin: 0;
     border: 1px solid var(--cizgi); border-radius: 8px; color: var(--yazi);
@@ -109,7 +113,7 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%236a766f' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
     background-repeat: no-repeat; background-position: right 4px center; background-size: 8px 5px;
     -webkit-appearance: none; appearance: none;
-    font-size: 16px; font-weight: 700; text-align: center; text-align-last: center;
+    font-size: 13px; font-weight: 600; text-align: center; text-align-last: center;
     text-overflow: ellipsis; white-space: nowrap; cursor: pointer;
   }
   .filtre select.aktif { border-color: var(--mavi); background-color: #f1f6fd; color: var(--mavi-koyu); }
@@ -283,10 +287,13 @@
     .sekme .u { display: inline; }
     .sekme .k { display: none; }
     .filtre { gap: 8px; overflow-x: visible; }
-    .f-sayi { width: 46px; }
+    .filtre .f-sayi { width: 56px; font-size: 12px; }
+    .filtre .f-sayi b { font-size: 28px; }
     .f-kutu { min-width: 0; }
-    .f-kutu > span { font-size: 10px; }
-    .filtre select { font-size: 14px; padding: 0 18px 0 6px; background-position: right 7px center; }
+    .f-kutu > span { font-size: 14px; }
+    .f-kutu > span .u { display: inline; }
+    .f-kutu > span .k { display: none; }
+    .filtre select { font-size: 13px; padding: 0 18px 0 6px; background-position: right 7px center; }
     .f-temizle { width: auto; padding: 0 12px; font-size: 13px; font-weight: 600; }
     .f-temizle .yz { display: inline; }
     #alan { padding: 8px 10px; max-width: calc(var(--genislik) + 20px); }
@@ -326,8 +333,8 @@
     thead th { font-size: 9px; }
     .toplam .kalem b { font-size: 13.5px; }
     .toplam .k-adet b, .toplam .k-lot b { font-size: 17px; }
-    .f-kutu { min-width: 56px; }
-    .filtre select { font-size: 15px; }
+    .f-kutu { min-width: 54px; }
+    .filtre select { font-size: 12.5px; }
   }
 </style>
 </head>
@@ -360,9 +367,9 @@
   <div class="filtre" id="filtre">
     <div class="sayi f-sayi" id="f-sayi"><b>0</b>Hisse</div>
     <label class="f-kutu"><span>Yoğunluk</span><select id="f-yog" title="Yoğunluk" aria-label="Yoğunluk"></select></label>
-    <label class="f-kutu"><span>Artış Trendi</span><select id="f-artis" title="Artış Trendi" aria-label="Artış Trendi"></select></label>
+    <label class="f-kutu"><span><i class="u">Artış Trendi</i><i class="k">Artış</i></span><select id="f-artis" title="Artış Trendi" aria-label="Artış Trendi"></select></label>
     <label class="f-kutu"><span>Dönem</span><select id="f-donem" title="Dönem" aria-label="Dönem"></select></label>
-    <label class="f-kutu"><span>Ort. Verim</span><select id="f-verim" title="Ortalama Verim" aria-label="Ortalama Verim"></select></label>
+    <label class="f-kutu"><span><i class="u">Ort. Verim</i><i class="k">Verim</i></span><select id="f-verim" title="Ortalama Verim" aria-label="Ortalama Verim"></select></label>
     <button class="f-temizle" id="f-temizle" type="button" title="Filtreleri Temizle" aria-label="Filtreleri Temizle"><span class="x">✕</span><span class="yz"> Filtreleri Temizle</span></button>
   </div>
   <div class="panel p-sol aktif" id="panel-sol">
@@ -681,6 +688,7 @@
       ["0.9", "≥ 0,90"],
       ["0.8", "≥ 0,80"],
       ["0.7", "≥ 0,70"],
+      ["0.6", "≥ 0,60"],
       ["0.5", "≥ 0,50"],
       ["veren", "Veren"],
       ["vermeyen", "Vermez"]
