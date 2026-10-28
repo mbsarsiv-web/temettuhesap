@@ -109,7 +109,8 @@
   }
 
   /* ---------- Tablolar ---------- */
-  #alan { display: none; padding: 6px 6px; max-width: var(--genislik); margin: 0 auto; }
+  /* Üst çubuktaki (.ust + .ust-satir) genişlik/dolgu ile birebir aynı: kenarlar aynı hizada kalır */
+  #alan { display: none; padding: 6px 6px; max-width: calc(var(--genislik) + 12px); margin: 0 auto; }
   #alan.goster { display: block; }
   .panel { display: none; background: var(--kart); border: 1px solid var(--cizgi); border-radius: 8px; overflow: clip; }
   .panel.aktif { display: block; }
@@ -126,9 +127,11 @@
     padding: 2px 2px; border-bottom: 1px solid var(--cizgi); font-size: 12.5px; font-weight: 600;
     font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.15;
   }
-  tbody tr:nth-child(even) { background: #f8faf9; }
+  tbody tr.cift { background: #f8faf9; }
   tbody tr.dolu { background: #e9f4ec; }
   .p-sag tbody tr.dolu { background: #e8eff8; }
+  tbody tr[data-kod] { cursor: pointer; }
+  tbody tr.acik td { border-bottom-color: transparent; }
   td.hisse { font-weight: 800; font-size: 13.5px; text-align: left; padding-left: 5px; }
   td.hisse small.mt { display: block; font-size: 9.5px; font-weight: 500; color: var(--soluk); }
   td.hisse small.sk {
@@ -151,6 +154,28 @@
   td small.esd { display: block; font-size: 10px; font-weight: 800; color: #946c0c; }
   .tl { display: none; }
 
+  /* ---------- Hisseye tıklayınca açılan bilgi kartı ---------- */
+  tbody tr.detay { background: #fff; cursor: default; }
+  tbody tr.detay td {
+    padding: 4px 8px 12px; white-space: normal; overflow: visible; text-overflow: clip;
+    border-bottom: 1px solid var(--cizgi); font-weight: 400;
+  }
+  .bilgi {
+    max-width: 440px; margin: 0 auto; padding: 14px 12px;
+    background: #eef8f1; border: 1px solid #bfe0cb; border-radius: 14px;
+    text-align: center; animation: bilgiAc .18s ease-out;
+  }
+  .bilgi .b-baslik { font-size: 12px; font-weight: 800; letter-spacing: .08em; color: #5b6670; }
+  .bilgi .b-deger { font-size: 34px; font-weight: 800; color: #1a9d52; line-height: 1.15; margin: 6px 0 12px; }
+  .bilgi .b-rozetler { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .bilgi .rozet {
+    display: inline-block; padding: 6px 12px; background: #fff;
+    border: 1px solid #d5e3da; border-radius: 999px;
+    font-size: 13px; font-weight: 600; color: #2c3a32;
+  }
+  .bilgi .rozet b { color: #1a9d52; font-weight: 800; }
+  @keyframes bilgiAc { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
   /* Mobil: tarih sütunu gizli (tarih hisse adının altında), TL eki yok */
   .t7 th:nth-child(4), .t7 td:nth-child(4) { display: none; }
   .t7 th:nth-child(1), .t7 td:nth-child(1) { width: 17%; }
@@ -163,12 +188,14 @@
   .t4 th:nth-child(2), .t4 td:nth-child(2) { width: 18%; }
   .t4 th:nth-child(3), .t4 td:nth-child(3) { width: 31%; }
   .t4 th:nth-child(4), .t4 td:nth-child(4) { width: 31%; }
+  /* Açılan bilgi kartı satırı tüm sütunlara yayılır; sütun genişlik kuralları ona uygulanmaz */
+  tbody tr.detay td:first-child { width: auto; }
 
   input.girdi {
     width: 100%; height: 30px; padding: 0 1px;
     text-align: center; font-size: 16px; font-weight: 800;
     border: 1px solid var(--girdi-kenar); background: var(--girdi); color: var(--yazi);
-    border-radius: 6px;
+    border-radius: 6px; cursor: text;
   }
   input.girdi:focus { outline: 2px solid var(--yazi); outline-offset: 0; }
   input.girdi { scroll-margin-top: calc(var(--ust-yuk, 80px) + 40px); scroll-margin-bottom: 96px; }
@@ -228,7 +255,7 @@
     .kriter { font-size: 12px; }
     .kriter .k-uzun { display: inline; }
     .kriter .k-dar { display: none; }
-    #alan { padding: 8px 10px; }
+    #alan { padding: 8px 10px; max-width: calc(var(--genislik) + 20px); }
     table { font-size: 15px; }
     thead th { font-size: 11.5px; padding: 5px 2px; }
     tbody td { font-size: 15px; padding: 3px 3px; }
@@ -246,9 +273,12 @@
     .t7 th:nth-child(5), .t7 td:nth-child(5) { width: 13%; }
     .t7 th:nth-child(6), .t7 td:nth-child(6) { width: 18%; }
     .t7 th:nth-child(7), .t7 td:nth-child(7) { width: 16%; }
+    tbody tr.detay td:first-child { width: auto; }
     input.girdi { height: 32px; font-size: 17px; }
     .toplam .kalem b { font-size: 15px; }
     .toplam .k-adet b, .toplam .k-lot b { font-size: 21px; }
+    .bilgi .b-deger { font-size: 38px; }
+    .bilgi .rozet { font-size: 14px; }
   }
   @media (min-width: 900px) {
     .ara { flex: 1 1 400px; max-width: 600px; }
@@ -466,8 +496,12 @@
   var giris = { sol: {}, sag: {}, stopaj: "15" };
   var aktifSekme = "sol";
   var veriKaynakNotu = "";
+  var acik = { sol: {}, sag: {}, port: {} };   // bilgi kartı açık olan hisseler
 
   function $(id) { return document.getElementById(id); }
+
+  /* Yalnızca hisse satırları (açılan bilgi kartı satırları hariç) */
+  function hisseSatirlari(bodyId) { return $(bodyId).querySelectorAll("tr[data-kod]"); }
 
   function sayi(metin) {
     if (metin === null || metin === undefined) return 0;
@@ -489,6 +523,7 @@
   function fmtLot(n)   { return fmt(Math.round(n), 0); }
   function fmtTL(n)    { return fmt(Math.round(n), 0) + " TL"; }
   function fmtTLh(n)   { return fmt(Math.round(n), 0) + "<span class='tl'> TL</span>"; }
+  function fmtVerim(n) { return n.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 
   function stopajOrani() {
     var n = parseFloat(String(giris.stopaj === undefined ? "15" : giris.stopaj).replace(",", "."));
@@ -523,7 +558,56 @@
     d.skArama = (sektorMetni(d) + " " + (SEKTOR_TR[d.sektor] || "")).toLocaleUpperCase("tr");
   }
 
-  /* Hisse seçim kriteri satırı: değerler FILTRE_* değişkenlerinden ve liste.length'ten otomatik gelir */
+  /* ---------- Hisse bilgi kartı (satıra tıklayınca açılır) ---------- */
+  function bilgiKartHtml(kod) {
+    var d = veri[kod];
+    if (!d) return "";
+    var ort = d.ortalama_verim > 0 ? "%" + fmtVerim(d.ortalama_verim) : "-";
+    var kes = (typeof d.kesintisiz === "number") ? d.kesintisiz + " Yıl" : "-";
+    var art = (typeof d.artis === "number") ? d.artis + " Yıl" : "-";
+    return "<div class='bilgi'>" +
+      "<div class='b-baslik'>ORTALAMA TEMETTÜ VERİMİ</div>" +
+      "<div class='b-deger'>" + ort + "</div>" +
+      "<div class='b-rozetler'>" +
+        "<span class='rozet'>💸 Kesintisiz Temettü Ödeme: <b>" + kes + "</b></span>" +
+        "<span class='rozet'>📈 Düzenli Temettü Artışı: <b>" + art + "</b></span>" +
+      "</div></div>";
+  }
+  function detaySatiri(kod, kolon) {
+    return "<tr class='detay' data-detay='" + kod + "'><td colspan='" + kolon + "'>" + bilgiKartHtml(kod) + "</td></tr>";
+  }
+
+  function satirTikla(e) {
+    var tbody = e.currentTarget;
+    var t = e.target;
+    if (!t || !t.closest) return;
+    if (t.closest(".c-in") || t.closest("tr.detay")) return;   // giriş kutusuna / karta tıklama açıp kapatmaz
+    var tr = t.closest("tr[data-kod]");
+    if (!tr) return;
+    var kod = tr.getAttribute("data-kod");
+    var tip = tbody.id.replace("-body", "");
+
+    if (tip === "port") {
+      if (acik.port[kod]) delete acik.port[kod]; else acik.port[kod] = true;
+      portfoyYaz();
+      return;
+    }
+    var sonraki = tr.nextElementSibling;
+    if (sonraki && sonraki.classList.contains("detay")) {
+      sonraki.parentNode.removeChild(sonraki);
+      tr.classList.remove("acik");
+      delete acik[tip][kod];
+    } else {
+      tr.insertAdjacentHTML("afterend", detaySatiri(kod, 7));
+      tr.classList.add("acik");
+      acik[tip][kod] = true;
+    }
+  }
+  $("sol-body").addEventListener("click", satirTikla);
+  $("sag-body").addEventListener("click", satirTikla);
+  $("port-body").addEventListener("click", satirTikla);
+
+  /* Hisse sayısı ve kriter değerleri FILTRE_* değişkenlerinden ve liste.length'ten otomatik gelir */
   function kriterYaz() {
     var el = $("kriter");
     if (!el) return;
@@ -676,13 +760,15 @@
       sektorDagilim[sAd] = (sektorDagilim[sAd] || 0) + maliyet;
 
       if (!aramaEslesir(k)) return;
+      var sinif = (gorunen % 2 === 0 ? "cift" : "") + (acik.port[k] ? " acik" : "");
       gorunen++;
 
       var hisseHtml = "<td class='hisse'>" + k + "<small class='sk' title='" + sektorBaslik(d) + "'>" + sektorMetni(d) + "</small></td>";
 
-      html.push("<tr>" + hisseHtml + "<td data-c='lot'>" + fmtLot(lot) + "</td>" +
+      html.push("<tr data-kod='" + k + "' class='" + sinif + "'>" + hisseHtml + "<td data-c='lot'>" + fmtLot(lot) + "</td>" +
         "<td data-c='maliyet'>" + fmtTL(maliyet) + "<small class='esd'>" + esdegerMetin(maliyet) + "</small></td>" +
         "<td>" + fmtTL(aylik) + "<small class='esd'>" + esdegerMetin(aylik) + "</small></td></tr>");
+      if (acik.port[k]) html.push(detaySatiri(k, 4));
     });
     $("port-body").innerHTML = html.join("");
     $("port-bos").style.display = gorunen === 0 ? "block" : "none";
@@ -866,7 +952,21 @@
         if (h && h > 0) { sonYil = y2; sonToplam = h; break; }
       }
 
-      var kayit = { kod: hKod, ort: ortVerim, adet: odemeYil, yog: yogunluk, hbYil: sonYil, hbToplam: sonToplam };
+      /* Bilgi kartı için seriler: içinde bulunulan yıl henüz ödeme yoksa bir önceki yıldan geriye sayılır */
+      var bitisYil = (verimMap[hKod + "_" + guncelYil] > 0) ? guncelYil : guncelYil - 1;
+      var kesintisiz = 0;
+      for (var ky = bitisYil; ky >= 1990; ky--) {
+        var kv = verimMap[hKod + "_" + ky];
+        if (kv !== undefined && !isNaN(kv) && kv > 0) kesintisiz++; else break;
+      }
+      var artis = 0;
+      for (var ay = bitisYil; ay > 1990; ay--) {
+        var a1 = hbMap[hKod + "_" + ay], a0 = hbMap[hKod + "_" + (ay - 1)];
+        if (a1 > 0 && a0 > 0 && a1 > a0) artis++; else break;
+      }
+
+      var kayit = { kod: hKod, ort: ortVerim, adet: odemeYil, yog: yogunluk, hbYil: sonYil, hbToplam: sonToplam,
+                    kesintisiz: kesintisiz, artis: artis };
       tumu.push(kayit);
 
       if (yogunluk >= FILTRE_YOGUNLUK && ortVerim >= FILTRE_VERIM) gecen.push(kayit);
@@ -927,6 +1027,8 @@
         tarih: tarih,
         stopajsiz: (isGyoHisse || isGyoSektor),
         ortalama_verim: g.ort,
+        kesintisiz: g.kesintisiz,
+        artis: g.artis,
         sektor: sektorStr,
         sanayi: sanayiStr
       };
@@ -1153,7 +1255,7 @@
 
   function temettuHucreleriniYenile() {
     ["sol-body", "sag-body"].forEach(function (id) {
-      var satirlar = $(id).children;
+      var satirlar = hisseSatirlari(id);
       for (var i = 0; i < satirlar.length; i++) {
         var h = satirlar[i].querySelector("[data-c=temettu]");
         if (h) h.innerHTML = temettuHucre(veri[satirlar[i].getAttribute("data-kod")]);
@@ -1249,8 +1351,9 @@
 
   function tablolariCiz() {
     var sol = [], sag = [];
-    liste.forEach(function (k) {
+    liste.forEach(function (k, sira) {
       var d = veri[k];
+      var sinif = (sira % 2 === 0) ? "cift" : "";
       var fiyatMetni = d.fiyat > 0 ? fmtFiyat(d.fiyat) : "-";
       var ortak = "<td class='hisse'>" + k + (d.tarih ? "<small class='mt'>" + d.tarih + "</small>" : "") +
                   "<small class='sk' title='" + sektorBaslik(d) + "'>" + sektorMetni(d) + "</small></td>" +
@@ -1258,12 +1361,12 @@
                   "<td data-c='temettu' data-l='TEMETTÜ'>" + temettuHucre(d) + "</td>" +
                   "<td data-c='tarih' data-l='SON TEMETTÜ'>" + (d.tarih || "-") + "</td>";
 
-      sol.push("<tr data-kod='" + k + "'>" + ortak +
+      sol.push("<tr data-kod='" + k + "' class='" + sinif + "'>" + ortak +
         "<td data-c='lot' data-l='LOT'>0</td>" +
         "<td data-c='maliyet' data-l='MALİYET'>0 TL</td>" +
         "<td class='c-in' data-l='AYLIK TEMETTÜ (TL)'><input class='girdi' inputmode='decimal' autocomplete='off' placeholder='0' enterkeyhint='next' data-t='sol' data-kod='" + k + "' value='" + (giris.sol[k] || "") + "'></td></tr>");
 
-      sag.push("<tr data-kod='" + k + "'>" + ortak +
+      sag.push("<tr data-kod='" + k + "' class='" + sinif + "'>" + ortak +
         "<td class='c-in' data-l='LOT'><input class='girdi' inputmode='decimal' autocomplete='off' placeholder='0' enterkeyhint='next' data-t='sag' data-kod='" + k + "' value='" + (giris.sag[k] || "") + "'></td>" +
         "<td data-c='maliyet' data-l='MALİYET'>0 TL</td>" +
         "<td data-c='aylik' data-l='AYLIK TEMETTÜ'>0 TL</td></tr>");
@@ -1284,7 +1387,7 @@
     }
     tr.querySelector("[data-c=lot]").textContent = fmtLot(lot);
     tr.querySelector("[data-c=maliyet]").innerHTML = fmtTLh(maliyet);
-    tr.className = aylik > 0 ? "dolu" : "";
+    tr.classList.toggle("dolu", aylik > 0);
     return { lot: lot, maliyet: maliyet, aylik: aylik };
   }
 
@@ -1295,13 +1398,13 @@
     var aylik = (lot * net(d)) / 12;
     tr.querySelector("[data-c=maliyet]").innerHTML = fmtTLh(maliyet);
     tr.querySelector("[data-c=aylik]").innerHTML = fmtTLh(aylik);
-    tr.className = lot > 0 ? "dolu" : "";
+    tr.classList.toggle("dolu", lot > 0);
     return { lot: lot, maliyet: maliyet, aylik: aylik };
   }
 
   function hesaplaSol() {
     var T = { lot: 0, maliyet: 0, aylik: 0, adet: 0 };
-    var satirlar = $("sol-body").children;
+    var satirlar = hisseSatirlari("sol-body");
     for (var i = 0; i < satirlar.length; i++) {
       var r = satirSol(satirlar[i], satirlar[i].getAttribute("data-kod"));
       T.lot += r.lot; T.maliyet += r.maliyet; T.aylik += r.aylik;
@@ -1317,7 +1420,7 @@
 
   function hesaplaSag() {
     var T = { lot: 0, maliyet: 0, aylik: 0, adet: 0 };
-    var satirlar = $("sag-body").children;
+    var satirlar = hisseSatirlari("sag-body");
     for (var i = 0; i < satirlar.length; i++) {
       var r = satirSag(satirlar[i], satirlar[i].getAttribute("data-kod"));
       T.lot += r.lot; T.maliyet += r.maliyet; T.aylik += r.aylik;
@@ -1363,7 +1466,7 @@
     e.preventDefault();
     var tr = el.closest("tr");
     var sonraki = tr ? tr.nextElementSibling : null;
-    while (sonraki && sonraki.style.display === "none") sonraki = sonraki.nextElementSibling;
+    while (sonraki && (sonraki.style.display === "none" || sonraki.classList.contains("detay"))) sonraki = sonraki.nextElementSibling;
     if (sonraki) {
       var kutu = sonraki.querySelector("input.girdi");
       if (kutu) kutu.focus();
@@ -1379,23 +1482,19 @@
     if (t !== this.value) this.value = t;
     giris.stopaj = t;
     depoYaz();
-    ["sol-body", "sag-body"].forEach(function (id) {
-      var satirlar = $(id).children;
-      for (var i = 0; i < satirlar.length; i++) {
-        var h = satirlar[i].querySelector("[data-c=temettu]");
-        if (h) h.innerHTML = temettuHucre(veri[satirlar[i].getAttribute("data-kod")]);
-      }
-    });
+    temettuHucreleriniYenile();
     bilgiYaz();
     hesaplaHepsi();
   });
 
   function aramaUygula() {
     ["sol", "sag"].forEach(function (t) {
-      var satirlar = $(t + "-body").children, gorunen = 0;
+      var satirlar = hisseSatirlari(t + "-body"), gorunen = 0;
       for (var i = 0; i < satirlar.length; i++) {
         var eslesir = aramaEslesir(satirlar[i].getAttribute("data-kod"));
         satirlar[i].style.display = eslesir ? "" : "none";
+        var sonraki = satirlar[i].nextElementSibling;
+        if (sonraki && sonraki.classList.contains("detay")) sonraki.style.display = eslesir ? "" : "none";
         if (eslesir) gorunen++;
       }
       $(t + "-bos").style.display = gorunen === 0 ? "block" : "none";
