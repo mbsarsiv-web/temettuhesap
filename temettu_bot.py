@@ -354,12 +354,13 @@ def is_yatirim_satirlari(session):
         except Exception:
             pass
 
+        # ÇÖZÜM: Tüm işlemleri getirmesi için filtreler boş bırakıldı
         payload = {
             "hisseKodu": "",
-            "hisseTanimKodu": "04",
+            "hisseTanimKodu": "",
             "yil": 0,
             "zaman": "HEPSI",
-            "endeksKodu": "09",
+            "endeksKodu": "",
             "sektorKodu": "",
         }
 
