@@ -10,13 +10,18 @@ GITHUB_TOKEN = os.environ.get("GH_TOKEN")
 REPO = "mbsarsiv-web/temettu-bot"
 DOSYA = "temettu_veri.json"
 
-# NOT: Filtreleme (Yoğunluk >= 0,50 / Son 10 Yıl / Verim >= %3) bu botta YAPILMAZ.
+# NOT: Filtreleme (Yoğunluk / Dönem / Verim) bu botta YAPILMAZ.
 # Hisse listesi ve filtreler "TEMETTÜ ANALİZ" uygulamasının kaynağından, hesaplama
 # uygulaması (index.html) içinde uygulanır. Bot, fiyat ve hisse başı temettü verisini üretir.
 #
-# YENİ: Her hisse için tarihli temettü geçmişi ("temettuler") ve bedelsiz bölünme
-# kayıtları ("bolunmeler") de yazılır. index.html, geçmiş yıllardaki lot sayısını
+# Her hisse için tarihli temettü geçmişi ("temettuler") ve bedelsiz bölünme
+# kayıtları ("bolunmeler") yazılır. index.html, geçmiş yıllardaki lot sayısını
 # bu verilerle hesaplar (güncel lot ÷ o tarihten sonraki bedelsiz çarpanları).
+#
+# BÖLÜNME KAYNAĞI ÖNCELİĞİ:
+#   1) İş Yatırım (tam tarihli, en güvenilir)
+#   2) Temettü Analiz (GAS) tablosundaki "Bedelsiz" sütunu (İş Yatırım'da kaydı olmayan hisseler için)
+# İki kaynak aynı hissede ASLA birleştirilmez (çift sayımı önlemek için).
 
 IS_URL = "https://www.isyatirim.com.tr/_layouts/15/IsYatirim.Website/StockInfo/CompanyInfoAjax.aspx/GetSermayeArttirimlari"
 IS_SAYFA = "https://www.isyatirim.com.tr/tr-tr/analiz/hisse/Sayfalar/Temettu-Ve-Sermaye-Artirimi-Tarihcesi.aspx"
@@ -57,6 +62,10 @@ def parse_sayi(val):
 def sayi_metni(x):
     """Gereksiz sıfırları atılmış sayı metni (JSON'u küçük tutmak için)."""
     return ("%.6f" % x).rstrip("0").rstrip(".")
+
+def norm(s):
+    """Türkçe harfleri sadeleştirip büyük harfe çevirir (başlık karşılaştırmaları için)."""
+    return str(s).replace("İ", "I").replace("ı", "I").replace("Ş", "S").replace("ş", "S").upper().strip()
 
 def parse_tarih(val):
     if val is None:
@@ -256,9 +265,45 @@ def eksik_fiyatlari_tamamla(kodlar, fiyatlar, oncelik=()):
     log("Yedek kaynaklarla bulunan:", bulunan, "| hala fiyati olmayan:", ", ".join(kalan) if kalan else "yok")
 
 # ----------------------------------------------------------------------
-# "TEMETTÜ ANALİZ" kaynağındaki hisse kodları
+# "TEMETTÜ ANALİZ" kaynağındaki hisse kodları + "Bedelsiz" sütunu
 # ----------------------------------------------------------------------
-def gas_kodlari(session):
+def gas_tarih_int(val, yil):
+    """Satırdaki tam tarih varsa onu, yalnızca yıl varsa o yılın 30 Haziran'ını döndürür."""
+    t, _ = parse_tarih(val)
+    if t > 0:
+        return t
+    return yil * 10000 + 630
+
+def gas_bedelsiz_tara(tablo, sonuc):
+    """Başlığında KOD, (YIL/TARIH) ve BEDEL(SIZ) geçen herhangi bir tablodan bedelsiz oranlarını ekler.
+    sonuc: {kod: {tarih_int: oran_yuzde}}"""
+    if not isinstance(tablo, list) or len(tablo) < 2 or not isinstance(tablo[0], list):
+        return 0
+    bas = [norm(x) for x in tablo[0]]
+    kod_i = next((i for i, b in enumerate(bas) if b == "KOD"), None)
+    bd_i = next((i for i, b in enumerate(bas) if "BEDEL" in b), None)
+    tar_i = next((i for i, b in enumerate(bas) if b in ("YIL", "TARIH")), None)
+    if kod_i is None or bd_i is None or tar_i is None:
+        return 0
+    eklenen = 0
+    for satir in tablo[1:]:
+        if not isinstance(satir, list) or len(satir) <= max(kod_i, bd_i, tar_i):
+            continue
+        kod = str(satir[kod_i] or "").strip().upper()
+        oran = parse_sayi(satir[bd_i])
+        if not kod or oran <= 0:
+            continue
+        m = re.search(r"(19|20)\d\d", str(satir[tar_i]))
+        if not m:
+            continue
+        t = gas_tarih_int(satir[tar_i], int(m.group(0)))
+        d = sonuc.setdefault(kod, {})
+        d[t] = max(d.get(t, 0.0), oran)
+        eklenen += 1
+    return eklenen
+
+def gas_verisi(session):
+    """(hisse_kodlari, {kod: {tarih_int: bedelsiz_oran}}) döndürür."""
     try:
         r = session.get(GAS_URL + "?t=%d" % int(time.time()), timeout=120)
         js = r.json()
@@ -270,10 +315,22 @@ def gas_kodlari(session):
                 if k:
                     kodlar.add(k)
         log("Temettu Analiz kaynagindaki hisse sayisi:", len(kodlar))
-        return kodlar
+
+        bol = {}
+        if isinstance(js, dict):
+            log("GAS tablo anahtarlari:", ", ".join(str(k) for k in js.keys()))
+            for anahtar, deger in js.items():
+                if anahtar == "anaTablo":
+                    continue
+                if isinstance(deger, list) and deger and isinstance(deger[0], list):
+                    n = gas_bedelsiz_tara(deger, bol)
+                    log("GAS '%s' tablosu basliklari: %s | bedelsiz satiri: %d" %
+                        (anahtar, [str(x) for x in deger[0]], n))
+        log("GAS'ta bedelsiz kaydi olan hisse sayisi:", len(bol))
+        return kodlar, bol
     except Exception as e:
         log("Temettu Analiz kaynagi okunamadi (yedek kullanilmayacak):", repr(e))
-        return set()
+        return set(), {}
 
 # ----------------------------------------------------------------------
 # İş Yatırım temettü verisi
@@ -345,10 +402,11 @@ def satiri_coz(satir):
 
 def bedelsiz_orani(satir):
     """Satırdaki bedelsiz sermaye artırımı oranı (%).
-    Alan adları 'BDLZ' ve 'ORAN' içerir (ör. iç kaynaklardan / temettüden bedelsiz).
+    Alan adları 'BDLZ' (veya 'BEDELSIZ') ve 'ORAN' içerir (ör. iç kaynaklardan / temettüden bedelsiz).
     Toplam bir alan varsa o, yoksa alt alanların toplamı alınır."""
     anahtarlar = [k for k in satir.keys()
-                  if "BDLZ" in str(k).upper() and "ORAN" in str(k).upper()]
+                  if ("BDLZ" in str(k).upper() or "BEDELSIZ" in norm(k))
+                  and "ORAN" in str(k).upper()]
     if not anahtarlar:
         return 0.0
     toplam = [k for k in anahtarlar if not any(x in str(k).upper() for x in ("_IK_", "_TM_"))]
@@ -381,7 +439,19 @@ def bolunme_kayitlari(satirlar):
             continue
         d = sonuc.setdefault(kod, {})
         d[t_int] = max(d.get(t_int, 0.0), oran)
-    log("Bedelsiz bolunme kaydi olan hisse sayisi:", len(sonuc))
+    log("Is Yatirim bedelsiz bolunme kaydi olan hisse sayisi:", len(sonuc))
+    return sonuc
+
+def bolunmeleri_birlestir(isy, gas_bol):
+    """İş Yatırım'da kaydı olan hissede yalnızca İş Yatırım kullanılır; olmayanlarda GAS kullanılır.
+    (Aynı bölünmenin iki kaynaktan çift sayılmasını önler.)"""
+    sonuc = {k: dict(v) for k, v in isy.items() if v}
+    gas_eklenen = 0
+    for kod, d in gas_bol.items():
+        if kod not in sonuc and d:
+            sonuc[kod] = dict(d)
+            gas_eklenen += 1
+    log("Bolunme kaynagi: Is Yatirim %d hisse, Temettu Analiz (ek) %d hisse" % (len(sonuc) - gas_eklenen, gas_eklenen))
     return sonuc
 
 def gecmis_metinleri(kod, kayitlar, bolunmeler):
@@ -489,8 +559,9 @@ def main():
         sys.exit(1)
 
     ham = temettu_kayitlari(satirlar)
-    bolunmeler = bolunme_kayitlari(satirlar)
-    gas = gas_kodlari(session)
+    isy_bol = bolunme_kayitlari(satirlar)
+    gas, gas_bol = gas_verisi(session)
+    bolunmeler = bolunmeleri_birlestir(isy_bol, gas_bol)
 
     hedef = set(ham.keys()) | gas
     eksik_fiyatlari_tamamla(hedef, fiyatlar, gas)
@@ -499,7 +570,7 @@ def main():
 
     veri = veriyi_hazirla(ham, fiyatlar, gas, sektorler, bolunmeler)
     log("Hazirlanan hisse sayisi:", len(veri))
-    for ornek in ("FROTO", "AKSA", "TUPRS"):
+    for ornek in ("FROTO", "ISMEN", "AKSA", "TUPRS"):
         if ornek in veri:
             log("  %s bolunmeler: %s" % (ornek, veri[ornek].get("bolunmeler") or "yok"))
 
