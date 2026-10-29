@@ -348,47 +348,58 @@ def is_yatirim_satirlari(session):
         "Referer": IS_SAYFA,
     })
 
-    for deneme in range(3):
-        try:
-            session.get(IS_SAYFA, timeout=30)
-        except Exception:
-            pass
+    try:
+        session.get(IS_SAYFA, timeout=30)
+    except Exception:
+        pass
 
-        # ÇÖZÜM: "09" (BİST TÜM) kodu geri eklendi, Tip ("") boş bırakılarak tüm bedelsiz ve temettüler dahil edildi.
+    # ÇÖZÜM: 500 hatasını önlemek ve verileri eksiksiz alabilmek için 
+    # API'ye devasa tek bir istek atmak yerine 3 ayrı tipe (Nakit Temettü, Bedelsiz, Bedelli) göre istek atıyoruz.
+    tipler = ["04", "01", "02"] 
+    tum_satirlar = []
+
+    for tip in tipler:
         payload = {
             "hisseKodu": "",
-            "hisseTanimKodu": "",
+            "hisseTanimKodu": tip,
             "yil": 0,
             "zaman": "HEPSI",
             "endeksKodu": "09",
             "sektorKodu": "",
         }
 
-        try:
-            log(f"Is Yatirim'dan veri cekiliyor (Deneme {deneme + 1}/3)...")
-            r = session.post(IS_URL, json=payload, timeout=120)
-            if r.status_code == 200:
-                js = r.json()
-                data = js
-                if isinstance(js, dict):
-                    data = js.get("value") or js.get("d") or js
-                if isinstance(data, str):
-                    data = json.loads(data)
-                if isinstance(data, dict):
-                    for v in data.values():
-                        if isinstance(v, list):
-                            data = v
-                            break
-                if isinstance(data, list) and len(data) > 0:
-                    return data
-            else:
-                log(f"Is Yatirim HTTP Hata: {r.status_code}")
-        except requests.exceptions.RequestException as e:
-            log(f"Is Yatirim HATA: {repr(e)}")
+        basarili = False
+        for deneme in range(3):
+            try:
+                log(f"Is Yatirim'dan veri cekiliyor (Tip: {tip}, Deneme {deneme + 1}/3)...")
+                r = session.post(IS_URL, json=payload, timeout=60)
+                if r.status_code == 200:
+                    js = r.json()
+                    data = js
+                    if isinstance(js, dict):
+                        data = js.get("value") or js.get("d") or js
+                    if isinstance(data, str):
+                        data = json.loads(data)
+                    if isinstance(data, dict):
+                        for v in data.values():
+                            if isinstance(v, list):
+                                data = v
+                                break
+                    if isinstance(data, list):
+                        tum_satirlar.extend(data)
+                        basarili = True
+                        break # Başarılı olduysa deneme döngüsünden çık
+                else:
+                    log(f"Is Yatirim HTTP Hata (Tip {tip}): {r.status_code}")
+            except requests.exceptions.RequestException as e:
+                log(f"Is Yatirim HATA (Tip {tip}): {repr(e)}")
 
-        time.sleep(5)
+            time.sleep(5)
+            
+        if not basarili:
+            log(f"UYARI: {tip} tipi icin Is Yatirim verisi alinamadi.")
 
-    return []
+    return tum_satirlar
 
 def kod_tarih(satir):
     kod = str(satir.get("SHHE_HS_KODU") or satir.get("HISSE_KODU") or "").strip().upper()
