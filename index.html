@@ -271,10 +271,10 @@
   .tg-bol { margin: 8px 4px 0; padding: 6px 8px; font-size: 10.5px; line-height: 1.45; color: var(--altin-koyu); background: #f7f1e1; border-left: 3px solid var(--altin); border-radius: 5px; }
   .tg-bol b { font-weight: 800; color: var(--yazi); }
 
-  /* Portföy: hisse bazlı yıl yıl net temettü tablosu (daraltılmış) */
+  /* Portföy: hisse bazlı yıl yıl net temettü tablosu (hizalanmış) */
   .tg-tbaslik { margin: 12px 4px 6px; font-size: 12px; font-weight: 800; color: var(--altin-koyu); line-height: 1.25; }
   .tg-tsar { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--cizgi); border-radius: 8px; }
-  .tg-tablo { width: auto; max-width: 100%; margin: 0 auto; table-layout: auto; border-collapse: collapse; font-size: 10px; text-align: right; font-variant-numeric: tabular-nums; }
+  .tg-tablo { width: 100%; table-layout: auto; border-collapse: collapse; font-size: 10px; text-align: right; font-variant-numeric: tabular-nums; }
   .tg-tablo thead th {
     position: static; background: var(--altin-koyu); color: #fff; font-size: 9.5px; font-weight: 800;
     padding: 5px 2px; text-align: right; white-space: normal; line-height: 1.1;
@@ -1075,7 +1075,6 @@
         if (d.tem) {
           d.tem.forEach(function (p) {
             if (Math.floor(p[0] / 10000) === y) {
-              // YENİ UYGULAMA: 2025 öncesi temettüleri sabit %10 ile, sonrası güncel girilen oran (örn. 15) ile netleştir.
               var gecerliStopaj = (p[0] < 20250101) ? 10 : oran;
               var kat = 1 - (d.stopajsiz ? 0 : gecerliStopaj) / 100;
               v += (x.lot / bolCarpan(d, p[0])) * p[1] * kat;
@@ -1085,7 +1084,6 @@
         } else {
           var h = d.g.h[y];
           if (h > 0) {
-            // Yıla göre netleştirme: 2025 öncesi sabit %10
             var gecerliStopaj = (y < 2025) ? 10 : oran;
             var kat = 1 - (d.stopajsiz ? 0 : gecerliStopaj) / 100;
             v += (x.lot / bolCarpan(d, y * 10000 + 630)) * h * kat;
