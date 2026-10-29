@@ -254,9 +254,9 @@
   }
 
   /* Portföy: son 5 yıl temettü geçmişi */
-  .tg { display: none; padding: 10px 12px 12px; border-top: 1px solid var(--cizgi); background: #fff; }
-  .tg h3 { margin: 0 0 8px; font-size: 13px; font-weight: 800; color: var(--altin-koyu); }
-  .tg-satir { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 4px 0; }
+  .tg { display: none; padding: 10px 6px 12px; border-top: 1px solid var(--cizgi); background: #fff; }
+  .tg h3 { margin: 0 0 8px 4px; font-size: 13px; font-weight: 800; color: var(--altin-koyu); }
+  .tg-satir { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 4px 4px; }
   .tg-yil { font-size: 13px; font-weight: 800; color: var(--yazi); }
   .tg-yil small { display: block; font-size: 8.5px; font-weight: 600; color: var(--soluk); }
   .tg-cubuk { height: 22px; background: #f1ece0; border-radius: 5px; overflow: hidden; }
@@ -267,34 +267,46 @@
   .tg-orta { min-width: 0; }
   .tg-liste { margin-top: 3px; font-size: 10.5px; font-weight: 600; color: var(--soluk); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
   .tg-liste b { color: var(--yazi); font-weight: 800; }
-  .tg-not { margin-top: 6px; font-size: 10px; color: var(--soluk); line-height: 1.3; }
-  .tg-bol { margin-top: 8px; padding: 6px 8px; font-size: 10.5px; line-height: 1.45; color: var(--altin-koyu); background: #f7f1e1; border-left: 3px solid var(--altin); border-radius: 5px; }
+  .tg-not { margin: 6px 4px 0; font-size: 10px; color: var(--soluk); line-height: 1.3; }
+  .tg-bol { margin: 8px 4px 0; padding: 6px 8px; font-size: 10.5px; line-height: 1.45; color: var(--altin-koyu); background: #f7f1e1; border-left: 3px solid var(--altin); border-radius: 5px; }
   .tg-bol b { font-weight: 800; color: var(--yazi); }
 
-  /* Portföy: hisse bazlı yıl yıl net temettü tablosu */
-  .tg-tbaslik { margin: 12px 0 6px; font-size: 13px; font-weight: 800; color: var(--altin-koyu); }
+  /* Portföy: hisse bazlı yıl yıl net temettü tablosu (mobilde tek tabloya sığar) */
+  .tg-tbaslik { margin: 12px 4px 6px; font-size: 12px; font-weight: 800; color: var(--altin-koyu); line-height: 1.25; }
   .tg-tsar { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--cizgi); border-radius: 8px; }
-  .tg-tablo { width: 100%; table-layout: auto; border-collapse: collapse; font-size: 12px; text-align: right; font-variant-numeric: tabular-nums; }
+  .tg-tablo { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 10px; text-align: right; font-variant-numeric: tabular-nums; }
   .tg-tablo thead th {
-    position: static; background: var(--altin-koyu); color: #fff; font-size: 11px; font-weight: 800;
-    padding: 6px 8px; text-align: right; white-space: nowrap; border: 0; border-right: 1px solid rgba(255,255,255,.18);
+    position: static; background: var(--altin-koyu); color: #fff; font-size: 9.5px; font-weight: 800;
+    padding: 5px 2px; text-align: right; white-space: normal; line-height: 1.1;
+    border: 0; border-right: 1px solid rgba(255,255,255,.18);
   }
-  .tg-tablo thead th:first-child { text-align: left; }
+  .tg-tablo thead th:first-child { text-align: left; padding-left: 4px; }
   .tg-tablo thead th:last-child { border-right: 0; }
+  .tg-tablo th:nth-child(1), .tg-tablo td:nth-child(1) { width: 13%; }
+  .tg-tablo th:nth-child(2), .tg-tablo td:nth-child(2),
+  .tg-tablo th:nth-child(3), .tg-tablo td:nth-child(3),
+  .tg-tablo th:nth-child(4), .tg-tablo td:nth-child(4),
+  .tg-tablo th:nth-child(5), .tg-tablo td:nth-child(5),
+  .tg-tablo th:nth-child(6), .tg-tablo td:nth-child(6) { width: 14.4%; }
+  .tg-tablo th:nth-child(7), .tg-tablo td:nth-child(7) { width: 15%; }
   .tg-tablo tbody td {
-    padding: 6px 8px; font-size: 12.5px; font-weight: 600; text-align: right; white-space: nowrap;
-    overflow: visible; text-overflow: clip; border-bottom: 1px solid #ece6d6; color: var(--yazi);
+    padding: 4px 2px; font-size: 10px; font-weight: 700; text-align: right; white-space: nowrap;
+    overflow: hidden; text-overflow: clip; border-bottom: 1px solid #ece6d6; color: var(--yazi); line-height: 1.15;
   }
   .tg-tablo tbody tr:nth-child(even) { background: #faf7ef; }
-  .tg-tablo tbody td:first-child { text-align: left; font-weight: 800; }
+  .tg-tablo tbody td:first-child { text-align: left; font-weight: 800; padding-left: 4px; font-size: 10.5px; }
   .tg-tablo tbody td.bos { color: #b3b9b6; font-weight: 400; }
   .tg-tablo tbody td.top { font-weight: 800; background: #f7f1e1; color: var(--altin-koyu); }
+  .tg-tablo small.tg-ps {
+    display: block; margin-top: 1px; font-size: 8px; font-weight: 600; color: var(--soluk); line-height: 1.1;
+  }
   .tg-tablo tfoot td {
-    padding: 7px 8px; font-size: 12.5px; font-weight: 800; text-align: right; white-space: nowrap;
+    padding: 5px 2px; font-size: 10px; font-weight: 800; text-align: right; white-space: nowrap; overflow: hidden;
     background: #efe6cc; color: var(--altin-koyu); border-top: 2px solid var(--altin);
   }
-  .tg-tablo tfoot td:first-child { text-align: left; }
-  .tg-tablo tfoot td.ay { font-size: 11px; font-weight: 700; }
+  .tg-tablo tfoot td:first-child { text-align: left; padding-left: 4px; font-size: 9.5px; white-space: normal; }
+  .tg-tablo tfoot td.ay { font-size: 9.5px; font-weight: 700; }
+  .tg-tablo tfoot tr + tr td { border-top: 1px solid #d8c994; }
 
   /* ---------- Geniş ekran ---------- */
   @media (min-width: 641px) {
@@ -348,9 +360,17 @@
     .bilgi { padding: 7px 6px; }
     .bilgi .b-etiket { font-size: 11px; }
     .bilgi .b-deger { font-size: 20px; }
-    .tg-tablo thead th { font-size: 12.5px; padding: 7px 12px; }
-    .tg-tablo tbody td { font-size: 14px; padding: 7px 12px; }
-    .tg-tablo tfoot td { font-size: 14px; padding: 8px 12px; }
+    .tg { padding: 10px 12px 12px; }
+    .tg h3, .tg-not, .tg-bol, .tg-tbaslik { margin-left: 0; margin-right: 0; }
+    .tg-satir { padding: 4px 0; }
+    .tg-tbaslik { font-size: 13px; }
+    .tg-tablo thead th { font-size: 12.5px; padding: 7px 10px; }
+    .tg-tablo tbody td { font-size: 14px; padding: 6px 10px; }
+    .tg-tablo tbody td:first-child { font-size: 14px; padding-left: 10px; }
+    .tg-tablo thead th:first-child, .tg-tablo tfoot td:first-child { padding-left: 10px; }
+    .tg-tablo small.tg-ps { font-size: 10.5px; }
+    .tg-tablo tfoot td { font-size: 14px; padding: 7px 10px; }
+    .tg-tablo tfoot td:first-child { font-size: 13px; }
     .tg-tablo tfoot td.ay { font-size: 12px; }
   }
   @media (min-width: 900px) {
@@ -366,6 +386,9 @@
     .toplam .k-adet b, .toplam .k-lot b { font-size: 17px; }
     .f-kutu { min-width: 54px; }
     .filtre select { font-size: 12.5px; }
+    .tg-tablo tbody td, .tg-tablo tfoot td { font-size: 9.5px; }
+    .tg-tablo thead th { font-size: 9px; }
+    .tg-tablo small.tg-ps { font-size: 7.5px; }
   }
 </style>
 </head>
@@ -1050,24 +1073,27 @@
     if (!GAS || tutulan.length === 0) { el.style.display = "none"; el.innerHTML = ""; return; }
     var gy = GAS.guncelYil, oran = stopajOrani();
 
+    /* Yıl detayı: v = o yıl toplam net tutar (lot düzeltmeli), ps = o yıl hisse başı ödenen net temettü */
     function yilDetay(y) {
       var t = 0, l = [];
       tutulan.forEach(function (x) {
-        var d = x.d, v = 0;
+        var d = x.d, v = 0, ps = 0;
         var kat = 1 - (d.stopajsiz ? 0 : oran) / 100;
         if (d.tem) {
           d.tem.forEach(function (p) {
             if (Math.floor(p[0] / 10000) === y) {
               v += (x.lot / bolCarpan(d, p[0])) * p[1] * kat;
+              ps += p[1] * kat;
             }
           });
         } else {
           var h = d.g.h[y];
           if (h > 0) {
             v += (x.lot / bolCarpan(d, y * 10000 + 630)) * h * kat;
+            ps += h * kat;
           }
         }
-        if (v > 0) { t += v; l.push({ k: x.k, v: v }); }
+        if (v > 0) { t += v; l.push({ k: x.k, v: v, ps: ps }); }
       });
       l.sort(function (a, b) { return b.v - a.v; });
       return { t: t, l: l };
@@ -1117,7 +1143,7 @@
     yillar.forEach(function (r) {
       r.l.forEach(function (x) {
         if (!hisseYil[x.k]) { hisseYil[x.k] = {}; hisseTop[x.k] = 0; }
-        hisseYil[x.k][r.y] = x.v;
+        hisseYil[x.k][r.y] = { v: x.v, ps: x.ps };
         hisseTop[x.k] += x.v;
       });
     });
@@ -1126,26 +1152,29 @@
       var genelTop = 0;
       yillar.forEach(function (r) { genelTop += r.t; });
 
-      html += "<div class='tg-tbaslik'>Hisse Bazlı Yıllık Net Temettü Tutarları (TL)</div>";
+      html += "<div class='tg-tbaslik'>Hisse Bazlı Yıllık Net Temettü (TL) <span style='font-weight:600;color:var(--soluk)'>· altta küçük: hisse başı net</span></div>";
       html += "<div class='tg-tsar'><table class='tg-tablo'><thead><tr><th>Hisse</th>";
       yillar.forEach(function (r) { html += "<th>" + r.y + (r.y === gy ? "*" : "") + "</th>"; });
       html += "<th>5 Yıl Toplam</th></tr></thead><tbody>";
       hisseSira.forEach(function (k) {
         html += "<tr><td>" + k + "</td>";
         yillar.forEach(function (r) {
-          var v = hisseYil[k][r.y];
-          html += v > 0 ? "<td>" + fmtTL(v) + "</td>" : "<td class='bos'>–</td>";
+          var c = hisseYil[k][r.y];
+          html += (c && c.v > 0)
+            ? "<td>" + fmtTLh(c.v) + "<small class='tg-ps'>" + fmtFiyat(c.ps) + "</small></td>"
+            : "<td class='bos'>–</td>";
         });
-        html += "<td class='top'>" + fmtTL(hisseTop[k]) + "</td></tr>";
+        html += "<td class='top'>" + fmtTLh(hisseTop[k]) + "</td></tr>";
       });
       html += "</tbody><tfoot><tr><td>TOPLAM</td>";
-      yillar.forEach(function (r) { html += "<td>" + (r.t > 0 ? fmtTL(r.t) : "–") + "</td>"; });
-      html += "<td>" + fmtTL(genelTop) + "</td></tr>";
+      yillar.forEach(function (r) { html += "<td>" + (r.t > 0 ? fmtTLh(r.t) : "–") + "</td>"; });
+      html += "<td>" + fmtTLh(genelTop) + "</td></tr>";
       html += "<tr><td class='ay'>Aylık ortalama</td>";
-      yillar.forEach(function (r) { html += "<td class='ay'>" + (r.t > 0 ? fmtTL(r.t / 12) : "–") + "</td>"; });
-      html += "<td class='ay'>" + fmtTL(genelTop / 60) + "</td></tr>";
+      yillar.forEach(function (r) { html += "<td class='ay'>" + (r.t > 0 ? fmtTLh(r.t / 12) : "–") + "</td>"; });
+      html += "<td class='ay'>" + fmtTLh(genelTop / 60) + "</td></tr>";
       html += "</tfoot></table></div>";
       if (bitis === gy) html += "<div class='tg-not'>* " + gy + " yılı kısmidir (yıl henüz tamamlanmadı).</div>";
+      html += "<div class='tg-not'>Küçük yazı: o yıl içinde hisse başına ödenen net temettü (stopaj düşülmüş, ödeme anındaki hisse sayısı üzerinden; birden fazla ödeme varsa toplamı).</div>";
     }
 
     var yeniVeri = tutulan.some(function (x) { return !!x.d.tem; });
