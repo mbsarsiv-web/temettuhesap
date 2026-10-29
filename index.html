@@ -1037,7 +1037,7 @@
   /* ---------- BÖLÜNME (BEDELSİZ) HESABI ----------
      Bölünmeler (d.bol) ile temettü tarihleri (d.tem) AYRI listelerde tutulur; birbirine karıştırılmaz.
      Bir temettünün ödendiği t tarihinden SONRA (aynı gün dahil) yapılan bedelsizlerin çarpanları çarpılır:
-        çarpan = Π (1 + oran/100)   (oran yüzde; örn. %322,54 → ×4,2254)
+       çarpan = Π (1 + oran/100)   (oran yüzde; örn. %322,54 → ×4,2254)
      O tarihteki lot = güncel lot ÷ çarpan.
      Yani temettüden önce yapılan bölünmeler lotu etkilemez, sonra yapılanlar lotu geriye doğru böler. */
   function bolCarpan(d, t) {
