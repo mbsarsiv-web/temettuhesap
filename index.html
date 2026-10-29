@@ -1123,7 +1123,7 @@
       if (!bs.length) return;
       bolSatirlari.push("<b>" + x.k + "</b> " + bs.map(function (b) {
         return tarihMetni(b[0]) + " %" + fmt(b[1], 2) + " (×" + fmt(1 + b[1] / 100, 2) + ")";
-      }).join(", "));
+      }).join(", ") + (x.d.bolK === "gas" ? " <span style='opacity:.7'>(tarih yaklaşık: yalnızca yıl biliniyor)</span>" : ""));
     });
     if (bolSatirlari.length) {
       html += "<div class='tg-bol'><b>Lot düzeltmesi uygulanan bedelsiz bölünmeler:</b><br>" + bolSatirlari.join("<br>") + "</div>";
