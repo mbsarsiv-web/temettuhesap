@@ -354,13 +354,13 @@ def is_yatirim_satirlari(session):
         except Exception:
             pass
 
-        # ÇÖZÜM: Tüm işlemleri getirmesi için filtreler boş bırakıldı
+        # ÇÖZÜM: "09" (BİST TÜM) kodu geri eklendi, Tip ("") boş bırakılarak tüm bedelsiz ve temettüler dahil edildi.
         payload = {
             "hisseKodu": "",
             "hisseTanimKodu": "",
             "yil": 0,
             "zaman": "HEPSI",
-            "endeksKodu": "",
+            "endeksKodu": "09",
             "sektorKodu": "",
         }
 
