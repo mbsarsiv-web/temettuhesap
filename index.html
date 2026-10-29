@@ -272,7 +272,7 @@
   /* Portföy: son 5 yıl temettü geçmişi */
   .tg { display: none; padding: 10px 12px 12px; border-top: 1px solid var(--cizgi); background: #fff; }
   .tg h3 { margin: 0 0 8px; font-size: 13px; font-weight: 800; color: var(--altin-koyu); }
-  .tg-satir { display: grid; grid-template-columns: 38px 1fr auto; gap: 8px; align-items: center; padding: 4px 0; }
+  .tg-satir { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 4px 0; }
   .tg-yil { font-size: 13px; font-weight: 800; color: var(--yazi); }
   .tg-yil small { display: block; font-size: 8.5px; font-weight: 600; color: var(--soluk); }
   .tg-cubuk { height: 22px; background: #f1ece0; border-radius: 5px; overflow: hidden; }
@@ -280,6 +280,9 @@
   .tg-deger { text-align: right; font-variant-numeric: tabular-nums; line-height: 1.15; min-width: 92px; }
   .tg-deger b { display: block; font-size: 13px; font-weight: 800; color: var(--yazi); }
   .tg-deger span { display: block; font-size: 11px; font-weight: 700; color: #946c0c; }
+  .tg-orta { min-width: 0; }
+  .tg-liste { margin-top: 3px; font-size: 10.5px; font-weight: 600; color: var(--soluk); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+  .tg-liste b { color: var(--yazi); font-weight: 800; }
   .tg-not { margin-top: 6px; font-size: 10px; color: var(--soluk); line-height: 1.3; }
 
   /* ---------- Geniş ekran ---------- */
@@ -1017,6 +1020,17 @@
     return aramaQ.length >= 3 && !!d && !!d.skArama && d.skArama.indexOf(aramaQ) > -1;
   }
 
+  /* Şirket listesi tek satıra sığsın diye gerekirse yazı boyutunu küçültür */
+  function tgSigdir() {
+    var l = document.querySelectorAll("#port-gecmis .tg-liste");
+    for (var i = 0; i < l.length; i++) {
+      var e = l[i], fs = 10.5;
+      e.style.fontSize = "";
+      if (!e.clientWidth) continue;
+      while (e.scrollWidth > e.clientWidth && fs > 6) { fs -= 0.5; e.style.fontSize = fs + "px"; }
+    }
+  }
+
   /* Portföyün son 5 yıldaki net temettü toplamı + aylık karşılığı (grafik) */
   function gecmisYaz(tutulan) {
     var el = $("port-gecmis");
@@ -1024,31 +1038,39 @@
     if (!GAS || tutulan.length === 0) { el.style.display = "none"; el.innerHTML = ""; return; }
     var gy = GAS.guncelYil, oran = stopajOrani();
 
-    function yilToplam(y) {
-      var t = 0;
+    function yilDetay(y) {
+      var t = 0, l = [];
       tutulan.forEach(function (x) {
         var h = x.d.g.h[y];
-        if (h > 0) t += x.lot * h * (1 - (x.d.stopajsiz ? 0 : oran) / 100);
+        if (h > 0) {
+          var v = x.lot * h * (1 - (x.d.stopajsiz ? 0 : oran) / 100);
+          t += v;
+          l.push({ k: x.k, v: v });
+        }
       });
-      return t;
+      l.sort(function (a, b) { return b.v - a.v; });
+      return { t: t, l: l };
     }
+    function yilToplam(y) { return yilDetay(y).t; }
 
     /* İçinde bulunulan yılda ödeme varsa o yıl da (kısmi) gösterilir, yoksa son tam yıl bitiş olur */
     var bitis = yilToplam(gy) > 0 ? gy : gy - 1;
     var yillar = [], maks = 0;
     for (var y = bitis - 4; y <= bitis; y++) {
-      var t = yilToplam(y);
-      yillar.push({ y: y, t: t });
+      var dt = yilDetay(y), t = dt.t;
+      yillar.push({ y: y, t: t, l: dt.l });
       if (t > maks) maks = t;
     }
     if (!(maks > 0)) { el.style.display = "none"; el.innerHTML = ""; return; }
 
-    var html = "<h3>Son 5 Yıl Temettü Geçmişi (net, stopaj dahil)</h3>";
+    var html = "<h3>Son 5 Yıl Temettü Geçmişi (Net, %" + fmt(oran, 2) + " Stopaj Dahil)</h3>";
     yillar.forEach(function (r) {
       var gen = r.t > 0 ? Math.max(2, (r.t / maks) * 100) : 0;
       html += "<div class='tg-satir'>" +
         "<div class='tg-yil'>" + r.y + (r.y === gy ? "<small>kısmi</small>" : "") + "</div>" +
-        "<div class='tg-cubuk'><i style='width:" + gen.toFixed(1) + "%'></i></div>" +
+        "<div class='tg-orta'><div class='tg-cubuk'><i style='width:" + gen.toFixed(1) + "%'></i></div>" +
+          (r.l.length ? "<div class='tg-liste'>" + r.l.map(function (x) { return "<b>" + x.k + ":</b> " + fmtTL(x.v); }).join(" + ") + "</div>" : "") +
+        "</div>" +
         "<div class='tg-deger'>" +
           (r.t > 0 ? "<b>" + fmtTL(r.t) + "</b><span>" + fmtTL(r.t / 12) + " / ay</span>"
                    : "<b style='color:#9aa3a0'>Ödeme yok</b>") +
@@ -1057,6 +1079,7 @@
     html += "<div class='tg-not'>Güncel lot sayılarının bu yıllarda da elde tutulduğu varsayılarak hesaplanmıştır. Aylık = yıllık net temettü ÷ 12.</div>";
     el.innerHTML = html;
     el.style.display = "block";
+    tgSigdir();
   }
 
   function portfoyYaz() {
@@ -1077,7 +1100,7 @@
 
       var sAd = sektorMetni(d) || "Diğer";
       sektorDagilim[sAd] = (sektorDagilim[sAd] || 0) + maliyet;
-      tutulan.push({ d: d, lot: lot });
+      tutulan.push({ k: k, d: d, lot: lot });
 
       if (!aramaEslesir(k)) return;
       var sinif = (gorunen % 2 === 0 ? "cift" : "") + (acik.port[k] ? " acik" : "");
@@ -1839,6 +1862,7 @@
       b[i].classList.toggle("aktif", b[i].getAttribute("data-hedef") === hedef);
     }
     $("filtre").style.display = hedef === "port" ? "none" : "";
+    if (hedef === "port") tgSigdir();
     ustYukseklik();
   }
 
@@ -1850,7 +1874,7 @@
   function ustYukseklik() {
     document.documentElement.style.setProperty("--ust-yuk", $("ust").offsetHeight + "px");
   }
-  window.addEventListener("resize", ustYukseklik);
+  window.addEventListener("resize", function () { ustYukseklik(); tgSigdir(); });
 
   bulutBaslat();
   kurOnbellekOku();
