@@ -284,6 +284,8 @@
   .tg-liste { margin-top: 3px; font-size: 10.5px; font-weight: 600; color: var(--soluk); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
   .tg-liste b { color: var(--yazi); font-weight: 800; }
   .tg-not { margin-top: 6px; font-size: 10px; color: var(--soluk); line-height: 1.3; }
+  .tg-bol { margin-top: 6px; padding: 6px 8px; font-size: 10.5px; line-height: 1.45; color: var(--altin-koyu); background: #f7f1e1; border-left: 3px solid var(--altin); border-radius: 5px; }
+  .tg-bol b { font-weight: 800; color: var(--yazi); }
 
   /* ---------- Geniş ekran ---------- */
   @media (min-width: 641px) {
@@ -454,7 +456,7 @@
   var JSON_RAW   = "https://raw.githubusercontent.com/mbsarsiv-web/temettu-bot/main/temettu_veri.json";
 
   var GAS_URL = "https://script.google.com/macros/s/AKfycbxo9u41oj1aXxgkuE7gTnHdeG_mzT41o3WmaYhhqNNUJi_NTDzLOmSBSnHAhfsvhOiK/exec";
-  var GAS_ANAHTAR = "temettuhesap_gas_v4";
+  var GAS_ANAHTAR = "temettuhesap_gas_v5";
 
   var FILTRE_ANAHTAR = "temettuhesap_filtre_v2";
   var FILTRE_VARSAYILAN = { yog: "0.5", sektor: "0", donem: "0", verim: "2" };
@@ -469,6 +471,7 @@
   var gosterilen = 0;
   var kaynakNotu = "";
   var tvBitti = false, yedekDenendi = {}, yedekCalisiyor = false, yedekTekrar = false;
+  var bolSayim = { isy: 0, gas: 0 };   // bölünme verisinin hangi kaynaktan geldiği (bilgi amaçlı)
 
   var DEPO_ANAHTAR = "temettuhesap_v2";
 
@@ -1031,12 +1034,21 @@
     return o;
   }
 
-  /* t tarihinden sonra (aynı gün dahil) yapılan bedelsiz bölünmelerin toplam çarpanı.
-     O tarihteki lot = güncel lot ÷ çarpan */
+  /* ---------- BÖLÜNME (BEDELSİZ) HESABI ----------
+     Bölünmeler (d.bol) ile temettü tarihleri (d.tem) AYRI listelerde tutulur; birbirine karıştırılmaz.
+     Bir temettünün ödendiği t tarihinden SONRA (aynı gün dahil) yapılan bedelsizlerin çarpanları çarpılır:
+        çarpan = Π (1 + oran/100)   (oran yüzde; örn. %322,54 → ×4,2254)
+     O tarihteki lot = güncel lot ÷ çarpan.
+     Yani temettüden önce yapılan bölünmeler lotu etkilemez, sonra yapılanlar lotu geriye doğru böler. */
   function bolCarpan(d, t) {
     var c = 1;
     (d.bol || []).forEach(function (b) { if (b[0] >= t) c *= 1 + b[1] / 100; });
     return c;
+  }
+
+  function tarihMetni(t) {
+    var y = Math.floor(t / 10000), a = Math.floor((t % 10000) / 100), g = t % 100;
+    return (g < 10 ? "0" : "") + g + "." + (a < 10 ? "0" : "") + a + "." + y;
   }
 
   /* Şirket listesi tek satıra sığsın diye gerekirse yazı boyutunu küçültür */
@@ -1068,8 +1080,9 @@
             if (Math.floor(p[0] / 10000) === y) v += (x.lot / bolCarpan(d, p[0])) * p[1] * kat;
           });
         } else {
-          var h = d.g.h[y];            /* eski JSON: yıllık seri, bölünme düzeltmesi yok */
-          if (h > 0) v = x.lot * h * kat;
+          /* Tarihli kayıt yok: yıllık seri kullanılır; bölünme yıl ortasına (30 Haziran) göre uygulanır */
+          var h = d.g.h[y];
+          if (h > 0) v = (x.lot / bolCarpan(d, y * 10000 + 630)) * h * kat;
         }
         if (v > 0) { t += v; l.push({ k: x.k, v: v }); }
       });
@@ -1101,14 +1114,24 @@
                    : "<b style='color:#9aa3a0'>Ödeme yok</b>") +
         "</div></div>";
     });
-    var bolKodlar = [];
+
+    /* Pencerede bölünmesi olan hisseler: tarih + oran + çarpan (şeffaflık için) */
+    var bolSatirlari = [];
+    var altSinir = (bitis - 4) * 10000;
     tutulan.forEach(function (x) {
-      if (x.d.bol && x.d.bol.some(function (b) { return b[0] >= (bitis - 4) * 10000; })) bolKodlar.push(x.k);
+      var bs = (x.d.bol || []).filter(function (b) { return b[0] >= altSinir; });
+      if (!bs.length) return;
+      bolSatirlari.push("<b>" + x.k + "</b> " + bs.map(function (b) {
+        return tarihMetni(b[0]) + " %" + fmt(b[1], 2) + " (×" + fmt(1 + b[1] / 100, 2) + ")";
+      }).join(", ") + " <span style='opacity:.7'>[" + (x.d.bolK === "gas" ? "Temettü Analiz" : "İş Yatırım") + "]</span>");
     });
+    if (bolSatirlari.length) {
+      html += "<div class='tg-bol'><b>Lot düzeltmesi uygulanan bedelsiz bölünmeler:</b><br>" + bolSatirlari.join("<br>") + "</div>";
+    }
+
     var yeniVeri = tutulan.some(function (x) { return !!x.d.tem; });
-    var not = "Her temettü, güncel lottan geriye doğru o tarihteki lot sayısıyla hesaplanmıştır (bedelsiz bölünmeler dikkate alınır). Aylık = yıllık net temettü ÷ 12.";
-    if (bolKodlar.length) not += " Bölünme olan hisseler: " + bolKodlar.join(", ") + ".";
-    if (!yeniVeri) not = "⚠ Bölünme/tarih verisi bulunamadı (botu güncelleyip çalıştırın). Şimdilik güncel lot tüm yıllarda sabit varsayıldı. Aylık = yıllık net temettü ÷ 12.";
+    var not = "Her temettü, güncel lottan geriye doğru o tarihteki lot sayısıyla hesaplanmıştır: temettü tarihinden sonra yapılan bedelsizler lotu böler, öncesindekiler etkilemez. Aylık = yıllık net temettü ÷ 12.";
+    if (!yeniVeri) not = "⚠ Tarihli temettü verisi bulunamadı (botu güncelleyip çalıştırın). Yıllık seri kullanıldı; bölünmeler yıl ortasına göre uygulandı. Aylık = yıllık net temettü ÷ 12.";
     html += "<div class='tg-not'>" + not + "</div>";
     el.innerHTML = html;
     el.style.display = "block";
@@ -1225,6 +1248,48 @@
     return isNaN(n) ? NaN : n;
   }
 
+  /* Başlık karşılaştırması için: Türkçe harfleri sadeleştirip büyük harfe çevirir */
+  function baslikNorm(s) {
+    return String(s).replace(/İ/g, "I").replace(/ı/g, "I").replace(/Ş/g, "S").replace(/ş/g, "S").toUpperCase().trim();
+  }
+
+  /* Satırdaki tam tarih varsa YYYYMMDD; yalnızca yıl varsa o yılın 30 Haziran'ı (yıl ortası) */
+  function tarihIntCoz(ham, yil) {
+    var s = String(ham).trim(), m;
+    m = s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (m) return parseInt(m[1], 10) * 10000 + parseInt(m[2], 10) * 100 + parseInt(m[3], 10);
+    m = s.match(/(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})/);
+    if (m) return parseInt(m[3], 10) * 10000 + parseInt(m[2], 10) * 100 + parseInt(m[1], 10);
+    return parseInt(yil, 10) * 10000 + 630;
+  }
+
+  function bolEkle(gBol, kod, t, oran) {
+    if (!(oran > 0) || !(t > 0)) return;
+    if (!gBol[kod]) gBol[kod] = {};
+    if (!(gBol[kod][t] >= oran)) gBol[kod][t] = oran;
+  }
+
+  /* Başlığında KOD + (YIL/TARİH) + BEDEL(SİZ) geçen herhangi bir ek tablodan bedelsiz oranlarını okur */
+  function bedelsizTablosuTara(tablo, gBol) {
+    if (!tablo || !tablo.length || !tablo[0] || !tablo[0].length) return;
+    var bas = tablo[0].map(baslikNorm);
+    var kodI = bas.indexOf("KOD"), bdI = -1, trI = -1, c;
+    for (c = 0; c < bas.length; c++) {
+      if (bdI === -1 && bas[c].indexOf("BEDEL") > -1) bdI = c;
+      if (trI === -1 && (bas[c] === "YIL" || bas[c] === "TARIH")) trI = c;
+    }
+    if (kodI < 0 || bdI < 0 || trI < 0) return;
+    for (var i = 1; i < tablo.length; i++) {
+      var s = tablo[i];
+      if (!s || !s[kodI] || !s[trI]) continue;
+      var ym = String(s[trI]).match(/(19|20)\d\d/);
+      if (!ym) continue;
+      var o = verimSayisiCoz(s[bdI]);
+      if (isNaN(o) || !(o > 0)) continue;
+      bolEkle(gBol, String(s[kodI]).trim().toUpperCase(), tarihIntCoz(s[trI], ym[0]), o);
+    }
+  }
+
   function gasIsle(payload) {
     if (!payload || !payload.anaTablo || payload.anaTablo.length <= 1) {
       throw new Error("gas-bos");
@@ -1234,14 +1299,17 @@
 
     var verimMap = {};
     var hbMap = {};
+    var gBol = {};   // {kod: {tarih: oran%}}  Temettü Analiz'deki "Bedelsiz" sütunundan
+    var gTem = {};   // {kod: {tarih: hisse başı temettü}}  Temettü Analiz satırlarından
 
     if (verimVerisi && verimVerisi.length > 1) {
       var bas = verimVerisi[0];
-      var kodI = 0, yilI = 1, verimI = -1, hbI = -1;
+      var kodI = 0, yilI = 1, verimI = -1, hbI = -1, bdI = -1;
       for (var c = 0; c < bas.length; c++) {
         var b = bas[c].toString().toUpperCase().trim();
         if (b === "KOD" && kodI === 0) kodI = c;
         else if ((b === "YIL" || b === "TARIH" || b === "TARİH") && yilI === 1) yilI = c;
+        else if (bdI === -1 && baslikNorm(bas[c]).indexOf("BEDEL") > -1) bdI = c;
         else if (verimI === -1 && (b.indexOf("VERIM") > -1 || b.indexOf("VERİM") > -1) && bas[c].toString().trim() !== "") verimI = c;
         else if (hbI === -1 && (b.indexOf("HISSE") > -1 || b.indexOf("HİSSE") > -1)) hbI = c;
       }
@@ -1259,6 +1327,7 @@
         var yil = yMatch[1];
         var tKod = kod.toString().trim().toUpperCase();
         var anahtar = tKod + "_" + yil;
+        var tInt = tarihIntCoz(tarih, yil);
 
         var sv = verimSayisiCoz(satir[verimI]);
         if (!isNaN(sv)) {
@@ -1268,10 +1337,27 @@
 
         if (hbI > -1) {
           var hb = verimSayisiCoz(satir[hbI]);
-          if (!isNaN(hb) && hb > 0) hbMap[anahtar] = (hbMap[anahtar] || 0) + hb;
+          if (!isNaN(hb) && hb > 0) {
+            hbMap[anahtar] = (hbMap[anahtar] || 0) + hb;
+            if (!gTem[tKod]) gTem[tKod] = {};
+            gTem[tKod][tInt] = (gTem[tKod][tInt] || 0) + hb;
+          }
+        }
+
+        /* Bedelsiz bölünme: temettü sütunlarından ayrı okunur, ayrı listede tutulur */
+        if (bdI > -1) {
+          var bd = verimSayisiCoz(satir[bdI]);
+          if (!isNaN(bd) && bd > 0) bolEkle(gBol, tKod, tInt, bd);
         }
       }
     }
+
+    /* Başka bir tabloda (ör. bedelsizTablo) bedelsiz sütunu varsa onu da tara */
+    Object.keys(payload).forEach(function (a) {
+      if (a === "anaTablo" || a === "verimTablo") return;
+      var t = payload[a];
+      if (t && t.length > 1 && t[0] && typeof t[0].map === "function") bedelsizTablosuTara(t, gBol);
+    });
 
     var orj = anaTablo[0];
     var idxYog = orj.indexOf("YOĞUNLUK");
@@ -1286,9 +1372,14 @@
     var sayfaYillari = yillar.length > 0 ? yillar.length : 1;
 
     function yuvarla(n) { return Math.round(n * 10000) / 10000; }
+    function haritaDizi(h) {
+      return Object.keys(h).map(function (t) { return [parseInt(t, 10), h[t]]; })
+        .sort(function (a, b) { return a[0] - b[0]; });
+    }
 
     var goruldu = {};
     var tumu = [];
+    var gBolOut = {}, gTemOut = {};
 
     for (var i = 1; i < anaTablo.length; i++) {
       var raw = anaTablo[i][0];
@@ -1312,9 +1403,12 @@
       if (!isNaN(hazir)) yogH = hazir > 1.0001 ? hazir / 100 : hazir;
 
       tumu.push({ kod: hKod, idx: i, v: vSeri, h: hSeri, yogH: yogH });
+      if (gBol[hKod]) gBolOut[hKod] = haritaDizi(gBol[hKod]);
+      if (gTem[hKod]) gTemOut[hKod] = haritaDizi(gTem[hKod]);
     }
 
-    return { guncelYil: guncelYil, sayfaYillari: sayfaYillari, toplamHisse: tumu.length, liste: tumu, zaman: Date.now() };
+    return { guncelYil: guncelYil, sayfaYillari: sayfaYillari, toplamHisse: tumu.length, liste: tumu,
+             gBol: gBolOut, gTem: gTemOut, zaman: Date.now() };
   }
 
   function gasGetir() {
@@ -1357,6 +1451,7 @@
   function veriyiIsle(bot, gas) {
     GAS = gas;
     veri = {}; liste = [];
+    bolSayim = { isy: 0, gas: 0 };
     gas.liste.forEach(function (g) {
       var kod = g.kod;
       var b = bot[kod] || {};
@@ -1388,9 +1483,20 @@
         m: null
       };
       sektorAramaYaz(veri[kod]);
-      /* Bot'tan gelen tarihli temettü ve bedelsiz bölünme kayıtları (eski JSON'da yoksa null) */
-      veri[kod].tem = (typeof b.temettuler === "string") ? ciftCoz(b.temettuler) : null;
-      veri[kod].bol = (typeof b.bolunmeler === "string") ? ciftCoz(b.bolunmeler) : null;
+
+      /* Tarihli temettü kayıtları: önce bot (İş Yatırım), yoksa Temettü Analiz satırları */
+      var botTem = (typeof b.temettuler === "string") ? ciftCoz(b.temettuler) : [];
+      var gasTem = (gas.gTem && gas.gTem[kod]) ? gas.gTem[kod] : [];
+      veri[kod].tem = botTem.length ? botTem : (gasTem.length ? gasTem : null);
+
+      /* Bedelsiz bölünmeler: önce bot (İş Yatırım, tam tarihli); o hissede kayıt yoksa Temettü Analiz.
+         İki kaynak asla birleştirilmez (aynı bölünmenin çift sayılmasını önlemek için). */
+      var botBol = (typeof b.bolunmeler === "string") ? ciftCoz(b.bolunmeler) : [];
+      var gasBol = (gas.gBol && gas.gBol[kod]) ? gas.gBol[kod] : [];
+      if (botBol.length) { veri[kod].bol = botBol; veri[kod].bolK = "isy"; bolSayim.isy++; }
+      else if (gasBol.length) { veri[kod].bol = gasBol; veri[kod].bolK = "gas"; bolSayim.gas++; }
+      else { veri[kod].bol = []; veri[kod].bolK = ""; }
+
       liste.push(kod);
     });
 
@@ -1398,7 +1504,8 @@
     sirali = liste.slice();
 
     kaynakNotu = "Kaynak: Temettü Analiz (" + gas.toplamHisse + " hisse)" +
-      (gas.onbellek ? " — son kayıtlı liste kullanılıyor" : "");
+      (gas.onbellek ? " — son kayıtlı liste kullanılıyor" : "") +
+      " · Bölünme verisi: İş Yatırım " + bolSayim.isy + ", Temettü Analiz " + bolSayim.gas + " hisse";
     veriKaynakNotu = kaynakNotu;
   }
 
