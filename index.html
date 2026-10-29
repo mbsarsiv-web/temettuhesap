@@ -268,8 +268,33 @@
   .tg-liste { margin-top: 3px; font-size: 10.5px; font-weight: 600; color: var(--soluk); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
   .tg-liste b { color: var(--yazi); font-weight: 800; }
   .tg-not { margin-top: 6px; font-size: 10px; color: var(--soluk); line-height: 1.3; }
-  .tg-bol { padding: 6px 8px; font-size: 10.5px; line-height: 1.45; color: var(--altin-koyu); background: #f7f1e1; border-left: 3px solid var(--altin); border-radius: 5px; }
+  .tg-bol { margin-top: 8px; padding: 6px 8px; font-size: 10.5px; line-height: 1.45; color: var(--altin-koyu); background: #f7f1e1; border-left: 3px solid var(--altin); border-radius: 5px; }
   .tg-bol b { font-weight: 800; color: var(--yazi); }
+
+  /* Portföy: hisse bazlı yıl yıl net temettü tablosu */
+  .tg-tbaslik { margin: 12px 0 6px; font-size: 13px; font-weight: 800; color: var(--altin-koyu); }
+  .tg-tsar { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--cizgi); border-radius: 8px; }
+  .tg-tablo { width: 100%; table-layout: auto; border-collapse: collapse; font-size: 12px; text-align: right; font-variant-numeric: tabular-nums; }
+  .tg-tablo thead th {
+    position: static; background: var(--altin-koyu); color: #fff; font-size: 11px; font-weight: 800;
+    padding: 6px 8px; text-align: right; white-space: nowrap; border: 0; border-right: 1px solid rgba(255,255,255,.18);
+  }
+  .tg-tablo thead th:first-child { text-align: left; }
+  .tg-tablo thead th:last-child { border-right: 0; }
+  .tg-tablo tbody td {
+    padding: 6px 8px; font-size: 12.5px; font-weight: 600; text-align: right; white-space: nowrap;
+    overflow: visible; text-overflow: clip; border-bottom: 1px solid #ece6d6; color: var(--yazi);
+  }
+  .tg-tablo tbody tr:nth-child(even) { background: #faf7ef; }
+  .tg-tablo tbody td:first-child { text-align: left; font-weight: 800; }
+  .tg-tablo tbody td.bos { color: #b3b9b6; font-weight: 400; }
+  .tg-tablo tbody td.top { font-weight: 800; background: #f7f1e1; color: var(--altin-koyu); }
+  .tg-tablo tfoot td {
+    padding: 7px 8px; font-size: 12.5px; font-weight: 800; text-align: right; white-space: nowrap;
+    background: #efe6cc; color: var(--altin-koyu); border-top: 2px solid var(--altin);
+  }
+  .tg-tablo tfoot td:first-child { text-align: left; }
+  .tg-tablo tfoot td.ay { font-size: 11px; font-weight: 700; }
 
   /* ---------- Geniş ekran ---------- */
   @media (min-width: 641px) {
@@ -323,6 +348,10 @@
     .bilgi { padding: 7px 6px; }
     .bilgi .b-etiket { font-size: 11px; }
     .bilgi .b-deger { font-size: 20px; }
+    .tg-tablo thead th { font-size: 12.5px; padding: 7px 12px; }
+    .tg-tablo tbody td { font-size: 14px; padding: 7px 12px; }
+    .tg-tablo tfoot td { font-size: 14px; padding: 8px 12px; }
+    .tg-tablo tfoot td.ay { font-size: 12px; }
   }
   @media (min-width: 900px) {
     .ara { flex: 1 1 400px; max-width: 600px; }
@@ -395,7 +424,7 @@
     <div class="bos-sonuc" id="sag-bos">Filtre veya aramaya uyan hisse yok.</div>
   </div>
 
-  <!-- PORTFÖY TABLOSU TAMAMEN ORİJİNAL 4 SÜTUNLU (HİSSE, LOT, MALİYET, AYLIK TEMETTÜ) HALİNE DÖNDÜRÜLDÜ -->
+  <!-- PORTFÖY TABLOSU: 4 SÜTUNLU (HİSSE, LOT, MALİYET, AYLIK TEMETTÜ) -->
   <div class="panel p-port" id="panel-port">
     <table class="t4">
       <thead>
@@ -1014,14 +1043,13 @@
     }
   }
 
-  /* GRAFİK VE DETAYLI BİLGİ ALANI (ESKİ GRAFİK + GÜNCEL DAĞILIM KUTUSU) */
+  /* GRAFİK + BÖLÜNME KUTUSU + HİSSE BAZLI YIL YIL NET TEMETTÜ TABLOSU */
   function gecmisYaz(tutulan) {
     var el = $("port-gecmis");
     if (!el) return;
     if (!GAS || tutulan.length === 0) { el.style.display = "none"; el.innerHTML = ""; return; }
     var gy = GAS.guncelYil, oran = stopajOrani();
 
-    // Orijinal Grafik Hesaplaması
     function yilDetay(y) {
       var t = 0, l = [];
       tutulan.forEach(function (x) {
@@ -1056,8 +1084,7 @@
     if (!(maks > 0)) { el.style.display = "none"; el.innerHTML = ""; return; }
 
     var html = "<h3>Son 5 Yıl Temettü Geçmişi (Net, %" + fmt(oran, 2) + " Stopaj Dahil)</h3>";
-    
-    // Orijinal Grafik Döngüsü (Parantez detayı olmadan)
+
     yillar.forEach(function (r) {
       var gen = r.t > 0 ? Math.max(2, (r.t / maks) * 100) : 0;
       html += "<div class='tg-satir'>" +
@@ -1071,7 +1098,7 @@
         "</div></div>";
     });
 
-    // Bölünme Bilgilerini Hazırlama
+    /* Lot düzeltmesi uygulanan bedelsiz bölünmeler */
     var bolSatirlari = [];
     var altSinir = (bitis - 4) * 10000;
     tutulan.forEach(function (x) {
@@ -1081,42 +1108,57 @@
         return tarihMetni(b[0]) + " %" + fmt(b[1], 2) + " (×" + fmt(1 + b[1] / 100, 2) + ")";
       }).join(", ") + (x.d.bolK === "gas" ? " <span style='opacity:.7'>(tarih yaklaşık: yalnızca yıl biliniyor)</span>" : ""));
     });
-    
-    // YAN YANA GÖSTERİM (FLEXBOX İLE SOLDA BÖLÜNMELER, SAĞDA YENİ DETAYLI BİLGİLER)
-    var flexContainer = "<div style='display:flex; flex-wrap:wrap; gap:10px; margin-top:6px;'>";
-    
-    // Sol Kutu: Orijinal Bölünme Kutusu
     if (bolSatirlari.length) {
-      flexContainer += "<div class='tg-bol' style='flex:1 1 300px; margin-top:0;'><b>Lot düzeltmesi uygulanan bedelsiz bölünmeler:</b><br>" + bolSatirlari.join("<br>") + "</div>";
+      html += "<div class='tg-bol'><b>Lot düzeltmesi uygulanan bedelsiz bölünmeler:</b><br>" + bolSatirlari.join("<br>") + "</div>";
     }
-    
-    // Sağ Kutu: İstediğiniz Güncel Portföy Detayları
-    var detaylar = [];
-    tutulan.forEach(function (x) {
-        var nt = net(x.d);
-        var yillik = x.lot * nt;
-        detaylar.push("<b>" + x.k + "</b>: " + fmtLot(x.lot) + " Lot &times; " + fmtFiyat(nt) + " TL (Hisse Başı) = <b>" + fmtTL(yillik) + " Yıllık Net</b> <span style='opacity:.7'>(Güncel Fiyat: " + fmtFiyat(x.d.fiyat) + " TL)</span>");
+
+    /* Hisse bazlı yıl yıl net temettü tablosu (grafikle aynı hesaplama) */
+    var hisseYil = {}, hisseTop = {};
+    yillar.forEach(function (r) {
+      r.l.forEach(function (x) {
+        if (!hisseYil[x.k]) { hisseYil[x.k] = {}; hisseTop[x.k] = 0; }
+        hisseYil[x.k][r.y] = x.v;
+        hisseTop[x.k] += x.v;
+      });
     });
-    
-    if (detaylar.length) {
-        flexContainer += "<div class='tg-bol' style='flex:1 1 300px; margin-top:0; background:#f4f7f5; border-left-color:var(--yesil); color:var(--yazi);'>" +
-                         "<b>Portföy Detaylı Temettü Dağılımı (Güncel):</b><br>" + detaylar.join("<br>") + "</div>";
+    var hisseSira = Object.keys(hisseYil).sort(function (a, b) { return hisseTop[b] - hisseTop[a]; });
+    if (hisseSira.length) {
+      var genelTop = 0;
+      yillar.forEach(function (r) { genelTop += r.t; });
+
+      html += "<div class='tg-tbaslik'>Hisse Bazlı Yıllık Net Temettü Tutarları (TL)</div>";
+      html += "<div class='tg-tsar'><table class='tg-tablo'><thead><tr><th>Hisse</th>";
+      yillar.forEach(function (r) { html += "<th>" + r.y + (r.y === gy ? "*" : "") + "</th>"; });
+      html += "<th>5 Yıl Toplam</th></tr></thead><tbody>";
+      hisseSira.forEach(function (k) {
+        html += "<tr><td>" + k + "</td>";
+        yillar.forEach(function (r) {
+          var v = hisseYil[k][r.y];
+          html += v > 0 ? "<td>" + fmtTL(v) + "</td>" : "<td class='bos'>–</td>";
+        });
+        html += "<td class='top'>" + fmtTL(hisseTop[k]) + "</td></tr>";
+      });
+      html += "</tbody><tfoot><tr><td>TOPLAM</td>";
+      yillar.forEach(function (r) { html += "<td>" + (r.t > 0 ? fmtTL(r.t) : "–") + "</td>"; });
+      html += "<td>" + fmtTL(genelTop) + "</td></tr>";
+      html += "<tr><td class='ay'>Aylık ortalama</td>";
+      yillar.forEach(function (r) { html += "<td class='ay'>" + (r.t > 0 ? fmtTL(r.t / 12) : "–") + "</td>"; });
+      html += "<td class='ay'>" + fmtTL(genelTop / 60) + "</td></tr>";
+      html += "</tfoot></table></div>";
+      if (bitis === gy) html += "<div class='tg-not'>* " + gy + " yılı kısmidir (yıl henüz tamamlanmadı).</div>";
     }
-    
-    flexContainer += "</div>";
-    html += flexContainer;
 
     var yeniVeri = tutulan.some(function (x) { return !!x.d.tem; });
     var not = "Her temettü, güncel lottan geriye doğru o tarihteki lot sayısıyla hesaplanmıştır: temettü tarihinden sonra yapılan bedelsizler lotu böler, öncesindekiler etkilemez. Aylık = yıllık net temettü ÷ 12.";
     if (!yeniVeri) not = "⚠ Tarihli temettü verisi bulunamadı (botu güncelleyip çalıştırın). Yıllık seri kullanıldı; bölünmeler yıl ortasına göre uygulandı. Aylık = yıllık net temettü ÷ 12.";
     html += "<div class='tg-not'>" + not + "</div>";
-    
+
     el.innerHTML = html;
     el.style.display = "block";
     tgSigdir();
   }
 
-  /* PORTFÖY TABLOSU ORİJİNAL 4 SÜTUNLU HALİNE GETİRİLDİ */
+  /* PORTFÖY TABLOSU (4 SÜTUN) */
   function portfoyYaz() {
     if (!$("port-body")) return;
     var html = [], T = { lot: 0, maliyet: 0, aylik: 0, adet: 0 }, gorunen = 0;
