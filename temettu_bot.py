@@ -5,6 +5,7 @@ import json
 import time
 import base64
 import requests
+import concurrent.futures
 
 GITHUB_TOKEN = os.environ.get("GH_TOKEN")
 REPO = "mbsarsiv-web/temettu-bot"
@@ -335,69 +336,67 @@ def gas_verisi(session):
         return set(), {}
 
 # ----------------------------------------------------------------------
-# İş Yatırım temettü verisi
+# İş Yatırım temettü verisi (Multithreading İle Hisse Bazlı Hızlı Sorgu)
 # ----------------------------------------------------------------------
-def is_yatirim_satirlari(session):
-    session.headers.update({
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+def is_yatirim_satirlari(kodlar):
+    """
+    Tüm hisseleri tek seferde sorup API'yi çökertmek (HTTP 500) yerine,
+    belirlenen hisseleri tek tek (fakat eşzamanlı olarak) sorgular.
+    Bu sayede hem 'Bedelsiz Temettü' gibi eksik dönen satırlar kurtarılır
+    hem de sunucu şişmez. 
+    """
+    tum_satirlar = []
+    
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
         "Accept": "application/json, text/javascript, */*; q=0.01",
-        "Accept-Language": "tr-TR,tr;q=0.9,en;q=0.8",
         "Content-Type": "application/json; charset=UTF-8",
         "X-Requested-With": "XMLHttpRequest",
         "Origin": "https://www.isyatirim.com.tr",
         "Referer": IS_SAYFA,
-    })
+    }
 
-    try:
-        session.get(IS_SAYFA, timeout=30)
-    except Exception:
-        pass
-
-    # ÇÖZÜM: 500 hatasını önlemek ve verileri eksiksiz alabilmek için 
-    # API'ye devasa tek bir istek atmak yerine 3 ayrı tipe (Nakit Temettü, Bedelsiz, Bedelli) göre istek atıyoruz.
-    tipler = ["04", "01", "02"] 
-    tum_satirlar = []
-
-    for tip in tipler:
+    def fetch_hisse(kod):
+        # İş Yatırım API'sinde tüm filtreleri boş bırakıp sadece ilgili hisse kodunu gönderiyoruz.
+        # Bu, sayfadaki tablonun eksiksiz birebir kopyasını döndürecektir.
         payload = {
-            "hisseKodu": "",
-            "hisseTanimKodu": tip,
+            "hisseKodu": kod,
+            "hisseTanimKodu": "",
             "yil": 0,
             "zaman": "HEPSI",
-            "endeksKodu": "09",
+            "endeksKodu": "",
             "sektorKodu": "",
         }
-
-        basarili = False
-        for deneme in range(3):
+        for _ in range(3):
             try:
-                log(f"Is Yatirim'dan veri cekiliyor (Tip: {tip}, Deneme {deneme + 1}/3)...")
-                r = session.post(IS_URL, json=payload, timeout=60)
+                r = requests.post(IS_URL, json=payload, headers=headers, timeout=15)
                 if r.status_code == 200:
                     js = r.json()
-                    data = js
-                    if isinstance(js, dict):
-                        data = js.get("value") or js.get("d") or js
+                    data = js.get("value") or js.get("d") or js
                     if isinstance(data, str):
                         data = json.loads(data)
                     if isinstance(data, dict):
                         for v in data.values():
                             if isinstance(v, list):
-                                data = v
-                                break
+                                return v
                     if isinstance(data, list):
-                        tum_satirlar.extend(data)
-                        basarili = True
-                        break # Başarılı olduysa deneme döngüsünden çık
-                else:
-                    log(f"Is Yatirim HTTP Hata (Tip {tip}): {r.status_code}")
-            except requests.exceptions.RequestException as e:
-                log(f"Is Yatirim HATA (Tip {tip}): {repr(e)}")
+                        return data
+            except Exception:
+                time.sleep(1)
+        return []
 
-            time.sleep(5)
-            
-        if not basarili:
-            log(f"UYARI: {tip} tipi icin Is Yatirim verisi alinamadi.")
+    log(f"Is Yatirim'dan {len(kodlar)} hisse icin tek tek eksiksiz veri cekiliyor...")
+    
+    # 15 Eşzamanlı istek ile sunucuyu yormadan hızlıca tüm verileri çeker
+    with concurrent.futures.ThreadPoolExecutor(max_workers=15) as executor:
+        future_to_kod = {executor.submit(fetch_hisse, kod): kod for kod in kodlar}
+        for future in concurrent.futures.as_completed(future_to_kod):
+            try:
+                res = future.result()
+                if res:
+                    tum_satirlar.extend(res)
+            except Exception:
+                pass
 
     return tum_satirlar
 
@@ -644,24 +643,29 @@ def github_a_yaz(veri):
 
 def main():
     session = requests.Session()
+    
+    # 1. Kaynaklardan mevcut hisse kodlarını topla
     fiyatlar = fiyatlari_cek(session)
-
-    satirlar = is_yatirim_satirlari(session)
+    gas, gas_bol = gas_verisi(session)
+    sektorler = sektorleri_cek(session)
+    
+    hedef_kodlar = sorted(list(set(fiyatlar.keys()) | gas))
+    
+    # 2. Hisseleri tek tek eşzamanlı olarak sorgula (HTTP 500'ü tamamen engeller)
+    satirlar = is_yatirim_satirlari(hedef_kodlar)
     if not satirlar:
         log("HATA: Is Yatirim'dan gecerli satir alinamadi.")
         sys.exit(1)
 
+    # 3. Verileri Ayrıştır
     ham = temettu_kayitlari(satirlar)
     isy_bol = bolunme_kayitlari(satirlar)
-    gas, gas_bol = gas_verisi(session)
     bolunmeler = bolunmeleri_birlestir(isy_bol, gas_bol)
 
-    hedef = set(ham.keys()) | gas
-    eksik_fiyatlari_tamamla(hedef, fiyatlar, gas)
-
-    sektorler = sektorleri_cek(session)
-
+    # 4. Eksik Fiyatları Telafi Et ve Son JSON'u Hazırla
+    eksik_fiyatlari_tamamla(hedef_kodlar, fiyatlar, gas)
     veri = veriyi_hazirla(ham, fiyatlar, gas, sektorler, bolunmeler)
+    
     log("Hazirlanan hisse sayisi:", len(veri))
     for ornek in ("FROTO", "ISMEN", "AKSA", "TUPRS"):
         if ornek in veri:
