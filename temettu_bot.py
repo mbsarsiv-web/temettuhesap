@@ -63,9 +63,11 @@ def sayi_metni(x):
     """Gereksiz sıfırları atılmış sayı metni (JSON'u küçük tutmak için)."""
     return ("%.6f" % x).rstrip("0").rstrip(".")
 
+_TR_HARITA = str.maketrans("İıŞşĞğÜüÖöÇç", "IISSGGUUOOCC")
+
 def norm(s):
-    """Türkçe harfleri sadeleştirip büyük harfe çevirir (başlık karşılaştırmaları için)."""
-    return str(s).replace("İ", "I").replace("ı", "I").replace("Ş", "S").replace("ş", "S").upper().strip()
+    """Türkçe harfleri sadeleştirip büyük harfe çevirir (başlık/alan adı karşılaştırmaları için)."""
+    return str(s).translate(_TR_HARITA).upper().strip()
 
 def parse_tarih(val):
     if val is None:
@@ -400,19 +402,57 @@ def satiri_coz(satir):
     hb = oran / 100.0 if oran > 0 else 0.0
     return kod, t_int, t_str, hb
 
+def alan_sinifi(k):
+    """İş Yatırım satırındaki alan adının hangi sütuna karşılık geldiğini tahmin eder.
+    Sermaye Artırımları tablosu: Bölünme Sonrası Sermaye | Tarih | Bedelli Oran | Bedelli Nom. Tutar |
+    Diğer (*) | Bedelsiz IK Oran | Bedelsiz Temettü Oran | Nakit Tem. Brüt | Nakit Temettü | Hisse Başı Brüt"""
+    n = norm(k)
+    if "BDLI" in n or "BEDELLI" in n:
+        return "bedelli"
+    if "NAKIT" in n or "HS_BRUT" in n or "HISSE_BASI" in n:
+        return "nakit"
+    if "BDLZ" in n or "BEDELSIZ" in n:
+        return "bedelsiz"
+    if "DIGER" in n or "_DGR" in n or "DGR_" in n or "_DIG_" in n:
+        return "diger"
+    if "SERMAYE" in n:
+        return "sermaye"
+    return ""
+
 def bedelsiz_orani(satir):
-    """Satırdaki bedelsiz sermaye artırımı oranı (%).
-    Alan adları 'BDLZ' (veya 'BEDELSIZ') ve 'ORAN' içerir (ör. iç kaynaklardan / temettüden bedelsiz).
-    Toplam bir alan varsa o, yoksa alt alanların toplamı alınır."""
-    anahtarlar = [k for k in satir.keys()
-                  if ("BDLZ" in str(k).upper() or "BEDELSIZ" in norm(k))
-                  and "ORAN" in str(k).upper()]
-    if not anahtarlar:
-        return 0.0
-    toplam = [k for k in anahtarlar if not any(x in str(k).upper() for x in ("_IK_", "_TM_"))]
-    if toplam:
-        return max(parse_sayi(satir.get(k)) for k in toplam)
-    return sum(parse_sayi(satir.get(k)) for k in anahtarlar)
+    """Satırdaki toplam bedelsiz oranı (%): Bedelsiz IK + Bedelsiz Temettü + Diğer (*) sütunları.
+    (FROTO 07.05.2025 bedelsizi %900 'Diğer' sütunundadır.)
+    Hazır bir 'toplam' alan varsa, alt alanların toplamıyla karşılaştırılıp büyük olan alınır."""
+    toplam, alt = [], []
+    for k, v in satir.items():
+        sinif = alan_sinifi(k)
+        n = norm(k)
+        val = parse_sayi(v)
+        if val <= 0:
+            continue
+        if sinif == "bedelsiz" and "ORAN" in n:
+            if any(x in n for x in ("_IK_", "_TM_")):
+                alt.append(val)
+            else:
+                toplam.append(val)
+        elif sinif == "diger":
+            alt.append(val)
+    return max(max(toplam) if toplam else 0.0, sum(alt))
+
+def sermaye_degeri(satir):
+    """'Bölünme Sonrası Sermaye (TL)' değeri (bulunamazsa 0)."""
+    degerler = [parse_sayi(v) for k, v in satir.items() if alan_sinifi(k) == "sermaye"]
+    return max(degerler) if degerler else 0.0
+
+def bedelli_durumu(satir):
+    """(bedelli alanı var mı, bedelli değer > 0 mı)"""
+    var, pozitif = False, False
+    for k, v in satir.items():
+        if alan_sinifi(k) == "bedelli":
+            var = True
+            if parse_sayi(v) > 0:
+                pozitif = True
+    return var, pozitif
 
 def temettu_kayitlari(satirlar):
     ham = {}
@@ -426,20 +466,61 @@ def temettu_kayitlari(satirlar):
     return ham
 
 def bolunme_kayitlari(satirlar):
-    """{kod: {tarih_int: bedelsiz_oran_yuzde}} - temettü olsun olmasın tüm bedelsiz kayıtları."""
+    """{kod: {tarih_int: bedelsiz_oran_yuzde}} - temettü olsun olmasın tüm bedelsiz kayıtları.
+
+    1) Sütunlardan okunan oran (Bedelsiz IK + Bedelsiz Temettü + Diğer).
+    2) Çapraz kontrol / yedek: 'Bölünme Sonrası Sermaye' bir önceki tarihe göre arttıysa ve satırda bedelli
+       artırım yoksa, oran sermaye artışından türetilir (sütun adı tanınmasa bile bölünme kaçmaz)."""
     sonuc = {}
+    sermaye = {}   # {kod: {tarih: sermaye}}
+    bedelli = {}   # {kod: {tarih: (alan_var, pozitif)}}
     if satirlar and isinstance(satirlar[0], dict):
         log("Ornek satir alanlari:", ", ".join(sorted(str(k) for k in satirlar[0].keys())))
+        log("Alan siniflari:", ", ".join("%s=%s" % (k, alan_sinifi(k) or "-") for k in sorted(satirlar[0].keys())))
+
     for satir in satirlar:
         if not isinstance(satir, dict):
             continue
         kod, t_int, _ = kod_tarih(satir)
-        oran = bedelsiz_orani(satir)
-        if not kod or t_int <= 0 or oran <= 0:
+        if not kod or t_int <= 0:
             continue
-        d = sonuc.setdefault(kod, {})
-        d[t_int] = max(d.get(t_int, 0.0), oran)
-    log("Is Yatirim bedelsiz bolunme kaydi olan hisse sayisi:", len(sonuc))
+        sm = sermaye_degeri(satir)
+        if sm > 0:
+            d = sermaye.setdefault(kod, {})
+            d[t_int] = max(d.get(t_int, 0.0), sm)
+        var, poz = bedelli_durumu(satir)
+        eski = bedelli.setdefault(kod, {}).get(t_int, (False, False))
+        bedelli[kod][t_int] = (eski[0] or var, eski[1] or poz)
+        oran = bedelsiz_orani(satir)
+        if oran > 0:
+            d = sonuc.setdefault(kod, {})
+            d[t_int] = max(d.get(t_int, 0.0), oran)
+
+    sutundan = len(sonuc)
+    turetilen = 0
+    for kod, sm in sermaye.items():
+        onceki = 0.0
+        for t in sorted(sm):
+            cap = sm[t]
+            if onceki > 0 and cap > onceki * 1.0001:
+                liste_oran = sonuc.get(kod, {}).get(t, 0.0)
+                oran_cap = (cap / onceki - 1.0) * 100.0
+                var, poz = bedelli.get(kod, {}).get(t, (False, False))
+                if liste_oran <= 0:
+                    if var and not poz:
+                        sonuc.setdefault(kod, {})[t] = round(oran_cap, 4)
+                        turetilen += 1
+                        log("  sermayeden turetilen bedelsiz: %s %d %%%.2f" % (kod, t, oran_cap))
+                elif abs(liste_oran - oran_cap) > max(1.0, liste_oran * 0.02):
+                    log("  UYARI oran farki: %s %d sutun=%%%.2f sermaye=%%%.2f" % (kod, t, liste_oran, oran_cap))
+            if cap > 0:
+                onceki = cap
+
+    log("Is Yatirim bedelsiz bolunme kaydi olan hisse: %d (sutundan %d, sermayeden eklenen kayit %d)" %
+        (len(sonuc), sutundan, turetilen))
+    for ornek in ("FROTO", "ISMEN", "AKSA", "TUPRS"):
+        if ornek in sonuc:
+            log("  %s bedelsiz: %s" % (ornek, ", ".join("%d:%%%.2f" % (t, o) for t, o in sorted(sonuc[ornek].items()))))
     return sonuc
 
 def bolunmeleri_birlestir(isy, gas_bol):
