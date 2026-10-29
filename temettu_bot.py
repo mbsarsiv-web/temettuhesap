@@ -13,6 +13,10 @@ DOSYA = "temettu_veri.json"
 # NOT: Filtreleme (Yoğunluk >= 0,50 / Son 10 Yıl / Verim >= %3) bu botta YAPILMAZ.
 # Hisse listesi ve filtreler "TEMETTÜ ANALİZ" uygulamasının kaynağından, hesaplama
 # uygulaması (index.html) içinde uygulanır. Bot, fiyat ve hisse başı temettü verisini üretir.
+#
+# YENİ: Her hisse için tarihli temettü geçmişi ("temettuler") ve bedelsiz bölünme
+# kayıtları ("bolunmeler") de yazılır. index.html, geçmiş yıllardaki lot sayısını
+# bu verilerle hesaplar (güncel lot ÷ o tarihten sonraki bedelsiz çarpanları).
 
 IS_URL = "https://www.isyatirim.com.tr/_layouts/15/IsYatirim.Website/StockInfo/CompanyInfoAjax.aspx/GetSermayeArttirimlari"
 IS_SAYFA = "https://www.isyatirim.com.tr/tr-tr/analiz/hisse/Sayfalar/Temettu-Ve-Sermaye-Artirimi-Tarihcesi.aspx"
@@ -22,6 +26,7 @@ FIYAT_GECMISI_URL = ("https://www.isyatirim.com.tr/_layouts/15/Isyatirim.Website
 GAS_URL = "https://script.google.com/macros/s/AKfycbxo9u41oj1aXxgkuE7gTnHdeG_mzT41o3WmaYhhqNNUJi_NTDzLOmSBSnHAhfsvhOiK/exec"
 
 YEDEK_FIYAT_BUTCE_SN = 300   # Yedek fiyat kaynakları için toplam süre sınırı
+GECMIS_BASLANGIC_YIL = 2018  # Tarihli temettü / bölünme kayıtları bu yıldan itibaren tutulur
 
 
 def log(*a):
@@ -48,6 +53,10 @@ def parse_sayi(val):
         return float(s)
     except ValueError:
         return 0.0
+
+def sayi_metni(x):
+    """Gereksiz sıfırları atılmış sayı metni (JSON'u küçük tutmak için)."""
+    return ("%.6f" % x).rstrip("0").rstrip(".")
 
 def parse_tarih(val):
     if val is None:
@@ -321,17 +330,31 @@ def is_yatirim_satirlari(session):
 
     return []
 
-def satiri_coz(satir):
+def kod_tarih(satir):
     kod = str(satir.get("SHHE_HS_KODU") or satir.get("HISSE_KODU") or "").strip().upper()
-
     t_int, t_str = parse_tarih(satir.get("SHHE_TARIH"))
     if t_int <= 0:
         t_int, t_str = parse_tarih(satir.get("TARIH"))
+    return kod, t_int, t_str
 
+def satiri_coz(satir):
+    kod, t_int, t_str = kod_tarih(satir)
     oran = parse_sayi(satir.get("SHHE_NAKIT_TM_ORAN"))
     hb = oran / 100.0 if oran > 0 else 0.0
-
     return kod, t_int, t_str, hb
+
+def bedelsiz_orani(satir):
+    """Satırdaki bedelsiz sermaye artırımı oranı (%).
+    Alan adları 'BDLZ' ve 'ORAN' içerir (ör. iç kaynaklardan / temettüden bedelsiz).
+    Toplam bir alan varsa o, yoksa alt alanların toplamı alınır."""
+    anahtarlar = [k for k in satir.keys()
+                  if "BDLZ" in str(k).upper() and "ORAN" in str(k).upper()]
+    if not anahtarlar:
+        return 0.0
+    toplam = [k for k in anahtarlar if not any(x in str(k).upper() for x in ("_IK_", "_TM_"))]
+    if toplam:
+        return max(parse_sayi(satir.get(k)) for k in toplam)
+    return sum(parse_sayi(satir.get(k)) for k in anahtarlar)
 
 def temettu_kayitlari(satirlar):
     ham = {}
@@ -344,8 +367,34 @@ def temettu_kayitlari(satirlar):
         ham.setdefault(kod, {})[(t_int, round(hb, 6))] = t_str
     return ham
 
-def veriyi_hazirla(ham, fiyatlar, gas, sektorler=None):
+def bolunme_kayitlari(satirlar):
+    """{kod: {tarih_int: bedelsiz_oran_yuzde}} - temettü olsun olmasın tüm bedelsiz kayıtları."""
+    sonuc = {}
+    if satirlar and isinstance(satirlar[0], dict):
+        log("Ornek satir alanlari:", ", ".join(sorted(str(k) for k in satirlar[0].keys())))
+    for satir in satirlar:
+        if not isinstance(satir, dict):
+            continue
+        kod, t_int, _ = kod_tarih(satir)
+        oran = bedelsiz_orani(satir)
+        if not kod or t_int <= 0 or oran <= 0:
+            continue
+        d = sonuc.setdefault(kod, {})
+        d[t_int] = max(d.get(t_int, 0.0), oran)
+    log("Bedelsiz bolunme kaydi olan hisse sayisi:", len(sonuc))
+    return sonuc
+
+def gecmis_metinleri(kod, kayitlar, bolunmeler):
+    """JSON'a yazılacak sıkıştırılmış metinler: 'YYYYMMDD:deger,YYYYMMDD:deger'."""
+    alt = GECMIS_BASLANGIC_YIL * 10000
+    tem = sorted(k for k in (kayitlar or {}) if k[0] >= alt)
+    bol = sorted((t, o) for t, o in (bolunmeler.get(kod) or {}).items() if t >= alt)
+    return (",".join("%d:%s" % (t, sayi_metni(hb)) for t, hb in tem),
+            ",".join("%d:%s" % (t, sayi_metni(o)) for t, o in bol))
+
+def veriyi_hazirla(ham, fiyatlar, gas, sektorler=None, bolunmeler=None):
     sektorler = sektorler or {}
+    bolunmeler = bolunmeler or {}
     sonuc = {}
     atlanan = 0
 
@@ -362,6 +411,7 @@ def veriyi_hazirla(ham, fiyatlar, gas, sektorler=None):
         son_yil = max(yillik.keys())
         odemeler = sorted(yillik[son_yil])
         toplam = sum(o[1] for o in odemeler)
+        tem_m, bol_m = gecmis_metinleri(kod, kayitlar, bolunmeler)
 
         sonuc[kod] = {
             "tarih": odemeler[-1][2],
@@ -372,6 +422,8 @@ def veriyi_hazirla(ham, fiyatlar, gas, sektorler=None):
             "tarihler": [o[2] for o in odemeler],
             "sektor": sektorler.get(kod, {}).get("sektor", ""),
             "sanayi": sektorler.get(kod, {}).get("sanayi", ""),
+            "temettuler": tem_m,
+            "bolunmeler": bol_m,
         }
 
     # Temettü kaydı olmayan ama Temettü Analiz listesinde bulunan hisseler (yalnızca fiyat)
@@ -381,6 +433,7 @@ def veriyi_hazirla(ham, fiyatlar, gas, sektorler=None):
             continue
         fiyat = fiyatlar.get(kod, 0.0)
         if fiyat > 0:
+            _, bol_m = gecmis_metinleri(kod, {}, bolunmeler)
             sonuc[kod] = {
                 "tarih": "",
                 "hisse_basi_tl": 0.0,
@@ -390,6 +443,8 @@ def veriyi_hazirla(ham, fiyatlar, gas, sektorler=None):
                 "tarihler": [],
                 "sektor": sektorler.get(kod, {}).get("sektor", ""),
                 "sanayi": sektorler.get(kod, {}).get("sanayi", ""),
+                "temettuler": "",
+                "bolunmeler": bol_m,
             }
             sadece_fiyat += 1
 
@@ -434,6 +489,7 @@ def main():
         sys.exit(1)
 
     ham = temettu_kayitlari(satirlar)
+    bolunmeler = bolunme_kayitlari(satirlar)
     gas = gas_kodlari(session)
 
     hedef = set(ham.keys()) | gas
@@ -441,8 +497,11 @@ def main():
 
     sektorler = sektorleri_cek(session)
 
-    veri = veriyi_hazirla(ham, fiyatlar, gas, sektorler)
+    veri = veriyi_hazirla(ham, fiyatlar, gas, sektorler, bolunmeler)
     log("Hazirlanan hisse sayisi:", len(veri))
+    for ornek in ("FROTO", "AKSA", "TUPRS"):
+        if ornek in veri:
+            log("  %s bolunmeler: %s" % (ornek, veri[ornek].get("bolunmeler") or "yok"))
 
     if not veri:
         log("HATA: Hic temettu verisi uretilemedi.")
