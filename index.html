@@ -1020,6 +1020,25 @@
     return aramaQ.length >= 3 && !!d && !!d.skArama && d.skArama.indexOf(aramaQ) > -1;
   }
 
+  /* "YYYYMMDD:değer,YYYYMMDD:değer" -> [[tarih, değer], ...] */
+  function ciftCoz(m) {
+    var o = [];
+    if (typeof m !== "string" || m === "") return o;
+    m.split(",").forEach(function (p) {
+      var a = p.split(":"), t = parseInt(a[0], 10), v = parseFloat(a[1]);
+      if (t > 0 && v > 0) o.push([t, v]);
+    });
+    return o;
+  }
+
+  /* t tarihinden sonra (aynı gün dahil) yapılan bedelsiz bölünmelerin toplam çarpanı.
+     O tarihteki lot = güncel lot ÷ çarpan */
+  function bolCarpan(d, t) {
+    var c = 1;
+    (d.bol || []).forEach(function (b) { if (b[0] >= t) c *= 1 + b[1] / 100; });
+    return c;
+  }
+
   /* Şirket listesi tek satıra sığsın diye gerekirse yazı boyutunu küçültür */
   function tgSigdir() {
     var l = document.querySelectorAll("#port-gecmis .tg-liste");
@@ -1041,12 +1060,18 @@
     function yilDetay(y) {
       var t = 0, l = [];
       tutulan.forEach(function (x) {
-        var h = x.d.g.h[y];
-        if (h > 0) {
-          var v = x.lot * h * (1 - (x.d.stopajsiz ? 0 : oran) / 100);
-          t += v;
-          l.push({ k: x.k, v: v });
+        var d = x.d, v = 0;
+        var kat = 1 - (d.stopajsiz ? 0 : oran) / 100;
+        if (d.tem) {
+          /* Her temettü, o tarihteki lot ile hesaplanır (bölünme öncesi daha az lot) */
+          d.tem.forEach(function (p) {
+            if (Math.floor(p[0] / 10000) === y) v += (x.lot / bolCarpan(d, p[0])) * p[1] * kat;
+          });
+        } else {
+          var h = d.g.h[y];            /* eski JSON: yıllık seri, bölünme düzeltmesi yok */
+          if (h > 0) v = x.lot * h * kat;
         }
+        if (v > 0) { t += v; l.push({ k: x.k, v: v }); }
       });
       l.sort(function (a, b) { return b.v - a.v; });
       return { t: t, l: l };
@@ -1076,7 +1101,15 @@
                    : "<b style='color:#9aa3a0'>Ödeme yok</b>") +
         "</div></div>";
     });
-    html += "<div class='tg-not'>Güncel lot sayılarının bu yıllarda da elde tutulduğu varsayılarak hesaplanmıştır. Aylık = yıllık net temettü ÷ 12.</div>";
+    var bolKodlar = [];
+    tutulan.forEach(function (x) {
+      if (x.d.bol && x.d.bol.some(function (b) { return b[0] >= (bitis - 4) * 10000; })) bolKodlar.push(x.k);
+    });
+    var yeniVeri = tutulan.some(function (x) { return !!x.d.tem; });
+    var not = "Her temettü, güncel lottan geriye doğru o tarihteki lot sayısıyla hesaplanmıştır (bedelsiz bölünmeler dikkate alınır). Aylık = yıllık net temettü ÷ 12.";
+    if (bolKodlar.length) not += " Bölünme olan hisseler: " + bolKodlar.join(", ") + ".";
+    if (!yeniVeri) not = "⚠ Bölünme/tarih verisi bulunamadı (botu güncelleyip çalıştırın). Şimdilik güncel lot tüm yıllarda sabit varsayıldı. Aylık = yıllık net temettü ÷ 12.";
+    html += "<div class='tg-not'>" + not + "</div>";
     el.innerHTML = html;
     el.style.display = "block";
     tgSigdir();
@@ -1299,14 +1332,26 @@
     });
   }
 
+  /* Yeni bot çıktısında (tarihli temettü + bölünme) "temettuler" alanı bulunur */
+  function botYeniMi(d) {
+    return !!d && Object.keys(d).some(function (k) { return d[k] && typeof d[k].temettuler === "string"; });
+  }
+  function botBosMu(d) { return !d || Object.keys(d).length === 0; }
+
+  /* Önce yerel dosya denenir; eski formattaysa GitHub'taki güncel dosya tercih edilir */
   function botVerisiGetir() {
     return jsonGetir(JSON_YEREL)
-      .then(function (d) {
-        if (!d || Object.keys(d).length === 0) throw new Error("bos");
-        return d;
-      })
-      .catch(function () { return jsonGetir(JSON_RAW); })
-      .catch(function () { return {}; });
+      .then(function (d) { if (botBosMu(d)) throw new Error("bos"); return d; })
+      .catch(function () { return null; })
+      .then(function (yerel) {
+        if (yerel && botYeniMi(yerel)) return yerel;
+        return jsonGetir(JSON_RAW)
+          .then(function (r) {
+            if (botBosMu(r)) throw new Error("bos");
+            return (botYeniMi(r) || !yerel) ? r : yerel;
+          })
+          .catch(function () { return yerel || {}; });
+      });
   }
 
   function veriyiIsle(bot, gas) {
@@ -1343,6 +1388,9 @@
         m: null
       };
       sektorAramaYaz(veri[kod]);
+      /* Bot'tan gelen tarihli temettü ve bedelsiz bölünme kayıtları (eski JSON'da yoksa null) */
+      veri[kod].tem = (typeof b.temettuler === "string") ? ciftCoz(b.temettuler) : null;
+      veri[kod].bol = (typeof b.bolunmeler === "string") ? ciftCoz(b.bolunmeler) : null;
       liste.push(kod);
     });
 
