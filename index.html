@@ -204,7 +204,6 @@
   .p-port .bilgi { --vurgu: #8a6a1c; --zemin-k: #f7f1e1; }
   @keyframes bilgiAc { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
 
-  /* Mobil: Sütun gizlemeleri ve oranları (t7 yapısı üzerinden) */
   .t7 th:nth-child(4), .t7 td:nth-child(4) { display: none; }
   .t7 th:nth-child(1), .t7 td:nth-child(1) { width: 17%; }
   .t7 th:nth-child(2), .t7 td:nth-child(2) { width: 14%; }
@@ -212,6 +211,10 @@
   .t7 th:nth-child(5), .t7 td:nth-child(5) { width: 17%; }
   .t7 th:nth-child(6), .t7 td:nth-child(6) { width: 19%; }
   .t7 th:nth-child(7), .t7 td:nth-child(7) { width: 18%; }
+  .t4 th:nth-child(1), .t4 td:nth-child(1) { width: 20%; }
+  .t4 th:nth-child(2), .t4 td:nth-child(2) { width: 18%; }
+  .t4 th:nth-child(3), .t4 td:nth-child(3) { width: 31%; }
+  .t4 th:nth-child(4), .t4 td:nth-child(4) { width: 31%; }
   tbody tr.detay td:first-child { width: auto; }
 
   input.girdi {
@@ -392,11 +395,11 @@
     <div class="bos-sonuc" id="sag-bos">Filtre veya aramaya uyan hisse yok.</div>
   </div>
 
-  <!-- PORTFÖY TABLOSU ORİJİNAL 7 SÜTUNLU HALİNE GETİRİLDİ -->
+  <!-- PORTFÖY TABLOSU TAMAMEN ORİJİNAL 4 SÜTUNLU (HİSSE, LOT, MALİYET, AYLIK TEMETTÜ) HALİNE DÖNDÜRÜLDÜ -->
   <div class="panel p-port" id="panel-port">
-    <table class="t7">
+    <table class="t4">
       <thead>
-        <tr><th>HİSSE</th><th>FİYAT</th><th>H. BAŞI NET</th><th>YILLIK NET</th><th>LOT</th><th>MALİYET</th><th>AYLIK NET</th></tr>
+        <tr><th>HİSSE</th><th>LOT</th><th>MALİYET</th><th>AYLIK TEMETTÜ</th></tr>
       </thead>
       <tbody id="port-body"></tbody>
     </table>
@@ -1011,14 +1014,14 @@
     }
   }
 
-  /* GRAFİK VE DETAYLI BİLGİ ALANI (ESKİ GRAFİK + 3. GÖRSELE EK BİLGİ KUTUSU) */
+  /* GRAFİK VE DETAYLI BİLGİ ALANI (ESKİ GRAFİK + GÜNCEL DAĞILIM KUTUSU) */
   function gecmisYaz(tutulan) {
     var el = $("port-gecmis");
     if (!el) return;
     if (!GAS || tutulan.length === 0) { el.style.display = "none"; el.innerHTML = ""; return; }
     var gy = GAS.guncelYil, oran = stopajOrani();
 
-    // 1. Orijinal Grafik Hesaplaması (Parantez detaysız)
+    // Orijinal Grafik Hesaplaması
     function yilDetay(y) {
       var t = 0, l = [];
       tutulan.forEach(function (x) {
@@ -1054,7 +1057,7 @@
 
     var html = "<h3>Son 5 Yıl Temettü Geçmişi (Net, %" + fmt(oran, 2) + " Stopaj Dahil)</h3>";
     
-    // Orijinal Grafik Döngüsü (Parantezler olmadan, tamamen eski hali)
+    // Orijinal Grafik Döngüsü (Parantez detayı olmadan)
     yillar.forEach(function (r) {
       var gen = r.t > 0 ? Math.max(2, (r.t / maks) * 100) : 0;
       html += "<div class='tg-satir'>" +
@@ -1068,6 +1071,7 @@
         "</div></div>";
     });
 
+    // Bölünme Bilgilerini Hazırlama
     var bolSatirlari = [];
     var altSinir = (bitis - 4) * 10000;
     tutulan.forEach(function (x) {
@@ -1078,15 +1082,15 @@
       }).join(", ") + (x.d.bolK === "gas" ? " <span style='opacity:.7'>(tarih yaklaşık: yalnızca yıl biliniyor)</span>" : ""));
     });
     
-    // 3. GÖRSELDEKİ BOŞ ALANI DOLDURAN FLEX YAPI (Yan Yana Kutular)
+    // YAN YANA GÖSTERİM (FLEXBOX İLE SOLDA BÖLÜNMELER, SAĞDA YENİ DETAYLI BİLGİLER)
     var flexContainer = "<div style='display:flex; flex-wrap:wrap; gap:10px; margin-top:6px;'>";
     
-    // Sol Kutu: Bölünme Bilgisi
+    // Sol Kutu: Orijinal Bölünme Kutusu
     if (bolSatirlari.length) {
       flexContainer += "<div class='tg-bol' style='flex:1 1 300px; margin-top:0;'><b>Lot düzeltmesi uygulanan bedelsiz bölünmeler:</b><br>" + bolSatirlari.join("<br>") + "</div>";
     }
     
-    // Sağ Kutu (Boşlukları Dolduran Kutu): Güncel Portföy Detayları
+    // Sağ Kutu: İstediğiniz Güncel Portföy Detayları
     var detaylar = [];
     tutulan.forEach(function (x) {
         var nt = net(x.d);
@@ -1112,7 +1116,7 @@
     tgSigdir();
   }
 
-  /* PORTFÖY TABLOSU ORİJİNAL 4 SÜTUNLU HALİNE GERİ DÖNDÜRÜLDÜ */
+  /* PORTFÖY TABLOSU ORİJİNAL 4 SÜTUNLU HALİNE GETİRİLDİ */
   function portfoyYaz() {
     if (!$("port-body")) return;
     var html = [], T = { lot: 0, maliyet: 0, aylik: 0, adet: 0 }, gorunen = 0;
