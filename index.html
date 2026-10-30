@@ -282,7 +282,7 @@
   }
   .tg-tablo thead th:first-child { text-align: left; padding-left: 4px; }
   .tg-tablo thead th:last-child { border-right: 0; }
-  
+
   .tg-tablo tbody td {
     padding: 4px 2px; font-size: 10px; font-weight: 700; text-align: right; white-space: nowrap;
     overflow: hidden; text-overflow: clip; border-bottom: 1px solid #ece6d6; color: var(--yazi); line-height: 1.15;
@@ -420,7 +420,7 @@
     <label class="f-kutu"><span><i class="u">Ort. Verim</i><i class="k">Verim</i></span><select id="f-verim" title="Ortalama Verim" aria-label="Ortalama Verim"></select></label>
     <button class="f-temizle" id="f-temizle" type="button" title="Filtreleri Temizle" aria-label="Filtreleri Temizle"><span class="x">✕</span><span class="yz"> Filtreleri Temizle</span></button>
   </div>
-  
+
   <div class="panel p-sol aktif" id="panel-sol">
     <table class="t7">
       <thead>
@@ -487,6 +487,11 @@
 
   var GAS_URL = "https://script.google.com/macros/s/AKfycbxo9u41oj1aXxgkuE7gTnHdeG_mzT41o3WmaYhhqNNUJi_NTDzLOmSBSnHAhfsvhOiK/exec";
   var GAS_ANAHTAR = "temettuhesap_gas_v5";
+
+  /* Bot (temettu_veri.json) tarihli temettü/bölünme kayıtlarını bu tarihten itibaren tutar
+     (bot dosyasındaki GECMIS_BASLANGIC_YIL = 2018 ile aynı olmalıdır).
+     Bu tarihten ÖNCEKİ bölünmeler yalnızca Temettü Analiz (GAS) kaynağından tamamlanır. */
+  var GECMIS_BASLANGIC_T = 20180101;
 
   var FILTRE_ANAHTAR = "temettuhesap_filtre_v2";
   var FILTRE_VARSAYILAN = { yog: "0.5", sektor: "0", donem: "0", verim: "2" };
@@ -803,7 +808,49 @@
     return "";
   }
 
-  function metrik(g, donem) {
+  /* ------------------------------------------------------------------
+     TEMETTÜ / BÖLÜNME TARİH MANTIĞI
+     ------------------------------------------------------------------
+     bolCarpan(d, t): t tarihinden SONRA (veya aynı gün) yapılan bedelsiz
+     bölünmelerin toplam çarpanı. Güncel lot ÷ çarpan = t tarihindeki lot.
+     Aynı gün hem temettü hem bölünme varsa temettü bölünme ÖNCESİ hisse
+     üzerinden ödenmiş sayılır (nakit temettü eski sermaye üzerinden dağıtılır).
+     Bölünmeden SONRAKİ temettüler çarpandan etkilenmez.
+  ------------------------------------------------------------------ */
+  function bolCarpan(d, t) {
+    var c = 1;
+    (d.bol || []).forEach(function (b) { if (b[0] >= t) c *= 1 + b[1] / 100; });
+    return c;
+  }
+
+  /* Bir yıla ait temettü ödemeleri: [[tarih_int, hisse_basi_brut], ...]
+     Önce tarihli kayıtlar (d.tem); o yıl için tarihli kayıt yoksa yıllık seri (g.h) yıl ortası (30 Haziran) varsayımıyla. */
+  function yilOdemeleri(d, y) {
+    var r = [];
+    if (d.tem) {
+      d.tem.forEach(function (p) { if (Math.floor(p[0] / 10000) === y) r.push([p[0], p[1]]); });
+    }
+    if (!r.length && d.g.h[y] > 0) r.push([y * 10000 + 630, d.g.h[y]]);
+    return r;
+  }
+
+  /* Yıllık "bölünme düzeltmeli" temettü: her ödeme, kendi tarihinden sonraki bedelsizlere bölünür.
+     Sonuç = o yıl ödenen TOPLAM temettü ÷ güncel hisse sayısı (hisse sayısı değişimlerinden bağımsız).
+     "Toplam Temettü (Yıllık Bazda)" ile aynı mantık: bedelsiz bölünme artış serisini bozmaz. */
+  function yillikDuzeltmeli(d) {
+    if (d.yadj) return d.yadj;
+    var gy = GAS.guncelYil, Y = {};
+    for (var y = 1990; y <= gy; y++) {
+      var top = 0;
+      yilOdemeleri(d, y).forEach(function (p) { top += p[1] / bolCarpan(d, p[0]); });
+      if (top > 0) Y[y] = top;
+    }
+    d.yadj = Y;
+    return Y;
+  }
+
+  function metrik(d, donem) {
+    var g = d.g;
     var gy = GAS.guncelYil, y;
     var minYil = donem > 0 ? gy - (donem - 1) : 0;
     var adet = 0, top = 0;
@@ -826,14 +873,19 @@
     var bitis = (g.v[gy] > 0) ? gy : gy - 1;
     var kes = 0;
     for (y = bitis; y >= 1990; y--) { if (g.v[y] > 0) kes++; else break; }
+
+    /* Düzenli artış: yıllık TOPLAM temettü (bölünme düzeltmeli) üst üste kaç yıl artmış */
+    var Y = yillikDuzeltmeli(d);
+    var aBitis = (Y[gy] > 0) ? gy : gy - 1;
     var art = 0;
-    for (y = bitis; y > 1990; y--) {
-      if (g.h[y] > 0 && g.h[y - 1] > 0 && g.h[y] > g.h[y - 1]) art++; else break;
+    for (y = aBitis; y > 1990; y--) {
+      if (Y[y] > 0 && Y[y - 1] > 0 && Y[y] > Y[y - 1] * (1 + 1e-9)) art++; else break;
     }
+
     var ilkH = 0, sonH = 0;
-    for (y = Math.max(1990, minYil); y <= gy; y++) { if (g.h[y] > 0) { if (!ilkH) ilkH = y; sonH = y; } }
+    for (y = Math.max(1990, minYil); y <= gy; y++) { if (Y[y] > 0) { if (!ilkH) ilkH = y; sonH = y; } }
     var buyume = null;
-    if (ilkH && sonH > ilkH) buyume = Math.pow(g.h[sonH] / g.h[ilkH], 1 / (sonH - ilkH)) - 1;
+    if (ilkH && sonH > ilkH) buyume = Math.pow(Y[sonH] / Y[ilkH], 1 / (sonH - ilkH)) - 1;
 
     return { ort: ort, adet: adet, yog: yog, kesintisiz: kes, artis: art, buyume: buyume };
   }
@@ -905,7 +957,7 @@
     gecen = {};
     liste.forEach(function (k) {
       var d = veri[k];
-      d.m = metrik(d.g, donem);
+      d.m = metrik(d, donem);
       if (filtredenGecer(d.m, d)) gecen[k] = true;
     });
     sirali = liste.slice().sort(karsilastir);
@@ -1039,12 +1091,6 @@
     return o;
   }
 
-  function bolCarpan(d, t) {
-    var c = 1;
-    (d.bol || []).forEach(function (b) { if (b[0] >= t) c *= 1 + b[1] / 100; });
-    return c;
-  }
-
   function tarihMetni(t) {
     var y = Math.floor(t / 10000), a = Math.floor((t % 10000) / 100), g = t % 100;
     return (g < 10 ? "0" : "") + g + "." + (a < 10 ? "0" : "") + a + "." + y;
@@ -1067,29 +1113,17 @@
     if (!GAS || tutulan.length === 0) { el.style.display = "none"; el.innerHTML = ""; return; }
     var gy = GAS.guncelYil, oran = stopajOrani();
 
-    /* Yıl detayı: v = o yıl toplam net tutar (lot düzeltmeli), ps = o yıl hisse başı ödenen net temettü */
+    /* Yıl detayı: v = o yıl toplam net tutar (her ödeme KENDİ tarihindeki lotla), ps = o yıl hisse başı ödenen net temettü */
     function yilDetay(y) {
       var t = 0, l = [];
       tutulan.forEach(function (x) {
         var d = x.d, v = 0, ps = 0;
-        if (d.tem) {
-          d.tem.forEach(function (p) {
-            if (Math.floor(p[0] / 10000) === y) {
-              var gecerliStopaj = (p[0] < 20250101) ? 10 : oran;
-              var kat = 1 - (d.stopajsiz ? 0 : gecerliStopaj) / 100;
-              v += (x.lot / bolCarpan(d, p[0])) * p[1] * kat;
-              ps += p[1] * kat;
-            }
-          });
-        } else {
-          var h = d.g.h[y];
-          if (h > 0) {
-            var gecerliStopaj = (y < 2025) ? 10 : oran;
-            var kat = 1 - (d.stopajsiz ? 0 : gecerliStopaj) / 100;
-            v += (x.lot / bolCarpan(d, y * 10000 + 630)) * h * kat;
-            ps += h * kat;
-          }
-        }
+        yilOdemeleri(d, y).forEach(function (p) {
+          var gecerliStopaj = (p[0] < 20250101) ? 10 : oran;
+          var kat = 1 - (d.stopajsiz ? 0 : gecerliStopaj) / 100;
+          v += (x.lot / bolCarpan(d, p[0])) * p[1] * kat;
+          ps += p[1] * kat;
+        });
         if (v > 0) { t += v; l.push({ k: x.k, v: v, ps: ps }); }
       });
       l.sort(function (a, b) { return b.v - a.v; });
@@ -1175,7 +1209,7 @@
     }
 
     var yeniVeri = tutulan.some(function (x) { return !!x.d.tem; });
-    var not = "Her temettü, güncel lottan geriye doğru o tarihteki lot sayısıyla hesaplanmıştır: temettü tarihinden sonra yapılan bedelsizler lotu böler, öncesindekiler etkilemez. Aylık = yıllık net temettü ÷ 12.";
+    var not = "Her temettü, güncel lottan geriye doğru o tarihteki lot sayısıyla hesaplanmıştır: temettü tarihinden sonra yapılan bedelsizler lotu böler, öncesindekiler etkilemez (aynı gün olanlarda temettü bölünme öncesi hisse üzerinden ödenmiş sayılır). Aynı yıl içinde hem bölünme hem temettü varsa her ödeme kendi tarihine göre ayrı ayrı hesaplanır. Aylık = yıllık net temettü ÷ 12.";
     if (!yeniVeri) not = "⚠ Tarihli temettü verisi bulunamadı (botu güncelleyip çalıştırın). Yıllık seri kullanıldı; bölünmeler yıl ortasına göre uygulandı. Aylık = yıllık net temettü ÷ 12.";
     html += "<div class='tg-not'>" + not + " <br><b>Stopaj Notu:</b> 2025 yılı öncesi temettüler %10, 2025 ve sonrası için girilen oran (%" + fmt(oran, 2) + ") baz alınarak netleştirilmiştir. (GYO'lar %0)</div>";
 
@@ -1216,10 +1250,10 @@
         "<td data-c='lot'>" + fmtLot(lot) + "</td>" +
         "<td data-c='maliyet'>" + fmtTL(maliyet) + "<small class='esd'>" + esdegerMetin(maliyet) + "</small></td>" +
         "<td>" + fmtTL(aylik) + "<small class='esd'>" + esdegerMetin(aylik) + "</small></td></tr>");
-      
+
       if (acik.port[k]) html.push(detaySatiri(k, 4));
     });
-    
+
     $("port-body").innerHTML = html.join("");
     $("port-bos").style.display = gorunen === 0 ? "block" : "none";
     $("port-bos").textContent = T.lot > 0 ? "Aramaya uyan hisse yok." : "Henüz giriş yok. Diğer sekmelerde aylık temettü veya lot girin.";
@@ -1520,7 +1554,8 @@
         sektor: sektorStr,
         sanayi: sanayiStr,
         g: g,
-        m: null
+        m: null,
+        yadj: null
       };
       sektorAramaYaz(veri[kod]);
 
@@ -1530,9 +1565,34 @@
 
       var botBol = (typeof b.bolunmeler === "string") ? ciftCoz(b.bolunmeler) : [];
       var gasBol = (gas.gBol && gas.gBol[kod]) ? gas.gBol[kod] : [];
-      if (botBol.length) { veri[kod].bol = botBol; veri[kod].bolK = "isy"; bolSayim.isy++; }
+      if (botBol.length) {
+        /* İş Yatırım (tam tarihli) kayıtları 2018'den itibaren tutulur. Bundan ÖNCEKİ bölünmeleri
+           (uzun serili "düzenli artış" hesabı için gerekli) Temettü Analiz'den tamamla; çakışma/çift sayım yok. */
+        var birlesik = botBol.slice();
+        gasBol.forEach(function (x) { if (x[0] < GECMIS_BASLANGIC_T) birlesik.push(x); });
+        birlesik.sort(function (a, c) { return a[0] - c[0]; });
+        veri[kod].bol = birlesik; veri[kod].bolK = "isy"; bolSayim.isy++;
+      }
       else if (gasBol.length) { veri[kod].bol = gasBol; veri[kod].bolK = "gas"; bolSayim.gas++; }
       else { veri[kod].bol = []; veri[kod].bolK = ""; }
+
+      /* TEMETTÜ SÜTUNU: son ödeme yılındaki hisse başı temettü, o yıl içinde ödeme tarihinden SONRA
+         yapılan bedelsiz bölünmelere göre güncel hisse sayısına çevrilir (her ödeme kendi tarihiyle).
+         Bölünme yoksa değer aynen kalır. */
+      var d0 = veri[kod];
+      var hy = parseInt((String(tarih).match(/(\d{4})/) || [])[1], 10);
+      if (d0.tem && hy > 0 && d0.temettu > 0) {
+        var topAdj = 0, say = 0, ayar = false;
+        d0.tem.forEach(function (p) {
+          if (Math.floor(p[0] / 10000) === hy) {
+            var cp = bolCarpan(d0, p[0]);
+            if (cp > 1 + 1e-9) ayar = true;
+            topAdj += p[1] / cp;
+            say++;
+          }
+        });
+        if (ayar && say > 0 && topAdj > 0) { d0.temettuHam = d0.temettu; d0.temettu = topAdj; }
+      }
 
       liste.push(kod);
     });
