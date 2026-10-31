@@ -250,36 +250,7 @@
   .toplam .k-adet span, .toplam .k-lot span { font-size: 11px; opacity: .8; }
   .toplam .k-adet b, .toplam .k-lot b { font-size: 20px; font-weight: 800; line-height: 1.15; }
 
-  /* ---------- PORTFÖY: özet kartları + sektör dağılımı ---------- */
-  .p-ust {
-    display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px;
-    padding: 8px 6px; border-bottom: 1px solid var(--cizgi); background: #fff;
-  }
-  .p-kpi { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
-  .kpi {
-    background: #f7f1e1; border-left: 3px solid var(--altin); border-radius: 6px;
-    padding: 6px 8px; min-width: 0; font-variant-numeric: tabular-nums;
-  }
-  .kpi .kpi-e { font-size: 10px; font-weight: 700; color: var(--soluk); line-height: 1.2; }
-  .kpi .kpi-d { font-size: 17px; font-weight: 800; color: var(--altin-koyu); line-height: 1.25; margin-top: 1px; white-space: nowrap; }
-  .kpi .kpi-a { font-size: 10px; font-weight: 800; color: #946c0c; line-height: 1.2; min-height: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .kpi.vurgu { background: var(--altin); border-left-color: var(--altin-koyu); }
-  .kpi.vurgu .kpi-e { color: rgba(255,255,255,.8); }
-  .kpi.vurgu .kpi-d { color: #fff; }
-  .kpi.vurgu .kpi-a { color: #f5dc8e; }
-
-  .p-sektor { background: #faf7ef; border: 1px solid #ece6d6; border-radius: 8px; padding: 8px 10px; min-width: 0; }
-  .p-sk-baslik { font-size: 12px; font-weight: 800; color: var(--altin-koyu); margin-bottom: 6px; }
-  .p-sk-baslik span { font-weight: 600; color: var(--soluk); font-size: 10.5px; }
-  .sk-bar { display: flex; height: 14px; border-radius: 7px; overflow: hidden; gap: 1px; background: #ece6d6; }
-  .sk-bar i { display: block; height: 100%; min-width: 2px; }
-  .sk-liste { display: flex; flex-wrap: wrap; gap: 3px 12px; margin-top: 8px; }
-  .sk-chip { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--yazi); white-space: nowrap; font-variant-numeric: tabular-nums; }
-  .sk-chip i { width: 9px; height: 9px; border-radius: 3px; flex: none; }
-  .sk-chip b { font-weight: 800; }
-  .sk-chip span { color: var(--soluk); font-weight: 600; }
-  .sk-chip em { display: none; font-style: normal; color: var(--soluk); font-weight: 500; }
-
+  /* ---------- PORTFÖY: sıralama çubuğu ---------- */
   .port-arac { display: flex; align-items: center; gap: 6px; padding: 6px 6px; background: #faf7ef; border-bottom: 1px solid var(--cizgi); }
   .port-arac > span { font-size: 11px; font-weight: 700; color: var(--soluk); margin-right: 2px; }
   .port-arac button {
@@ -433,17 +404,6 @@
     .bilgi .b-etiket { font-size: 11px; }
     .bilgi .b-deger { font-size: 20px; }
 
-    .p-ust { padding: 12px 12px; gap: 12px; }
-    .p-kpi { gap: 8px; }
-    .kpi { padding: 8px 12px; }
-    .kpi .kpi-e { font-size: 11px; }
-    .kpi .kpi-d { font-size: 21px; }
-    .kpi .kpi-a { font-size: 11px; }
-    .p-sektor { padding: 10px 14px; }
-    .p-sk-baslik { font-size: 13px; }
-    .sk-bar { height: 18px; border-radius: 9px; }
-    .sk-chip { font-size: 12.5px; }
-    .sk-chip em { display: inline; }
     .port-arac { padding: 8px 12px; }
     .port-arac button { height: 28px; font-size: 13px; padding: 0 14px; }
 
@@ -470,8 +430,6 @@
     .ara { flex: 1 1 400px; max-width: 600px; }
     .kur { font-size: 12.5px; }
     .kur .ek { display: inline; }
-    .p-ust { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); align-items: stretch; }
-    .p-sektor { display: flex; flex-direction: column; justify-content: center; }
   }
   /* Portföy sekmesinde masaüstünde daha geniş çalışma alanı */
   @media (min-width: 1000px) {
@@ -485,7 +443,6 @@
     .toplam .k-adet b, .toplam .k-lot b { font-size: 17px; }
     .f-kutu { min-width: 54px; }
     .filtre select { font-size: 12.5px; }
-    .kpi .kpi-d { font-size: 15px; }
     .tg-tablo tbody td, .tg-tablo tfoot td { font-size: 9.5px; }
     .tg-tablo thead th { font-size: 9px; }
     .tg-tablo small.tg-ps { font-size: 7.5px; }
@@ -549,10 +506,6 @@
 
   <!-- PORTFÖY: özet kartları, sektör dağılımı, sıralama, tablo, temettü geçmişi -->
   <div class="panel p-port" id="panel-port">
-    <div class="p-ust" id="port-ust" style="display:none">
-      <div class="p-kpi" id="port-kpi"></div>
-      <div class="p-sektor" id="port-sektor-ozet"></div>
-    </div>
     <div class="port-arac" id="port-arac" style="display:none">
       <span>Sırala:</span>
       <button type="button" data-sira="maliyet" class="aktif">Maliyet</button>
@@ -722,9 +675,6 @@
     "Broadcasting": "Yayıncılık",
     "Publishing: Books/Magazines": "Yayıncılık"
   };
-
-  /* Portföy sektör dağılımı renk paleti */
-  var SEKTOR_RENK = ["#8a6a1c", "#2b5797", "#1e6b3e", "#b3472e", "#6b4e9b", "#2a8c8c", "#c27c0e", "#7a8a2e", "#a14a7a", "#5b6770"];
 
   var veri = {};
   var liste = [];
@@ -1362,11 +1312,10 @@
     el.style.display = "block";
   }
 
-  /* PORTFÖY: özet kartları + sektör dağılımı + sıralanabilir tablo (4 SÜTUN) */
+  /* PORTFÖY: sıralanabilir tablo (4 SÜTUN) */
   function portfoyYaz() {
     if (!$("port-body")) return;
     var T = { lot: 0, maliyet: 0, aylik: 0, adet: 0 };
-    var sektorDagilim = {};
     var tutulan = [];
     var satirlar = [];
 
@@ -1381,8 +1330,6 @@
       var aylik = yillik / 12;
       T.lot += lot; T.maliyet += maliyet; T.aylik += aylik; T.adet++;
 
-      var sAd = sektorMetni(d) || "Diğer";
-      sektorDagilim[sAd] = (sektorDagilim[sAd] || 0) + maliyet;
       tutulan.push({ k: k, d: d, lot: lot });
       satirlar.push({ k: k, d: d, lot: lot, maliyet: maliyet, aylik: aylik });
     });
@@ -1433,46 +1380,7 @@
     $("port-alt-maliyet").textContent = esdegerMetin(T.maliyet);
     $("port-alt-aylik").textContent = esdegerMetin(T.aylik);
 
-    /* Özet kartları */
-    var ust = $("port-ust"), arac = $("port-arac");
-    if (T.lot > 0) {
-      var yillikNet = T.aylik * 12;
-      var verim = T.maliyet > 0 ? (yillikNet / T.maliyet) * 100 : 0;
-      var kart = function (etiket, deger, alt, ek) {
-        return "<div class='kpi" + (ek ? " " + ek : "") + "'><div class='kpi-e'>" + etiket + "</div>" +
-               "<div class='kpi-d'>" + deger + "</div><div class='kpi-a'>" + alt + "</div></div>";
-      };
-      $("port-kpi").innerHTML =
-        kart("Toplam maliyet", fmtTL(T.maliyet), esdegerMetin(T.maliyet)) +
-        kart("Aylık net temettü", fmtTL(T.aylik), esdegerMetin(T.aylik), "vurgu") +
-        kart("Yıllık net temettü", fmtTL(yillikNet), esdegerMetin(yillikNet)) +
-        kart("Maliyete net verim", "%" + fmtVerim(verim), "yıllık net ÷ maliyet");
-
-      /* Sektör dağılımı: yığılmış çubuk + renkli etiketler */
-      var sArr = [];
-      for (var key in sektorDagilim) {
-        if (sektorDagilim[key] > 0) sArr.push({ s: key, v: sektorDagilim[key] });
-      }
-      sArr.sort(function (a, b) { return b.v - a.v; });
-      var bar = "", etiketler = "";
-      sArr.forEach(function (x, i) {
-        var yuzde = T.maliyet > 0 ? (x.v / T.maliyet) * 100 : 0;
-        var renk = SEKTOR_RENK[i % SEKTOR_RENK.length];
-        bar += "<i style='width:" + yuzde.toFixed(2) + "%;background:" + renk + "' title='" + kacis(x.s) + " %" + fmt(yuzde, 1) + "'></i>";
-        etiketler += "<span class='sk-chip'><i style='background:" + renk + "'></i><b>" + kacis(x.s) + "</b> <span>%" + fmt(yuzde, 1) + "</span> <em>" + fmtTL(x.v) + "</em></span>";
-      });
-      $("port-sektor-ozet").innerHTML =
-        "<div class='p-sk-baslik'>Sektör dağılımı <span>(maliyete göre)</span></div>" +
-        "<div class='sk-bar'>" + bar + "</div><div class='sk-liste'>" + etiketler + "</div>";
-
-      ust.style.display = "grid";
-      arac.style.display = "flex";
-    } else {
-      ust.style.display = "none";
-      arac.style.display = "none";
-      $("port-kpi").innerHTML = "";
-      $("port-sektor-ozet").innerHTML = "";
-    }
+    $("port-arac").style.display = T.lot > 0 ? "flex" : "none";
 
     gecmisYaz(tutulan);
   }
