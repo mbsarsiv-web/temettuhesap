@@ -169,6 +169,9 @@
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
   td.hisse small.sk:empty { display: none; }
+  td.hisse small.pay {
+    display: block; font-size: 9.5px; font-weight: 800; color: #946c0c; line-height: 1.15; white-space: nowrap;
+  }
 
   td[data-c='fiyat'],
   td[data-c='temettu'],
@@ -211,10 +214,10 @@
   .t7 th:nth-child(5), .t7 td:nth-child(5) { width: 17%; }
   .t7 th:nth-child(6), .t7 td:nth-child(6) { width: 19%; }
   .t7 th:nth-child(7), .t7 td:nth-child(7) { width: 18%; }
-  .t4 th:nth-child(1), .t4 td:nth-child(1) { width: 20%; }
-  .t4 th:nth-child(2), .t4 td:nth-child(2) { width: 18%; }
-  .t4 th:nth-child(3), .t4 td:nth-child(3) { width: 31%; }
-  .t4 th:nth-child(4), .t4 td:nth-child(4) { width: 31%; }
+  .t4 th:nth-child(1), .t4 td:nth-child(1) { width: 26%; }
+  .t4 th:nth-child(2), .t4 td:nth-child(2) { width: 15%; }
+  .t4 th:nth-child(3), .t4 td:nth-child(3) { width: 29%; }
+  .t4 th:nth-child(4), .t4 td:nth-child(4) { width: 30%; }
   tbody tr.detay td:first-child { width: auto; }
 
   input.girdi {
@@ -247,16 +250,51 @@
   .toplam .k-adet span, .toplam .k-lot span { font-size: 11px; opacity: .8; }
   .toplam .k-adet b, .toplam .k-lot b { font-size: 20px; font-weight: 800; line-height: 1.15; }
 
-  /* Portföy Sektör Analiz Bölümü */
-  .sektor-ozet {
-    width: 100%; font-size: 13px; padding: 12px; border-top: 1px solid var(--cizgi);
-    text-align: left; color: var(--yazi); line-height: 1.6; display: none; background: #f8faf9;
+  /* ---------- PORTFÖY: özet kartları + sektör dağılımı ---------- */
+  .p-ust {
+    display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px;
+    padding: 8px 6px; border-bottom: 1px solid var(--cizgi); background: #fff;
   }
+  .p-kpi { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+  .kpi {
+    background: #f7f1e1; border-left: 3px solid var(--altin); border-radius: 6px;
+    padding: 6px 8px; min-width: 0; font-variant-numeric: tabular-nums;
+  }
+  .kpi .kpi-e { font-size: 10px; font-weight: 700; color: var(--soluk); line-height: 1.2; }
+  .kpi .kpi-d { font-size: 17px; font-weight: 800; color: var(--altin-koyu); line-height: 1.25; margin-top: 1px; white-space: nowrap; }
+  .kpi .kpi-a { font-size: 10px; font-weight: 800; color: #946c0c; line-height: 1.2; min-height: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .kpi.vurgu { background: var(--altin); border-left-color: var(--altin-koyu); }
+  .kpi.vurgu .kpi-e { color: rgba(255,255,255,.8); }
+  .kpi.vurgu .kpi-d { color: #fff; }
+  .kpi.vurgu .kpi-a { color: #f5dc8e; }
+
+  .p-sektor { background: #faf7ef; border: 1px solid #ece6d6; border-radius: 8px; padding: 8px 10px; min-width: 0; }
+  .p-sk-baslik { font-size: 12px; font-weight: 800; color: var(--altin-koyu); margin-bottom: 6px; }
+  .p-sk-baslik span { font-weight: 600; color: var(--soluk); font-size: 10.5px; }
+  .sk-bar { display: flex; height: 14px; border-radius: 7px; overflow: hidden; gap: 1px; background: #ece6d6; }
+  .sk-bar i { display: block; height: 100%; min-width: 2px; }
+  .sk-liste { display: flex; flex-wrap: wrap; gap: 3px 12px; margin-top: 8px; }
+  .sk-chip { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--yazi); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .sk-chip i { width: 9px; height: 9px; border-radius: 3px; flex: none; }
+  .sk-chip b { font-weight: 800; }
+  .sk-chip span { color: var(--soluk); font-weight: 600; }
+  .sk-chip em { display: none; font-style: normal; color: var(--soluk); font-weight: 500; }
+
+  .port-arac { display: flex; align-items: center; gap: 6px; padding: 6px 6px; background: #faf7ef; border-bottom: 1px solid var(--cizgi); }
+  .port-arac > span { font-size: 11px; font-weight: 700; color: var(--soluk); margin-right: 2px; }
+  .port-arac button {
+    height: 26px; padding: 0 11px; border-radius: 14px; border: 1px solid var(--cizgi);
+    background: #fff; color: var(--soluk); font-size: 12px; font-weight: 700; cursor: pointer;
+  }
+  .port-arac button.aktif { background: var(--altin); border-color: var(--altin-koyu); color: #fff; }
+  .port-arac button:focus-visible { outline: 2px solid var(--yazi); outline-offset: 1px; }
 
   /* Portföy: son 5 yıl temettü geçmişi */
   .tg { display: none; padding: 10px 6px 12px; border-top: 1px solid var(--cizgi); background: #fff; }
   .tg h3 { margin: 0 0 8px 4px; font-size: 13px; font-weight: 800; color: var(--altin-koyu); }
-  .tg-satir { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 4px 4px; }
+  .tg-satir { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 5px 4px; border-radius: 8px; }
+  .tg-satir.tik { cursor: pointer; }
+  .tg-satir.tik:active { background: #faf7ef; }
   .tg-yil { font-size: 13px; font-weight: 800; color: var(--yazi); }
   .tg-yil small { display: block; font-size: 8.5px; font-weight: 600; color: var(--soluk); }
   .tg-cubuk { height: 22px; background: #f1ece0; border-radius: 5px; overflow: hidden; }
@@ -264,14 +302,36 @@
   .tg-deger { text-align: right; font-variant-numeric: tabular-nums; line-height: 1.15; min-width: 92px; }
   .tg-deger b { display: block; font-size: 13px; font-weight: 800; color: var(--yazi); }
   .tg-deger span { display: block; font-size: 11px; font-weight: 700; color: #946c0c; }
+  .tg-deger .yoy { font-size: 10px; font-weight: 800; }
+  .tg-deger .yoy.up { color: #1e6b3e; }
+  .tg-deger .yoy.dn { color: #b3261e; }
   .tg-orta { min-width: 0; }
-  .tg-liste { margin-top: 3px; font-size: 10.5px; font-weight: 600; color: var(--soluk); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
-  .tg-liste b { color: var(--yazi); font-weight: 800; }
+  .tg-liste { margin-top: 5px; display: flex; flex-wrap: wrap; gap: 4px; }
+  .tg-chip {
+    display: inline-flex; align-items: baseline; gap: 3px; padding: 1px 7px; border-radius: 10px;
+    background: #f7f1e1; font-size: 10.5px; font-weight: 600; color: var(--soluk); white-space: nowrap; font-variant-numeric: tabular-nums;
+  }
+  .tg-chip b { color: var(--yazi); font-weight: 800; }
+  .tg-chip.ek { display: none; }
+  .tg-satir.acik .tg-chip.ek { display: inline-flex; }
+  .tg-chip.daha { background: var(--altin); color: #fff; font-weight: 800; }
+  .tg-satir.acik .tg-chip.daha { display: none; }
   .tg-not { margin: 6px 4px 0; font-size: 10px; color: var(--soluk); line-height: 1.3; }
-  .tg-bol { margin: 8px 4px 0; padding: 6px 8px; font-size: 10.5px; line-height: 1.45; color: var(--altin-koyu); background: #f7f1e1; border-left: 3px solid var(--altin); border-radius: 5px; }
-  .tg-bol b { font-weight: 800; color: var(--yazi); }
 
-  /* Portföy: hisse bazlı yıl yıl net temettü tablosu (hizalanmış) */
+  .tg-ac { margin: 8px 4px 0; background: #f7f1e1; border-left: 3px solid var(--altin); border-radius: 5px; }
+  .tg-ac > summary {
+    cursor: pointer; padding: 7px 8px; font-size: 11px; font-weight: 800; color: var(--altin-koyu);
+    list-style: none; display: flex; align-items: center; gap: 6px;
+  }
+  .tg-ac > summary::-webkit-details-marker { display: none; }
+  .tg-ac > summary::before { content: "▸"; font-size: 11px; transition: transform .15s; }
+  .tg-ac[open] > summary::before { transform: rotate(90deg); }
+  .tg-ac > div { padding: 0 8px 4px 22px; font-size: 10.5px; line-height: 1.45; color: var(--altin-koyu); }
+  .tg-ac > div b { font-weight: 800; color: var(--yazi); }
+  .tg-ac > .tg-not { margin: 0; padding: 0 8px 6px 22px; }
+  .tg-ac > .tg-not:last-child { padding-bottom: 8px; }
+
+  /* Portföy: hisse bazlı yıl yıl net temettü tablosu (ısı haritalı, sabit ilk sütun) */
   .tg-tbaslik { margin: 12px 4px 6px; font-size: 12px; font-weight: 800; color: var(--altin-koyu); line-height: 1.25; }
   .tg-tsar { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--cizgi); border-radius: 8px; }
   .tg-tablo { width: 100%; table-layout: auto; border-collapse: collapse; font-size: 10px; text-align: right; font-variant-numeric: tabular-nums; }
@@ -301,6 +361,19 @@
   .tg-tablo tfoot td:first-child { text-align: left; padding-left: 4px; font-size: 9.5px; white-space: normal; }
   .tg-tablo tfoot td.ay { font-size: 9.5px; font-weight: 700; }
   .tg-tablo tfoot tr + tr td { border-top: 1px solid #d8c994; }
+
+  /* sabit ilk sütun (yatay kaydırmada hisse adı görünür kalır) */
+  .tg-tablo th:first-child, .tg-tablo td:first-child { position: sticky; left: 0; top: auto; z-index: 2; }
+  .tg-tablo thead th:first-child { background: var(--altin-koyu); z-index: 3; }
+  .tg-tablo tbody td:first-child { background: #fff; }
+  .tg-tablo tbody tr:nth-child(even) td:first-child { background: #faf7ef; }
+  .tg-tablo tfoot td:first-child { background: #efe6cc; }
+
+  @media (hover: hover) {
+    .p-port tbody tr[data-kod]:hover { background-color: #f4efe0; }
+    .tg-satir.tik:hover { background: #faf7ef; }
+    .port-arac button:not(.aktif):hover { border-color: var(--altin); color: var(--altin-koyu); }
+  }
 
   /* ---------- Geniş ekran ---------- */
   @media (min-width: 641px) {
@@ -336,6 +409,7 @@
     td.hisse { font-size: 16px; padding-left: 6px; }
     td.hisse small.mt { display: none; }
     td.hisse small.sk { font-size: 10px; }
+    td.hisse small.pay { font-size: 10.5px; }
     td[data-c=tarih] { font-size: 13px; }
     td small.brut { font-size: 10.5px; }
     .tl { display: inline; }
@@ -347,6 +421,10 @@
     .t7 th:nth-child(5), .t7 td:nth-child(5) { width: 13%; }
     .t7 th:nth-child(6), .t7 td:nth-child(6) { width: 18%; }
     .t7 th:nth-child(7), .t7 td:nth-child(7) { width: 16%; }
+    .t4 th:nth-child(1), .t4 td:nth-child(1) { width: 22%; }
+    .t4 th:nth-child(2), .t4 td:nth-child(2) { width: 14%; }
+    .t4 th:nth-child(3), .t4 td:nth-child(3) { width: 32%; }
+    .t4 th:nth-child(4), .t4 td:nth-child(4) { width: 32%; }
     tbody tr.detay td:first-child { width: auto; }
     input.girdi { height: 32px; font-size: 17px; }
     .toplam .kalem b { font-size: 15px; }
@@ -354,9 +432,30 @@
     .bilgi { padding: 7px 6px; }
     .bilgi .b-etiket { font-size: 11px; }
     .bilgi .b-deger { font-size: 20px; }
+
+    .p-ust { padding: 12px 12px; gap: 12px; }
+    .p-kpi { gap: 8px; }
+    .kpi { padding: 8px 12px; }
+    .kpi .kpi-e { font-size: 11px; }
+    .kpi .kpi-d { font-size: 21px; }
+    .kpi .kpi-a { font-size: 11px; }
+    .p-sektor { padding: 10px 14px; }
+    .p-sk-baslik { font-size: 13px; }
+    .sk-bar { height: 18px; border-radius: 9px; }
+    .sk-chip { font-size: 12.5px; }
+    .sk-chip em { display: inline; }
+    .port-arac { padding: 8px 12px; }
+    .port-arac button { height: 28px; font-size: 13px; padding: 0 14px; }
+
     .tg { padding: 10px 12px 12px; }
-    .tg h3, .tg-not, .tg-bol, .tg-tbaslik { margin-left: 0; margin-right: 0; }
-    .tg-satir { padding: 4px 0; }
+    .tg h3, .tg-not, .tg-tbaslik { margin-left: 0; margin-right: 0; }
+    .tg-ac { margin-left: 0; margin-right: 0; }
+    .tg-ac > summary { font-size: 12.5px; padding: 9px 12px; }
+    .tg-ac > div { font-size: 12.5px; padding-left: 28px; }
+    .tg-ac > .tg-not { font-size: 11.5px; padding-left: 28px; }
+    .tg-satir { padding: 6px 6px; }
+    .tg-chip { font-size: 11.5px; }
+    .tg-deger .yoy { font-size: 11px; }
     .tg-tbaslik { font-size: 13px; }
     .tg-tablo thead th { font-size: 12.5px; padding: 7px 10px; }
     .tg-tablo tbody td { font-size: 14px; padding: 6px 10px; }
@@ -371,6 +470,12 @@
     .ara { flex: 1 1 400px; max-width: 600px; }
     .kur { font-size: 12.5px; }
     .kur .ek { display: inline; }
+    .p-ust { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); align-items: stretch; }
+    .p-sektor { display: flex; flex-direction: column; justify-content: center; }
+  }
+  /* Portföy sekmesinde masaüstünde daha geniş çalışma alanı */
+  @media (min-width: 1000px) {
+    body.port-modu { --genislik: 1140px; }
   }
   @media (max-width: 360px) {
     tbody td { font-size: 12px; }
@@ -380,6 +485,7 @@
     .toplam .k-adet b, .toplam .k-lot b { font-size: 17px; }
     .f-kutu { min-width: 54px; }
     .filtre select { font-size: 12.5px; }
+    .kpi .kpi-d { font-size: 15px; }
     .tg-tablo tbody td, .tg-tablo tfoot td { font-size: 9.5px; }
     .tg-tablo thead th { font-size: 9px; }
     .tg-tablo small.tg-ps { font-size: 7.5px; }
@@ -441,8 +547,18 @@
     <div class="bos-sonuc" id="sag-bos">Filtre veya aramaya uyan hisse yok.</div>
   </div>
 
-  <!-- PORTFÖY TABLOSU: 4 SÜTUNLU (HİSSE, LOT, MALİYET, AYLIK TEMETTÜ) -->
+  <!-- PORTFÖY: özet kartları, sektör dağılımı, sıralama, tablo, temettü geçmişi -->
   <div class="panel p-port" id="panel-port">
+    <div class="p-ust" id="port-ust" style="display:none">
+      <div class="p-kpi" id="port-kpi"></div>
+      <div class="p-sektor" id="port-sektor-ozet"></div>
+    </div>
+    <div class="port-arac" id="port-arac" style="display:none">
+      <span>Sırala:</span>
+      <button type="button" data-sira="maliyet" class="aktif">Maliyet</button>
+      <button type="button" data-sira="temettu">Temettü</button>
+      <button type="button" data-sira="ad">A–Z</button>
+    </div>
     <table class="t4">
       <thead>
         <tr><th>HİSSE</th><th>LOT</th><th>MALİYET</th><th>AYLIK TEMETTÜ</th></tr>
@@ -450,7 +566,6 @@
       <tbody id="port-body"></tbody>
     </table>
     <div class="bos-sonuc" id="port-bos">Henüz giriş yok. Diğer sekmelerde aylık temettü veya lot girin.</div>
-    <div class="sektor-ozet" id="port-sektor-ozet"></div>
     <div class="tg" id="port-gecmis"></div>
   </div>
 </div>
@@ -494,6 +609,7 @@
   var GECMIS_BASLANGIC_T = 20180101;
 
   var FILTRE_ANAHTAR = "temettuhesap_filtre_v2";
+  var PORT_ANAHTAR = "temettuhesap_port_v1";
   var FILTRE_VARSAYILAN = { yog: "0.5", sektor: "0", donem: "0", verim: "2" };
   var FILTRE_BOS = { yog: "tum", sektor: "0", donem: "0", verim: "0" };
   var FILTRE_ID = { yog: "f-yog", sektor: "f-sektor", donem: "f-donem", verim: "f-verim" };
@@ -607,12 +723,18 @@
     "Publishing: Books/Magazines": "Yayıncılık"
   };
 
+  /* Portföy sektör dağılımı renk paleti */
+  var SEKTOR_RENK = ["#8a6a1c", "#2b5797", "#1e6b3e", "#b3472e", "#6b4e9b", "#2a8c8c", "#c27c0e", "#7a8a2e", "#a14a7a", "#5b6770"];
+
   var veri = {};
   var liste = [];
   var giris = { sol: {}, sag: {}, stopaj: "15" };
   var aktifSekme = "sol";
   var veriKaynakNotu = "";
   var acik = { sol: {}, sag: {}, port: {} };
+  var acikYil = {};
+  var acikDetay = {};
+  var portSira = "maliyet";
 
   function $(id) { return document.getElementById(id); }
 
@@ -762,6 +884,16 @@
     } catch (e) {}
   }
   function filtreYaz() { try { localStorage.setItem(FILTRE_ANAHTAR, JSON.stringify(F)); } catch (e) {} }
+
+  function portAyarOku() {
+    try {
+      var o = JSON.parse(localStorage.getItem(PORT_ANAHTAR));
+      if (o && (o.sira === "maliyet" || o.sira === "temettu" || o.sira === "ad")) portSira = o.sira;
+    } catch (e) {}
+  }
+  function portAyarYaz() {
+    try { localStorage.setItem(PORT_ANAHTAR, JSON.stringify({ sira: portSira })); } catch (e) {}
+  }
 
   function secimleriYansit() {
     Object.keys(FILTRE_ID).forEach(function (a) {
@@ -1096,16 +1228,6 @@
     return (g < 10 ? "0" : "") + g + "." + (a < 10 ? "0" : "") + a + "." + y;
   }
 
-  function tgSigdir() {
-    var l = document.querySelectorAll("#port-gecmis .tg-liste");
-    for (var i = 0; i < l.length; i++) {
-      var e = l[i], fs = 10.5;
-      e.style.fontSize = "";
-      if (!e.clientWidth) continue;
-      while (e.scrollWidth > e.clientWidth && fs > 6) { fs -= 0.5; e.style.fontSize = fs + "px"; }
-    }
-  }
-
   /* GRAFİK + BÖLÜNME KUTUSU + HİSSE BAZLI YIL YIL NET TEMETTÜ TABLOSU */
   function gecmisYaz(tutulan) {
     var el = $("port-gecmis");
@@ -1142,20 +1264,32 @@
 
     var html = "<h3>Son 5 Yıl Temettü Geçmişi (Net)</h3>";
 
-    yillar.forEach(function (r) {
+    yillar.forEach(function (r, i) {
       var gen = r.t > 0 ? Math.max(2, (r.t / maks) * 100) : 0;
-      html += "<div class='tg-satir'>" +
+      var genis = r.l.length > 3;
+      var yoy = "";
+      if (i > 0 && r.y !== gy && r.t > 0 && yillar[i - 1].t > 0) {
+        var pc = (r.t / yillar[i - 1].t - 1) * 100;
+        yoy = "<span class='yoy " + (pc >= 0 ? "up" : "dn") + "'>" + (pc >= 0 ? "▲ +" : "▼ ") + fmt(pc, 0) + "%</span>";
+      }
+      var chips = r.l.map(function (x, j) {
+        return "<span class='tg-chip" + (j >= 3 ? " ek" : "") + "'><b>" + x.k + "</b> " + fmtTL(x.v) + "</span>";
+      }).join("");
+      if (genis) chips += "<span class='tg-chip daha'>+" + (r.l.length - 3) + "</span>";
+
+      html += "<div class='tg-satir" + (genis ? " tik" : "") + (genis && acikYil[r.y] ? " acik" : "") + "'" +
+        (genis ? " data-y='" + r.y + "' title='Tüm hisseleri göster / gizle'" : "") + ">" +
         "<div class='tg-yil'>" + r.y + (r.y === gy ? "<small>kısmi</small>" : "") + "</div>" +
         "<div class='tg-orta'><div class='tg-cubuk'><i style='width:" + gen.toFixed(1) + "%'></i></div>" +
-          (r.l.length ? "<div class='tg-liste'>" + r.l.map(function (x) { return "<b>" + x.k + ":</b> " + fmtTL(x.v); }).join(" + ") + "</div>" : "") +
+          (r.l.length ? "<div class='tg-liste'>" + chips + "</div>" : "") +
         "</div>" +
         "<div class='tg-deger'>" +
-          (r.t > 0 ? "<b>" + fmtTL(r.t) + "</b><span>" + fmtTL(r.t / 12) + " / ay</span>"
+          (r.t > 0 ? "<b>" + fmtTL(r.t) + "</b><span>" + fmtTL(r.t / 12) + " / ay</span>" + yoy
                    : "<b style='color:#9aa3a0'>Ödeme yok</b>") +
         "</div></div>";
     });
 
-    /* Lot düzeltmesi uygulanan bedelsiz bölünmeler */
+    /* Lot düzeltmesi uygulanan bedelsiz bölünmeler (açılır kutu) */
     var bolSatirlari = [];
     var altSinir = (bitis - 4) * 10000;
     tutulan.forEach(function (x) {
@@ -1166,16 +1300,20 @@
       }).join(", ") + (x.d.bolK === "gas" ? " <span style='opacity:.7'>(tarih yaklaşık: yalnızca yıl biliniyor)</span>" : ""));
     });
     if (bolSatirlari.length) {
-      html += "<div class='tg-bol'><b>Lot düzeltmesi uygulanan bedelsiz bölünmeler:</b><br>" + bolSatirlari.join("<br>") + "</div>";
+      html += "<details class='tg-ac' data-a='bol'" + (acikDetay.bol ? " open" : "") + ">" +
+        "<summary>Lot düzeltmesi uygulanan bedelsiz bölünmeler (" + bolSatirlari.length + " hisse)</summary>" +
+        bolSatirlari.map(function (s) { return "<div>" + s + "</div>"; }).join("") +
+        "</details>";
     }
 
     /* Hisse bazlı yıl yıl net temettü tablosu */
-    var hisseYil = {}, hisseTop = {};
+    var hisseYil = {}, hisseTop = {}, maksHucre = 0;
     yillar.forEach(function (r) {
       r.l.forEach(function (x) {
         if (!hisseYil[x.k]) { hisseYil[x.k] = {}; hisseTop[x.k] = 0; }
         hisseYil[x.k][r.y] = { v: x.v, ps: x.ps };
         hisseTop[x.k] += x.v;
+        if (x.v > maksHucre) maksHucre = x.v;
       });
     });
     var hisseSira = Object.keys(hisseYil).sort(function (a, b) { return hisseTop[b] - hisseTop[a]; });
@@ -1183,7 +1321,7 @@
       var genelTop = 0;
       yillar.forEach(function (r) { genelTop += r.t; });
 
-      html += "<div class='tg-tbaslik'>Hisse Bazlı Yıllık Net Temettü (TL) <span style='font-weight:600;color:var(--soluk)'>· altta küçük: hisse başı net</span></div>";
+      html += "<div class='tg-tbaslik'>Hisse Bazlı Yıllık Net Temettü (TL) <span style='font-weight:600;color:var(--soluk)'>· altta küçük: hisse başı net · koyu zemin = yüksek tutar</span></div>";
       html += "<div class='tg-tsar'><table class='tg-tablo'><thead><tr><th>Hisse</th>";
       yillar.forEach(function (r) { html += "<th>" + r.y + (r.y === gy ? "*" : "") + "</th>"; });
       html += "<th>5 Yıl Toplam</th></tr></thead><tbody>";
@@ -1191,9 +1329,12 @@
         html += "<tr><td>" + k + "</td>";
         yillar.forEach(function (r) {
           var c = hisseYil[k][r.y];
-          html += (c && c.v > 0)
-            ? "<td>" + fmtTLh(c.v) + "<small class='tg-ps'>" + fmtFiyat(c.ps) + "</small></td>"
-            : "<td class='bos'>–</td>";
+          if (c && c.v > 0) {
+            var a = (0.04 + 0.28 * (maksHucre > 0 ? c.v / maksHucre : 0)).toFixed(3);
+            html += "<td style='background:rgba(138,106,28," + a + ")'>" + fmtTLh(c.v) + "<small class='tg-ps'>" + fmtFiyat(c.ps) + "</small></td>";
+          } else {
+            html += "<td class='bos'>–</td>";
+          }
         });
         html += "<td class='top'>" + fmtTLh(hisseTop[k]) + "</td></tr>";
       });
@@ -1205,25 +1346,29 @@
       html += "<td class='ay'>" + fmtTLh(genelTop / 60) + "</td></tr>";
       html += "</tfoot></table></div>";
       if (bitis === gy) html += "<div class='tg-not'>* " + gy + " yılı kısmidir (yıl henüz tamamlanmadı).</div>";
-      html += "<div class='tg-not'>Küçük yazı: o yıl içinde hisse başına ödenen net temettü (stopaj düşülmüş, ödeme anındaki hisse sayısı üzerinden; birden fazla ödeme varsa toplamı).</div>";
     }
 
     var yeniVeri = tutulan.some(function (x) { return !!x.d.tem; });
     var not = "Her temettü, güncel lottan geriye doğru o tarihteki lot sayısıyla hesaplanmıştır: temettü tarihinden sonra yapılan bedelsizler lotu böler, öncesindekiler etkilemez (aynı gün olanlarda temettü bölünme öncesi hisse üzerinden ödenmiş sayılır). Aynı yıl içinde hem bölünme hem temettü varsa her ödeme kendi tarihine göre ayrı ayrı hesaplanır. Aylık = yıllık net temettü ÷ 12.";
     if (!yeniVeri) not = "⚠ Tarihli temettü verisi bulunamadı (botu güncelleyip çalıştırın). Yıllık seri kullanıldı; bölünmeler yıl ortasına göre uygulandı. Aylık = yıllık net temettü ÷ 12.";
-    html += "<div class='tg-not'>" + not + " <br><b>Stopaj Notu:</b> 2025 yılı öncesi temettüler %10, 2025 ve sonrası için girilen oran (%" + fmt(oran, 2) + ") baz alınarak netleştirilmiştir. (GYO'lar %0)</div>";
+    html += "<details class='tg-ac' data-a='not'" + (acikDetay.not ? " open" : "") + ">" +
+      "<summary>Hesaplama notları ve stopaj</summary>" +
+      "<div class='tg-not'>Küçük yazı: o yıl içinde hisse başına ödenen net temettü (stopaj düşülmüş, ödeme anındaki hisse sayısı üzerinden; birden fazla ödeme varsa toplamı).</div>" +
+      "<div class='tg-not'>" + not + "</div>" +
+      "<div class='tg-not'><b>Stopaj Notu:</b> 2025 yılı öncesi temettüler %10, 2025 ve sonrası için girilen oran (%" + fmt(oran, 2) + ") baz alınarak netleştirilmiştir. (GYO'lar %0)</div>" +
+      "</details>";
 
     el.innerHTML = html;
     el.style.display = "block";
-    tgSigdir();
   }
 
-  /* PORTFÖY TABLOSU (4 SÜTUN) */
+  /* PORTFÖY: özet kartları + sektör dağılımı + sıralanabilir tablo (4 SÜTUN) */
   function portfoyYaz() {
     if (!$("port-body")) return;
-    var html = [], T = { lot: 0, maliyet: 0, aylik: 0, adet: 0 }, gorunen = 0;
+    var T = { lot: 0, maliyet: 0, aylik: 0, adet: 0 };
     var sektorDagilim = {};
     var tutulan = [];
+    var satirlar = [];
 
     sirali.forEach(function (k) {
       var d = veri[k];
@@ -1239,23 +1384,47 @@
       var sAd = sektorMetni(d) || "Diğer";
       sektorDagilim[sAd] = (sektorDagilim[sAd] || 0) + maliyet;
       tutulan.push({ k: k, d: d, lot: lot });
+      satirlar.push({ k: k, d: d, lot: lot, maliyet: maliyet, aylik: aylik });
+    });
 
-      if (!aramaEslesir(k)) return;
-      var sinif = (gorunen % 2 === 0 ? "cift" : "") + (acik.port[k] ? " acik" : "");
-      gorunen++;
+    /* Sıralama düğmeleri */
+    var dugmeler = $("port-arac").querySelectorAll("button[data-sira]");
+    for (var di = 0; di < dugmeler.length; di++) {
+      dugmeler[di].classList.toggle("aktif", dugmeler[di].getAttribute("data-sira") === portSira);
+    }
 
-      var hisseHtml = "<td class='hisse'>" + k + "<small class='sk' title='" + sektorBaslik(d) + "'>" + sektorMetni(d) + "</small></td>";
+    var gorunenler = satirlar.filter(function (r) { return aramaEslesir(r.k); });
+    gorunenler.sort(function (a, b) {
+      if (portSira === "maliyet" && b.maliyet !== a.maliyet) return b.maliyet - a.maliyet;
+      if (portSira === "temettu" && b.aylik !== a.aylik) return b.aylik - a.aylik;
+      return karsilastir(a.k, b.k);
+    });
 
-      html.push("<tr data-kod='" + k + "' class='" + sinif + "'>" + hisseHtml +
-        "<td data-c='lot'>" + fmtLot(lot) + "</td>" +
-        "<td data-c='maliyet'>" + fmtTL(maliyet) + "<small class='esd'>" + esdegerMetin(maliyet) + "</small></td>" +
-        "<td>" + fmtTL(aylik) + "<small class='esd'>" + esdegerMetin(aylik) + "</small></td></tr>");
+    var maksMaliyet = 0;
+    satirlar.forEach(function (r) { if (r.maliyet > maksMaliyet) maksMaliyet = r.maliyet; });
+
+    var html = [];
+    gorunenler.forEach(function (r, i) {
+      var d = r.d, k = r.k;
+      var sinif = (i % 2 === 0 ? "cift" : "") + (acik.port[k] ? " acik" : "");
+      var pay = T.maliyet > 0 ? (r.maliyet / T.maliyet) * 100 : 0;
+      var gen = maksMaliyet > 0 ? (r.maliyet / maksMaliyet) * 100 : 0;
+      var stil = " style='background-image:linear-gradient(90deg,rgba(138,106,28,.14) " + gen.toFixed(1) + "%,transparent " + gen.toFixed(1) + "%)'";
+
+      var hisseHtml = "<td class='hisse'>" + k +
+        "<small class='sk' title='" + sektorBaslik(d) + "'>" + sektorMetni(d) + "</small>" +
+        (pay > 0 ? "<small class='pay'>%" + fmt(pay, 1) + " pay</small>" : "") + "</td>";
+
+      html.push("<tr data-kod='" + k + "' class='" + sinif + "'" + stil + ">" + hisseHtml +
+        "<td data-c='lot'>" + fmtLot(r.lot) + "</td>" +
+        "<td data-c='maliyet'>" + fmtTL(r.maliyet) + "<small class='esd'>" + esdegerMetin(r.maliyet) + "</small></td>" +
+        "<td>" + fmtTL(r.aylik) + "<small class='esd'>" + esdegerMetin(r.aylik) + "</small></td></tr>");
 
       if (acik.port[k]) html.push(detaySatiri(k, 4));
     });
 
     $("port-body").innerHTML = html.join("");
-    $("port-bos").style.display = gorunen === 0 ? "block" : "none";
+    $("port-bos").style.display = gorunenler.length === 0 ? "block" : "none";
     $("port-bos").textContent = T.lot > 0 ? "Aramaya uyan hisse yok." : "Henüz giriş yok. Diğer sekmelerde aylık temettü veya lot girin.";
     $("port-toplam-adet").textContent = T.adet;
     $("port-toplam-lot").textContent = T.lot > 0 ? fmtLot(T.lot) : "-";
@@ -1264,27 +1433,74 @@
     $("port-alt-maliyet").textContent = esdegerMetin(T.maliyet);
     $("port-alt-aylik").textContent = esdegerMetin(T.aylik);
 
-    var sArr = [];
-    for (var key in sektorDagilim) {
-      if (sektorDagilim[key] > 0) sArr.push({ s: key, v: sektorDagilim[key] });
-    }
-    sArr.sort(function(a, b) { return b.v - a.v; });
-    var sHTML = sArr.map(function(x) {
-      var yuzde = T.maliyet > 0 ? ((x.v / T.maliyet) * 100).toFixed(1) : 0;
-      return "<span style='white-space:nowrap'><b>" + x.s + ":</b> " + fmtTL(x.v) + " <span style='opacity:.7'>(%" + yuzde + ")</span></span>";
-    }).join(" &nbsp;|&nbsp; ");
+    /* Özet kartları */
+    var ust = $("port-ust"), arac = $("port-arac");
+    if (T.lot > 0) {
+      var yillikNet = T.aylik * 12;
+      var verim = T.maliyet > 0 ? (yillikNet / T.maliyet) * 100 : 0;
+      var kart = function (etiket, deger, alt, ek) {
+        return "<div class='kpi" + (ek ? " " + ek : "") + "'><div class='kpi-e'>" + etiket + "</div>" +
+               "<div class='kpi-d'>" + deger + "</div><div class='kpi-a'>" + alt + "</div></div>";
+      };
+      $("port-kpi").innerHTML =
+        kart("Toplam maliyet", fmtTL(T.maliyet), esdegerMetin(T.maliyet)) +
+        kart("Aylık net temettü", fmtTL(T.aylik), esdegerMetin(T.aylik), "vurgu") +
+        kart("Yıllık net temettü", fmtTL(yillikNet), esdegerMetin(yillikNet)) +
+        kart("Maliyete net verim", "%" + fmtVerim(verim), "yıllık net ÷ maliyet");
 
-    var ozetDiv = $("port-sektor-ozet");
-    if (sArr.length > 0) {
-      ozetDiv.style.display = "block";
-      ozetDiv.innerHTML = sHTML;
+      /* Sektör dağılımı: yığılmış çubuk + renkli etiketler */
+      var sArr = [];
+      for (var key in sektorDagilim) {
+        if (sektorDagilim[key] > 0) sArr.push({ s: key, v: sektorDagilim[key] });
+      }
+      sArr.sort(function (a, b) { return b.v - a.v; });
+      var bar = "", etiketler = "";
+      sArr.forEach(function (x, i) {
+        var yuzde = T.maliyet > 0 ? (x.v / T.maliyet) * 100 : 0;
+        var renk = SEKTOR_RENK[i % SEKTOR_RENK.length];
+        bar += "<i style='width:" + yuzde.toFixed(2) + "%;background:" + renk + "' title='" + kacis(x.s) + " %" + fmt(yuzde, 1) + "'></i>";
+        etiketler += "<span class='sk-chip'><i style='background:" + renk + "'></i><b>" + kacis(x.s) + "</b> <span>%" + fmt(yuzde, 1) + "</span> <em>" + fmtTL(x.v) + "</em></span>";
+      });
+      $("port-sektor-ozet").innerHTML =
+        "<div class='p-sk-baslik'>Sektör dağılımı <span>(maliyete göre)</span></div>" +
+        "<div class='sk-bar'>" + bar + "</div><div class='sk-liste'>" + etiketler + "</div>";
+
+      ust.style.display = "grid";
+      arac.style.display = "flex";
     } else {
-      ozetDiv.style.display = "none";
-      ozetDiv.innerHTML = "";
+      ust.style.display = "none";
+      arac.style.display = "none";
+      $("port-kpi").innerHTML = "";
+      $("port-sektor-ozet").innerHTML = "";
     }
 
     gecmisYaz(tutulan);
   }
+
+  /* Portföy: temettü geçmişi satırını aç/kapat + açılır kutu durumunu hatırla */
+  $("port-gecmis").addEventListener("click", function (e) {
+    var t = e.target;
+    if (!t || !t.closest) return;
+    var s = t.closest(".tg-satir[data-y]");
+    if (!s) return;
+    var y = s.getAttribute("data-y");
+    var ac = !s.classList.contains("acik");
+    s.classList.toggle("acik", ac);
+    if (ac) acikYil[y] = true; else delete acikYil[y];
+  });
+  $("port-gecmis").addEventListener("toggle", function (e) {
+    var t = e.target;
+    if (t && t.getAttribute && t.getAttribute("data-a")) acikDetay[t.getAttribute("data-a")] = !!t.open;
+  }, true);
+
+  /* Portföy: sıralama */
+  $("port-arac").addEventListener("click", function (e) {
+    var b = e.target && e.target.closest ? e.target.closest("button[data-sira]") : null;
+    if (!b) return;
+    portSira = b.getAttribute("data-sira");
+    portAyarYaz();
+    portfoyYaz();
+  });
 
   function depoOku() {
     try {
@@ -1893,6 +2109,7 @@
     fiyatOnbellekOku();
     sektorOnbellekOku();
     filtreOku();
+    portAyarOku();
     Promise.all([botVerisiGetir(), gasGetir()])
       .then(function (sonuc) {
         var bot = sonuc[0], gas = sonuc[1];
@@ -2095,7 +2312,7 @@
       b[i].classList.toggle("aktif", b[i].getAttribute("data-hedef") === hedef);
     }
     $("filtre").style.display = hedef === "port" ? "none" : "";
-    if (hedef === "port") tgSigdir();
+    document.body.classList.toggle("port-modu", hedef === "port");
     ustYukseklik();
   }
 
@@ -2107,7 +2324,7 @@
   function ustYukseklik() {
     document.documentElement.style.setProperty("--ust-yuk", $("ust").offsetHeight + "px");
   }
-  window.addEventListener("resize", function () { ustYukseklik(); tgSigdir(); });
+  window.addEventListener("resize", function () { ustYukseklik(); });
 
   bulutBaslat();
   kurOnbellekOku();
