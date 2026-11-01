@@ -10,6 +10,7 @@ import concurrent.futures
 GITHUB_TOKEN = os.environ.get("GH_TOKEN")
 REPO = "mbsarsiv-web/temettu-bot"
 DOSYA = "temettu_veri.json"
+GUNCELLEME_DOSYA = "guncelleme.json"   # İş Yatırım verisinin son çekilme zamanı (uygulama bunu gösterir)
 
 # NOT: Filtreleme (Yoğunluk / Dönem / Verim) bu botta YAPILMAZ.
 # Hisse listesi ve filtreler "TEMETTÜ ANALİZ" uygulamasının kaynağından, hesaplama
@@ -614,12 +615,30 @@ def veriyi_hazirla(ham, fiyatlar, gas, sektorler=None, bolunmeler=None):
     log("Yalnizca fiyat eklenen hisse:", sadece_fiyat)
     return sonuc
 
-def github_a_yaz(veri):
+def guncelleme_bilgisi(ham, veri):
+    """Uygulamanın göstereceği 'İş Yatırım verisi son güncelleme' bilgisi (guncelleme.json).
+    is_yatirim_guncelleme: İş Yatırım'dan verinin çekildiği an (UTC, ISO-8601);
+    son_temettu_kaydi: çekilen veri içindeki en yeni temettü ödeme tarihi (GG.AA.YYYY)."""
+    son_t = 0
+    for kayitlar in ham.values():
+        for (t_int, _hb) in kayitlar.keys():
+            if t_int > son_t:
+                son_t = t_int
+    son_metin = ""
+    if son_t > 0:
+        son_metin = "%02d.%02d.%04d" % (son_t % 100, (son_t // 100) % 100, son_t // 10000)
+    return {
+        "is_yatirim_guncelleme": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "hisse_sayisi": len(veri),
+        "son_temettu_kaydi": son_metin,
+    }
+
+def github_a_yaz(veri, dosya=DOSYA, mesaj=None):
     if not GITHUB_TOKEN:
         log("GH_TOKEN yok, GitHub'a yazilamadi.")
         return False
 
-    url = "https://api.github.com/repos/%s/contents/%s" % (REPO, DOSYA)
+    url = "https://api.github.com/repos/%s/contents/%s" % (REPO, dosya)
     h = {"Authorization": "Bearer " + GITHUB_TOKEN, "Accept": "application/vnd.github+json"}
 
     sha = ""
@@ -629,7 +648,7 @@ def github_a_yaz(veri):
 
     icerik = json.dumps(veri, indent=2, ensure_ascii=False, sort_keys=True)
     govde = {
-        "message": "otomatik guncelleme: %d hisse temettu verisi" % len(veri),
+        "message": mesaj or ("otomatik guncelleme: %d hisse temettu verisi" % len(veri)),
         "content": base64.b64encode(icerik.encode("utf-8")).decode("utf-8"),
     }
     if sha:
@@ -677,6 +696,12 @@ def main():
 
     if not github_a_yaz(veri):
         sys.exit(1)
+
+    # 5. İş Yatırım verisinin son güncelleme zamanını ayrı küçük dosyaya yaz (uygulama ekranda gösterir).
+    #    Bu adım başarısız olsa bile ana veri zaten yazıldığı için bot hata ile bitmez.
+    if not github_a_yaz(guncelleme_bilgisi(ham, veri), GUNCELLEME_DOSYA, "otomatik guncelleme: is yatirim veri zamani"):
+        log("UYARI: guncelleme.json yazilamadi (ana veri yazildi).")
+
     log("Tamamlandi.")
 
 if __name__ == "__main__":
