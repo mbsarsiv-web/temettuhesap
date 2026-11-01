@@ -123,6 +123,10 @@
   }
   .f-temizle .yz { display: none; }
 
+  .guncel { max-width: var(--genislik); margin: 3px auto 0; font-size: 10.5px; line-height: 1.3; color: var(--soluk); font-variant-numeric: tabular-nums; }
+  .guncel:empty { display: none; }
+  .guncel b { font-weight: 800; color: var(--yazi); }
+  .guncel.eski, .guncel.eski b { color: #9b2c2c; }
   .durum { max-width: var(--genislik); margin: 3px auto 0; font-size: 11px; line-height: 1.3; color: var(--soluk); }
   .durum:empty { display: none; }
   .durum.uyari { color: #9b2c2c; font-weight: 700; }
@@ -211,10 +215,11 @@
   .t7 th:nth-child(5), .t7 td:nth-child(5) { width: 17%; }
   .t7 th:nth-child(6), .t7 td:nth-child(6) { width: 19%; }
   .t7 th:nth-child(7), .t7 td:nth-child(7) { width: 18%; }
-  .t4 th:nth-child(1), .t4 td:nth-child(1) { width: 20%; }
-  .t4 th:nth-child(2), .t4 td:nth-child(2) { width: 18%; }
-  .t4 th:nth-child(3), .t4 td:nth-child(3) { width: 31%; }
-  .t4 th:nth-child(4), .t4 td:nth-child(4) { width: 31%; }
+  .t4 th:nth-child(1), .t4 td:nth-child(1) { width: 19%; }
+  .t4 th:nth-child(2), .t4 td:nth-child(2) { width: 13%; }
+  .t4 th:nth-child(3), .t4 td:nth-child(3) { width: 25%; }
+  .t4 th:nth-child(4), .t4 td:nth-child(4) { width: 25%; }
+  .t4 th:nth-child(5), .t4 td:nth-child(5) { width: 18%; }
   tbody tr.detay td:first-child { width: auto; }
 
   input.girdi {
@@ -252,6 +257,16 @@
   .p-port thead th .si, .tg-tablo thead th .si { display: inline-block; margin-left: 3px; font-size: 9px; font-weight: 700; opacity: .55; }
   .p-port thead th.s-aktif { background: #7d5f17; }
   .p-port thead th.s-aktif .si, .tg-tablo thead th.s-aktif .si { opacity: 1; color: #f5dc8e; }
+
+  /* Temettü trendi rozeti (portföy tablosunun son sütunu) */
+  td.trend-h { white-space: normal; font-size: 11px; line-height: 1.2; }
+  .trend {
+    display: inline-block; max-width: 100%; padding: 2px 7px; border-radius: 10px; font-size: 11px; font-weight: 800;
+    line-height: 1.2; background: #f7f1e1; color: var(--altin-koyu); border: 1px solid #e3d8b8; overflow-wrap: anywhere;
+  }
+  .trend.up { background: #e9f4ec; color: #1e6b3e; border-color: #bcd9c5; }
+  .trend.dn { background: #fbeaea; color: #b3261e; border-color: #e8bcbc; }
+  .trend.yok { background: transparent; border-color: transparent; color: #b3b9b6; font-weight: 400; }
 
   /* Bölünme kutusu (portföy tablosunun altında) */
   .tg-bolkutu { padding: 0 10px 10px; border-top: 1px solid var(--cizgi); background: #fff; }
@@ -352,6 +367,8 @@
     td.hisse { font-size: 16px; padding-left: 6px; }
     td.hisse small.mt { display: none; }
     td.hisse small.sk { font-size: 10px; }
+    td.trend-h, .trend { font-size: 13px; }
+    .guncel { font-size: 11.5px; }
     td[data-c=tarih] { font-size: 13px; }
     td small.brut { font-size: 10.5px; }
     .tl { display: inline; }
@@ -426,6 +443,7 @@
     <button class="sekme sag" data-hedef="sag" type="button"><span class="u">LOT SAYISINA GÖRE</span><span class="k">LOT</span></button>
     <button class="sekme port" data-hedef="port" type="button"><span class="u">PORTFÖY</span><span class="k">PORTFÖY</span></button>
   </div>
+  <div class="guncel" id="guncel"></div>
   <div class="durum" id="durum"></div>
 </div>
 
@@ -466,7 +484,7 @@
   <div class="panel p-port" id="panel-port">
     <table class="t4">
       <thead>
-        <tr><th data-sira="ad" title="Sırala">HİSSE<span class="si">⇅</span></th><th data-sira="lot" title="Büyükten küçüğe sırala">LOT<span class="si">⇅</span></th><th data-sira="maliyet" title="Büyükten küçüğe sırala">MALİYET<span class="si">⇅</span></th><th data-sira="aylik" title="Büyükten küçüğe sırala">AYLIK TEMETTÜ<span class="si">⇅</span></th></tr>
+        <tr><th data-sira="ad" title="Sırala">HİSSE<span class="si">⇅</span></th><th data-sira="lot" title="Büyükten küçüğe sırala">LOT<span class="si">⇅</span></th><th data-sira="maliyet" title="Büyükten küçüğe sırala">MALİYET<span class="si">⇅</span></th><th data-sira="aylik" title="Büyükten küçüğe sırala">AYLIK TEMETTÜ<span class="si">⇅</span></th><th data-sira="trend" title="Büyükten küçüğe sırala">TEMETTÜ TRENDİ<span class="si">⇅</span></th></tr>
       </thead>
       <tbody id="port-body"></tbody>
     </table>
@@ -507,7 +525,12 @@
   var JSON_RAW   = "https://raw.githubusercontent.com/mbsarsiv-web/temettu-bot/main/temettu_veri.json";
 
   var GAS_URL = "https://script.google.com/macros/s/AKfycbxo9u41oj1aXxgkuE7gTnHdeG_mzT41o3WmaYhhqNNUJi_NTDzLOmSBSnHAhfsvhOiK/exec";
-  var GAS_ANAHTAR = "temettuhesap_gas_v5";
+  var GAS_ANAHTAR = "temettuhesap_gas_v6";
+
+  /* Temettü verisinin İş Yatırım'dan son güncellenme zamanı (bot yazar; yoksa GitHub commit tarihi kullanılır) */
+  var GUNC_YEREL = "guncelleme.json";
+  var GUNC_RAW = "https://raw.githubusercontent.com/mbsarsiv-web/temettu-bot/main/guncelleme.json";
+  var GUNC_API = "https://api.github.com/repos/mbsarsiv-web/temettu-bot/commits?path=temettu_veri.json&per_page=1";
 
   /* Bot (temettu_veri.json) tarihli temettü/bölünme kayıtlarını bu tarihten itibaren tutar
      (bot dosyasındaki GECMIS_BASLANGIC_YIL = 2018 ile aynı olmalıdır).
@@ -1256,7 +1279,24 @@
     }
   }
 
-  /* PORTFÖY TABLOSU (4 SÜTUN, başlıklardan sıralanabilir) */
+  /* Temettü trendi: kaynaktaki metni olduğu gibi gösterir; yönüne göre renklendirir ve sıralama puanı üretir */
+  function trendBilgi(ham) {
+    var t = String(ham === undefined || ham === null ? "" : ham).trim();
+    if (t === "" || t === "-" || t === "–") return { html: "<span class='trend yok'>–</span>", skor: -1e9 };
+    var u = t.toLocaleUpperCase("tr");
+    var yuk = /▲|↑|↗|📈|🔼|⬆|ARTI|ARTAN|YÜKSEL|YUKSEL|YUKARI|POZİTİF|POZITIF/.test(u);
+    var dus = /▼|↓|↘|📉|🔽|⬇|AZAL|DÜŞ|DUS|AŞAĞI|ASAGI|NEGATİF|NEGATIF/.test(u);
+    var yon = (yuk && !dus) ? 1 : ((dus && !yuk) ? -1 : 0);
+    var m = t.match(/-?\d+(?:[.,]\d+)?/);
+    var skor = yon;
+    if (m) {
+      var n = parseFloat(m[0].replace(",", "."));
+      if (isFinite(n)) skor = (yon === -1 ? -Math.abs(n) : n) + yon * 0.001;
+    }
+    return { html: "<span class='trend" + (yon === 1 ? " up" : (yon === -1 ? " dn" : "")) + "' title='" + kacis(t) + "'>" + kacis(t) + "</span>", skor: skor };
+  }
+
+  /* PORTFÖY TABLOSU (5 SÜTUN, başlıklardan sıralanabilir) */
   function portfoyYaz() {
     if (!$("port-body")) return;
     var html = [], T = { lot: 0, maliyet: 0, aylik: 0, adet: 0 };
@@ -1274,7 +1314,8 @@
       var aylik = yillik / 12;
       T.lot += lot; T.maliyet += maliyet; T.aylik += aylik; T.adet++;
       tutulan.push({ k: k, d: d, lot: lot });
-      satirlar.push({ k: k, d: d, lot: lot, maliyet: maliyet, aylik: aylik });
+      var tb = trendBilgi(d.trend);
+      satirlar.push({ k: k, d: d, lot: lot, maliyet: maliyet, aylik: aylik, trend: tb.skor, tb: tb });
     });
 
     /* Başlık sıralama simgeleri */
@@ -1300,9 +1341,10 @@
       html.push("<tr data-kod='" + k + "' class='" + sinif + "'>" + hisseHtml +
         "<td data-c='lot'>" + fmtLot(r.lot) + "</td>" +
         "<td data-c='maliyet'>" + fmtTL(r.maliyet) + "<small class='esd'>" + esdegerMetin(r.maliyet) + "</small></td>" +
-        "<td>" + fmtTL(r.aylik) + "<small class='esd'>" + esdegerMetin(r.aylik) + "</small></td></tr>");
+        "<td>" + fmtTL(r.aylik) + "<small class='esd'>" + esdegerMetin(r.aylik) + "</small></td>" +
+        "<td class='trend-h'>" + r.tb.html + "</td></tr>");
 
-      if (acik.port[k]) html.push(detaySatiri(k, 4));
+      if (acik.port[k]) html.push(detaySatiri(k, 5));
     });
 
     $("port-body").innerHTML = html.join("");
@@ -1501,6 +1543,13 @@
     var idxYog = orj.indexOf("YOĞUNLUK");
     if (idxYog === -1) idxYog = orj.length > 2 ? orj.length - 2 : 18;
 
+    /* "Trend" sütunu: başlığında TREND geçen sütun; bulunamazsa YOĞUNLUK'tan sonraki son sütun */
+    var idxTrend = -1;
+    for (var ti = 0; ti < orj.length; ti++) {
+      if (baslikNorm(orj[ti]).indexOf("TREND") > -1) idxTrend = ti;
+    }
+    if (idxTrend === -1 && orj.length - 1 > idxYog) idxTrend = orj.length - 1;
+
     var yillar = [];
     for (var idx = 2; idx < idxYog; idx++) {
       var yn = parseInt(orj[idx]);
@@ -1538,7 +1587,10 @@
       var hazir = verimSayisiCoz(anaTablo[i][idxYog]);
       if (!isNaN(hazir)) yogH = hazir > 1.0001 ? hazir / 100 : hazir;
 
-      tumu.push({ kod: hKod, idx: i, v: vSeri, h: hSeri, yogH: yogH });
+      var trendHam = idxTrend > -1 ? anaTablo[i][idxTrend] : "";
+      var trendMetin = (trendHam === undefined || trendHam === null) ? "" : String(trendHam).trim();
+
+      tumu.push({ kod: hKod, idx: i, v: vSeri, h: hSeri, yogH: yogH, trend: trendMetin });
       if (gBol[hKod]) gBolOut[hKod] = haritaDizi(gBol[hKod]);
       if (gTem[hKod]) gTemOut[hKod] = haritaDizi(gTem[hKod]);
     }
@@ -1615,7 +1667,8 @@
         sanayi: sanayiStr,
         g: g,
         m: null,
-        yadj: null
+        yadj: null,
+        trend: g.trend || ""
       };
       sektorAramaYaz(veri[kod]);
 
@@ -1948,6 +2001,40 @@
     $("tekrar").addEventListener("click", function () { window.location.reload(); });
   }
 
+  /* ---- Temettü verisinin İş Yatırım'dan son güncellenme tarihi ---- */
+  function guncelleKaynakCoz(j) {
+    var t = j && (j.is_yatirim_guncelleme || j.zaman);
+    var d = t ? new Date(t) : null;
+    if (!d || isNaN(d.getTime())) throw new Error("tarih yok");
+    return { tarih: d, son: (j && j.son_temettu_kaydi) || "" };
+  }
+  function guncellemeGetir() {
+    return jsonGetir(GUNC_YEREL).then(guncelleKaynakCoz)
+      .catch(function () { return jsonGetir(GUNC_RAW).then(guncelleKaynakCoz); })
+      .catch(function () {
+        return jsonGetir(GUNC_API).then(function (a) {
+          var c = a && a[0] && a[0].commit && a[0].commit.committer && a[0].commit.committer.date;
+          return guncelleKaynakCoz({ zaman: c });
+        });
+      });
+  }
+  function guncellemeYukle() {
+    guncellemeGetir().then(function (g) {
+      var el = $("guncel");
+      if (!el) return;
+      var metin = g.tarih.toLocaleString("tr-TR", {
+        day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Istanbul"
+      });
+      var gun = (Date.now() - g.tarih.getTime()) / 86400000;
+      var eski = gun > 7;
+      el.className = "guncel" + (eski ? " eski" : "");
+      el.innerHTML = "Temettü verisi · İş Yatırım son güncelleme: <b>" + metin + "</b>" + (eski ? " ⚠ güncel olmayabilir" : "");
+      el.title = "Temettü ve bölünme kayıtları İş Yatırım'dan en son bu tarihte çekildi" +
+        (g.son ? " · veri içindeki en yeni temettü kaydı: " + g.son : "");
+      ustYukseklik();
+    }).catch(function () {});
+  }
+
   function baslat() {
     depoOku();
     fiyatOnbellekOku();
@@ -1973,6 +2060,7 @@
         durumYaz();
         canliFiyatlariYukle();
         sektorleriYukle();
+        guncellemeYukle();
         bulutEsitle();
       })
       .catch(function (e) {
