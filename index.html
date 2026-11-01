@@ -209,11 +209,11 @@
   .t7 th:nth-child(5), .t7 td:nth-child(5) { width: 17%; }
   .t7 th:nth-child(6), .t7 td:nth-child(6) { width: 19%; }
   .t7 th:nth-child(7), .t7 td:nth-child(7) { width: 18%; }
-  .t4 th:nth-child(1), .t4 td:nth-child(1) { width: 18%; }
-  .t4 th:nth-child(2), .t4 td:nth-child(2) { width: 12%; }
-  .t4 th:nth-child(3), .t4 td:nth-child(3) { width: 24%; }
-  .t4 th:nth-child(4), .t4 td:nth-child(4) { width: 24%; }
-  .t4 th:nth-child(5), .t4 td:nth-child(5) { width: 22%; }
+  .t4 th:nth-child(1), .t4 td:nth-child(1) { width: 17%; }
+  .t4 th:nth-child(2), .t4 td:nth-child(2) { width: 21%; }
+  .t4 th:nth-child(3), .t4 td:nth-child(3) { width: 22%; }
+  .t4 th:nth-child(4), .t4 td:nth-child(4) { width: 22%; }
+  .t4 th:nth-child(5), .t4 td:nth-child(5) { width: 18%; }
   tbody tr.detay td:first-child { width: auto; }
 
   input.girdi {
@@ -226,7 +226,7 @@
   input.girdi { scroll-margin-top: calc(var(--ust-yuk, 80px) + 40px); scroll-margin-bottom: 96px; }
 
   .port-girdi {
-    width: 100%; max-width: 80px; height: 26px; font-size: 14px; font-weight: 700;
+    width: 100%; max-width: 100%; height: 28px; font-size: 15px; font-weight: 800;
     text-align: center; border: 1px solid var(--girdi-kenar); background: var(--girdi);
     border-radius: 4px; color: var(--yazi); margin: 0 auto;
   }
@@ -283,7 +283,6 @@
     font-weight: 800;
     color: var(--altin-koyu);
     margin-bottom: 6px;
-    text-transform: uppercase;
     line-height: 1.25;
   }
   .tg-p-satir {
@@ -301,6 +300,7 @@
   }
   .tg-p-satir > span { flex: 1 1 0; min-width: 0; }
   .tg-p-satir .tg-y { white-space: nowrap; display: inline-block; margin-right: 4px; }
+  .tg-p-satir .tg-y b { width: auto; font-weight: 800; color: var(--yazi); }
 
   /* Portföy: yıllık net temettü bölümü */
   .tg { display: none; padding: 10px 6px 12px; border-top: 1px solid var(--cizgi); background: #fff; }
@@ -1252,7 +1252,7 @@
     /* Lot düzeltmesi uygulanan bedelsiz bölünmeler (alt alta, taşmadan alt satıra geçer) */
     var bolSatirlari = [];
     var altSinir = (bitis - 4) * 10000;
-    tutulan.forEach(function (x) {
+    tutulan.slice().sort(function (a, b) { return karsilastir(a.k, b.k); }).forEach(function (x) {
       var k = x.k;
       var bs = (x.d.bol || []).filter(function (b) { return b[0] >= altSinir; });
       if (bs.length) {
@@ -1263,12 +1263,12 @@
     });
 
     var temSatirlari = [];
-    hisseSira.forEach(function (k) {
+    Object.keys(hisseYil).sort(karsilastir).forEach(function (k) {
       var arr = [];
       yillar.forEach(function (r) {
         var c = hisseYil[k] && hisseYil[k][r.y];
         if (c && c.ps > 0) {
-          arr.push("<span class='tg-y'>" + r.y + ": " + fmtFiyat(c.ps) + " TL</span>");
+          arr.push("<span class='tg-y'><b>" + r.y + ":</b> " + fmtFiyat(c.ps) + " TL</span>");
         }
       });
       var metin = arr.length > 0 ? arr.join(" · ") : "<span style='opacity:0.5'>Temettü yok</span>";
@@ -1277,7 +1277,7 @@
 
     if (bolSatirlari.length > 0 || temSatirlari.length > 0) {
       var kutuHtml = "<details class='tg-ac' data-a='bol'" + (acikDetay.bol ? " open" : "") + ">" +
-        "<summary>Bedelsiz bölünmeler ve hisse başı net temettüler</summary>" +
+        "<summary>Bedelsiz Bölünmeler ve Hisse Başı Net Temettüler</summary>" +
         "<div class='tg-dikey'>" +
           "<div class='tg-p-blok'>" +
             "<div class='tg-p-baslik'>Lot Düzeltmesi Uygulanan Bedelsiz Bölünmeler</div>" +
@@ -1299,7 +1299,7 @@
       var genelTop = 0;
       yillar.forEach(function (r) { genelTop += r.t; });
 
-      html += "<div class='tg-tbaslik'>Hisse Bazlı Yıllık Net Temettü (TL) <span style='font-weight:600;color:var(--soluk)'>· altta küçük: hisse başı net · koyu zemin = yüksek tutar · başlığa dokunarak sırala</span></div>";
+      html += "<div class='tg-tbaslik'>Hisse Bazlı Yıllık Net Temettü (TL)</div>";
       html += "<div class='tg-tsar'><table class='tg-tablo'><thead><tr>" + bas("ad", "Hisse");
       yillar.forEach(function (r) { html += bas(String(r.y), r.y + (r.y === gy ? "*" : "")); });
       html += bas("top", "5 Yıl Toplam") + "</tr></thead><tbody>";
@@ -1330,7 +1330,7 @@
     var not = "Her temettü, güncel lottan geriye doğru o tarihteki lot sayısıyla hesaplanmıştır: temettü tarihinden sonra yapılan bedelsizler lotu böler, öncesindekiler etkilemez (aynı gün olanlarda temettü bölünme öncesi hisse üzerinden ödenmiş sayılır). Aynı yıl içinde hem bölünme hem temettü varsa her ödeme kendi tarihine göre ayrı ayrı hesaplanır. Aylık = yıllık net temettü ÷ 12.";
     if (!yeniVeri) not = "⚠ Tarihli temettü verisi bulunamadı (botu güncelleyip çalıştırın). Yıllık seri kullanıldı; bölünmeler yıl ortasına göre uygulandı. Aylık = yıllık net temettü ÷ 12.";
     html += "<details class='tg-ac' data-a='not'" + (acikDetay.not ? " open" : "") + ">" +
-      "<summary>Hesaplama notları ve stopaj</summary>" +
+      "<summary>Hesaplama Notları ve Stopaj</summary>" +
       "<div class='tg-not'>Küçük yazı: o yıl içinde hisse başına ödenen net temettü (stopaj düşülmüş, ödeme anındaki hisse sayısı üzerinden; birden fazla ödeme varsa toplamı).</div>" +
       "<div class='tg-not'>" + not + "</div>" +
       "<div class='tg-not'><b>Stopaj Notu:</b> 2025 yılı öncesi temettüler %10, 2025 ve sonrası için girilen oran (%" + fmt(oran, 2) + ") baz alınarak netleştirilmiştir. (GYO'lar %0)</div>" +
