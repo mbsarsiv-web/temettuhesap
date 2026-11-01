@@ -277,10 +277,47 @@
   /* Bölünme kutusu (portföy tablosunun altında) */
   .tg-bolkutu { padding: 0 10px 10px; border-top: 1px solid var(--cizgi); background: #fff; }
   .tg-bolkutu .tg-ac { margin-left: 0; margin-right: 0; }
-  .tg-bol-satir { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; border-bottom: 1px dashed rgba(138, 106, 28, 0.25); padding: 6px 0; }
-  .tg-bol-satir:last-child { border-bottom: none; padding-bottom: 2px; }
-  .tg-bol-sol { flex: 1 1 150px; }
-  .tg-bol-sag { flex: 1 1 200px; text-align: right; color: var(--yazi); font-weight: 700; }
+
+  /* Bölünme ve Temettü İkili Panel (SİZİN İSTEDİĞİNİZ BÖLÜM) */
+  .tg-ikili {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 20px;
+    padding: 0 8px 8px 22px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tg-ikili > div {
+    flex: 1 0 auto;
+    min-width: max-content; /* Asla alt satıra düşmesini engeller, sığmazsa kaydırır */
+  }
+  .tg-ikili-sol {
+    border-right: 2px solid rgba(138, 106, 28, 0.2);
+    padding-right: 20px;
+  }
+  .tg-p-baslik {
+    font-size: 11.5px;
+    font-weight: 800;
+    color: var(--altin-koyu);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .tg-p-satir {
+    font-size: 10.5px;
+    color: var(--altin-koyu);
+    border-bottom: 1px dashed rgba(138, 106, 28, 0.25);
+    padding: 4px 0;
+    white-space: nowrap; /* Asla alt satıra düşmemesi için */
+  }
+  .tg-p-satir:last-child {
+    border-bottom: none;
+  }
+  .tg-p-satir b {
+    color: var(--yazi);
+    display: inline-block;
+    width: 48px;
+  }
 
   /* Portföy: yıllık net temettü bölümü */
   .tg { display: none; padding: 10px 6px 12px; border-top: 1px solid var(--cizgi); background: #fff; }
@@ -1207,38 +1244,6 @@
       });
     });
 
-    /* Lot düzeltmesi uygulanan bedelsiz bölünmeler ve 2 Sütunlu Temettü Eşleşmesi */
-    var bolSatirlari = [];
-    var altSinir = (bitis - 4) * 10000;
-    tutulan.forEach(function (x) {
-      var k = x.k;
-      var bs = (x.d.bol || []).filter(function (b) { return b[0] >= altSinir; });
-      if (!bs.length) return;
-
-      var solMetin = "<b>" + k + "</b> " + bs.map(function (b) {
-        return tarihMetni(b[0]) + " %" + fmt(b[1], 2) + " (×" + fmt(1 + b[1] / 100, 2) + ")";
-      }).join(", ") + (x.d.bolK === "gas" ? " <span style='opacity:.7'>(tarih yaklaşık)</span>" : "");
-
-      var sagMetinArr = [];
-      yillar.forEach(function (r) {
-        var c = hisseYil[k] && hisseYil[k][r.y];
-        if (c && c.v > 0) sagMetinArr.push(r.y + ": " + fmtTL(c.v));
-      });
-      var sagMetin = sagMetinArr.length > 0 ? sagMetinArr.join(" · ") : "<span style='color:var(--soluk);font-weight:500'>Temettü yok</span>";
-
-      bolSatirlari.push("<div class='tg-bol-satir'><div class='tg-bol-sol'>" + solMetin + "</div><div class='tg-bol-sag'>" + sagMetin + "</div></div>");
-    });
-
-    if (bolSatirlari.length) {
-      bel.innerHTML = "<details class='tg-ac' data-a='bol'" + (acikDetay.bol === false ? "" : " open") + ">" +
-        "<summary>Bedelsiz Bölünmeler ve Net Temettüler (" + bolSatirlari.length + " hisse)</summary>" +
-        "<div style='padding:0 8px 4px 22px;'>" + bolSatirlari.join("") + "</div>" +
-        "</details>";
-      bel.style.display = "block";
-    } else {
-      bel.style.display = "none"; bel.innerHTML = "";
-    }
-
     function sutunDeger(k) {
       if (tgSira.k === "top") return hisseTop[k];
       var c = hisseYil[k][tgSira.k];
@@ -1249,11 +1254,53 @@
       if (r === 0) r = (hisseTop[b] - hisseTop[a]) || karsilastir(a, b);
       return r;
     });
-    function bas(kol, metin) {
-      var akt = tgSira.k === kol;
-      return "<th data-ts='" + kol + "'" + (akt ? " class='s-aktif'" : "") + " title='Büyükten küçüğe sırala'>" + metin +
-        "<span class='si'>" + (akt ? (tgSira.y === 1 ? "▲" : "▼") : "⇅") + "</span></th>";
+
+    /* Lot düzeltmesi uygulanan bedelsiz bölünmeler ve 2 Sütunlu Temettü Eşleşmesi */
+    var bolSatirlari = [];
+    var altSinir = (bitis - 4) * 10000;
+    tutulan.forEach(function (x) {
+      var k = x.k;
+      var bs = (x.d.bol || []).filter(function (b) { return b[0] >= altSinir; });
+      if (bs.length) {
+          bolSatirlari.push("<div class='tg-p-satir'><b>" + k + "</b> " + bs.map(function (b) {
+            return tarihMetni(b[0]) + " %" + fmt(b[1], 2) + " (×" + fmt(1 + b[1] / 100, 2) + ")";
+          }).join(", ") + (x.d.bolK === "gas" ? " <span style='opacity:.7'>(tarih yaklaşık)</span>" : "") + "</div>");
+      }
+    });
+
+    var temSatirlari = [];
+    hisseSira.forEach(function(k) {
+        var arr = [];
+        yillar.forEach(function (r) {
+            var c = hisseYil[k] && hisseYil[k][r.y];
+            if (c && c.ps > 0) {
+                arr.push(r.y + ": " + fmtFiyat(c.ps) + " TL");
+            }
+        });
+        var metin = arr.length > 0 ? arr.join(" · ") : "<span style='opacity:0.5'>Temettü yok</span>";
+        temSatirlari.push("<div class='tg-p-satir'><b>" + k + "</b> " + metin + "</div>");
+    });
+
+    if (bolSatirlari.length > 0 || temSatirlari.length > 0) {
+      var kutuHtml = "<details class='tg-ac' data-a='bol'" + (acikDetay.bol === false ? "" : " open") + ">" +
+        "<summary>Bedelsiz Bölünmeler ve Hisse Başı Net Temettüler</summary>" +
+        "<div class='tg-ikili'>" +
+          "<div class='tg-ikili-sol'>" +
+            "<div class='tg-p-baslik'>Lot Düzeltmesi Uygulanan Bedelsiz Bölünmeler</div>" +
+            (bolSatirlari.length ? bolSatirlari.join("") : "<div class='tg-p-satir' style='opacity:0.5'>Son 5 yılda bedelsiz yok</div>") +
+          "</div>" +
+          "<div class='tg-ikili-sag'>" +
+            "<div class='tg-p-baslik'>HİSSE BAŞI NET TEMETTÜ TUTARI</div>" +
+            (temSatirlari.length ? temSatirlari.join("") : "") +
+          "</div>" +
+        "</div>" +
+      "</details>";
+      bel.innerHTML = kutuHtml;
+      bel.style.display = "block";
+    } else {
+      bel.style.display = "none"; bel.innerHTML = "";
     }
+
     if (hisseSira.length) {
       var genelTop = 0;
       yillar.forEach(function (r) { genelTop += r.t; });
