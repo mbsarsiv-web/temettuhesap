@@ -277,6 +277,10 @@
   /* Bölünme kutusu (portföy tablosunun altında) */
   .tg-bolkutu { padding: 0 10px 10px; border-top: 1px solid var(--cizgi); background: #fff; }
   .tg-bolkutu .tg-ac { margin-left: 0; margin-right: 0; }
+  .tg-bol-satir { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; border-bottom: 1px dashed rgba(138, 106, 28, 0.25); padding: 6px 0; }
+  .tg-bol-satir:last-child { border-bottom: none; padding-bottom: 2px; }
+  .tg-bol-sol { flex: 1 1 150px; }
+  .tg-bol-sag { flex: 1 1 200px; text-align: right; color: var(--yazi); font-weight: 700; }
 
   /* Portföy: yıllık net temettü bölümü */
   .tg { display: none; padding: 10px 6px 12px; border-top: 1px solid var(--cizgi); background: #fff; }
@@ -534,14 +538,10 @@
   var GAS_URL = "https://script.google.com/macros/s/AKfycbxo9u41oj1aXxgkuE7gTnHdeG_mzT41o3WmaYhhqNNUJi_NTDzLOmSBSnHAhfsvhOiK/exec";
   var GAS_ANAHTAR = "temettuhesap_gas_v6";
 
-  /* Temettü verisinin İş Yatırım'dan son güncellenme zamanı (bot yazar; yoksa GitHub commit tarihi kullanılır) */
   var GUNC_YEREL = "guncelleme.json";
   var GUNC_RAW = "https://raw.githubusercontent.com/mbsarsiv-web/temettu-bot/main/guncelleme.json";
   var GUNC_API = "https://api.github.com/repos/mbsarsiv-web/temettu-bot/commits?path=temettu_veri.json&per_page=1";
 
-  /* Bot (temettu_veri.json) tarihli temettü/bölünme kayıtlarını bu tarihten itibaren tutar
-     (bot dosyasındaki GECMIS_BASLANGIC_YIL = 2018 ile aynı olmalıdır).
-     Bu tarihten ÖNCEKİ bölünmeler yalnızca Temettü Analiz (GAS) kaynağından tamamlanır. */
   var GECMIS_BASLANGIC_T = 20180101;
 
   var FILTRE_ANAHTAR = "temettuhesap_filtre_v2";
@@ -862,15 +862,6 @@
     return "";
   }
 
-  /* ------------------------------------------------------------------
-     TEMETTÜ / BÖLÜNME TARİH MANTIĞI
-     ------------------------------------------------------------------
-     bolCarpan(d, t): t tarihinden SONRA (veya aynı gün) yapılan bedelsiz
-     bölünmelerin toplam çarpanı. Güncel lot ÷ çarpan = t tarihindeki lot.
-     Aynı gün hem temettü hem bölünme varsa temettü bölünme ÖNCESİ hisse
-     üzerinden ödenmiş sayılır (nakit temettü eski sermaye üzerinden dağıtılır).
-     Bölünmeden SONRAKİ temettüler çarpandan etkilenmez.
-  ------------------------------------------------------------------ */
   function bolCarpan(d, t) {
     var c = 1;
     (d.bol || []).forEach(function (b) { if (b[0] >= t) c *= 1 + b[1] / 100; });
@@ -1204,25 +1195,7 @@
     }
     if (!(maks > 0)) { gizle(); return; }
 
-    var bolSatirlari = [];
-    var altSinir = (bitis - 4) * 10000;
-    tutulan.forEach(function (x) {
-      var bs = (x.d.bol || []).filter(function (b) { return b[0] >= altSinir; });
-      if (!bs.length) return;
-      bolSatirlari.push("<b>" + x.k + "</b> " + bs.map(function (b) {
-        return tarihMetni(b[0]) + " %" + fmt(b[1], 2) + " (×" + fmt(1 + b[1] / 100, 2) + ")";
-      }).join(", ") + (x.d.bolK === "gas" ? " <span style='opacity:.7'>(tarih yaklaşık: yalnızca yıl biliniyor)</span>" : ""));
-    });
-    if (bolSatirlari.length) {
-      bel.innerHTML = "<details class='tg-ac' data-a='bol'" + (acikDetay.bol === false ? "" : " open") + ">" +
-        "<summary>Lot düzeltmesi uygulanan bedelsiz bölünmeler (" + bolSatirlari.length + " hisse)</summary>" +
-        bolSatirlari.map(function (s) { return "<div>" + s + "</div>"; }).join("") +
-        "</details>";
-      bel.style.display = "block";
-    } else {
-      bel.style.display = "none"; bel.innerHTML = "";
-    }
-
+    /* Yıllık Temettü Hesabı Haritasını İlk Olarak Oluştur */
     var html = "";
     var hisseYil = {}, hisseTop = {}, maksHucre = 0;
     yillar.forEach(function (r) {
@@ -1233,6 +1206,39 @@
         if (x.v > maksHucre) maksHucre = x.v;
       });
     });
+
+    /* Lot düzeltmesi uygulanan bedelsiz bölünmeler ve 2 Sütunlu Temettü Eşleşmesi */
+    var bolSatirlari = [];
+    var altSinir = (bitis - 4) * 10000;
+    tutulan.forEach(function (x) {
+      var k = x.k;
+      var bs = (x.d.bol || []).filter(function (b) { return b[0] >= altSinir; });
+      if (!bs.length) return;
+
+      var solMetin = "<b>" + k + "</b> " + bs.map(function (b) {
+        return tarihMetni(b[0]) + " %" + fmt(b[1], 2) + " (×" + fmt(1 + b[1] / 100, 2) + ")";
+      }).join(", ") + (x.d.bolK === "gas" ? " <span style='opacity:.7'>(tarih yaklaşık)</span>" : "");
+
+      var sagMetinArr = [];
+      yillar.forEach(function (r) {
+        var c = hisseYil[k] && hisseYil[k][r.y];
+        if (c && c.v > 0) sagMetinArr.push(r.y + ": " + fmtTL(c.v));
+      });
+      var sagMetin = sagMetinArr.length > 0 ? sagMetinArr.join(" · ") : "<span style='color:var(--soluk);font-weight:500'>Temettü yok</span>";
+
+      bolSatirlari.push("<div class='tg-bol-satir'><div class='tg-bol-sol'>" + solMetin + "</div><div class='tg-bol-sag'>" + sagMetin + "</div></div>");
+    });
+
+    if (bolSatirlari.length) {
+      bel.innerHTML = "<details class='tg-ac' data-a='bol'" + (acikDetay.bol === false ? "" : " open") + ">" +
+        "<summary>Bedelsiz Bölünmeler ve Net Temettüler (" + bolSatirlari.length + " hisse)</summary>" +
+        "<div style='padding:0 8px 4px 22px;'>" + bolSatirlari.join("") + "</div>" +
+        "</details>";
+      bel.style.display = "block";
+    } else {
+      bel.style.display = "none"; bel.innerHTML = "";
+    }
+
     function sutunDeger(k) {
       if (tgSira.k === "top") return hisseTop[k];
       var c = hisseYil[k][tgSira.k];
@@ -1327,7 +1333,6 @@
     return html;
   }
 
-  /* PORTFÖY TABLOSU (Geliştirilmiş Düzenlenebilir Hücreler) */
   function portfoyYaz() {
     if (!$("port-body")) return;
     var html = [], T = { lot: 0, maliyet: 0, aylik: 0, adet: 0 };
@@ -2022,7 +2027,6 @@
     $("tekrar").addEventListener("click", function () { window.location.reload(); });
   }
 
-  /* ---- Temettü verisinin İş Yatırım'dan son güncellenme tarihi ---- */
   function guncelleKaynakCoz(j) {
     var t = j && (j.is_yatirim_guncelleme || j.zaman);
     var d = t ? new Date(t) : null;
@@ -2176,7 +2180,6 @@
 
   function hesaplaHepsi() { hesaplaSol(); hesaplaSag(); }
 
-  /* Gelişmiş Girdi Olayı ve Canlı DOM Güncelleme */
   function girdiOlayi(e) {
     var el = e.target;
     if (!el.classList || !el.classList.contains("girdi")) return;
@@ -2187,13 +2190,11 @@
     if (temiz === "") delete giris[t][kod]; else giris[t][kod] = temiz;
     depoYaz();
 
-    // Diğer asıl sekmelerdeki (sol/sag) aynalanmış inputları da senkronize tut
     var mainInput = $(t + "-body").querySelector("input[data-kod='" + kod + "']");
     if (mainInput && mainInput !== el) mainInput.value = temiz;
 
     if (t === "sol") hesaplaSol(); else hesaplaSag();
 
-    // Eğer girdi portföy sekmesinden yapılıyorsa (odak kaybı yaşamamak için yalnızca o satırın metinlerini canlı güncelleriz)
     if (el.closest("#port-body")) {
        var pr = el.closest("tr");
        if (!pr) return;
@@ -2218,7 +2219,6 @@
     }
   }
 
-  // Tüm tablolara girdi (input) event dinleyicilerini ekle
   $("sol-body").addEventListener("input", girdiOlayi);
   $("sag-body").addEventListener("input", girdiOlayi);
   $("port-body").addEventListener("input", girdiOlayi);
