@@ -272,7 +272,7 @@
   .tg-bolkutu { padding: 0 10px 10px; border-top: 1px solid var(--cizgi); background: #fff; }
   .tg-bolkutu .tg-ac { margin-left: 0; margin-right: 0; }
 
-  /* Bölünme ve Temettü İkili Panel (SİZİN İSTEDİĞİNİZ BÖLÜM) */
+  /* Bölünme ve Temettü İkili Panel */
   .tg-ikili {
     display: flex;
     flex-wrap: nowrap;
@@ -325,6 +325,18 @@
   .tg-ac > summary::-webkit-details-marker { display: none; }
   .tg-ac > summary::before { content: "▸"; font-size: 11px; transition: transform .15s; }
   .tg-ac[open] > summary::before { transform: rotate(90deg); }
+
+  /* Bedelsiz Bölünmeler ve Temettüler kutusunun başlığı: büyük + ortalı */
+  .tg-ac[data-a='bol'] > summary {
+    position: relative; justify-content: center; text-align: center;
+    font-size: 13px; letter-spacing: .02em; padding: 10px 28px;
+  }
+  .tg-ac[data-a='bol'] > summary::before {
+    position: absolute; left: 10px; top: 50%;
+    margin-top: -7px; line-height: 1;
+  }
+  .tg-ac[data-a='bol'][open] > summary::before { transform: rotate(90deg); }
+
   .tg-ac > div { padding: 0 8px 4px 22px; font-size: 10.5px; line-height: 1.45; color: var(--altin-koyu); }
   .tg-ac > div b { font-weight: 800; color: var(--yazi); }
   .tg-ac > .tg-not { margin: 0; padding: 0 8px 6px 22px; }
@@ -446,6 +458,9 @@
     .tg-tablo tfoot td { font-size: 14px; padding: 7px 10px; }
     .tg-tablo tfoot td:first-child { font-size: 13px; }
     .tg-tablo tfoot td.ay { font-size: 12px; }
+
+    .tg-ac[data-a='bol'] > summary { font-size: 17px; padding: 12px 36px; }
+    .tg-ac[data-a='bol'] > summary::before { left: 14px; }
   }
   @media (min-width: 900px) {
     .ara { flex: 1 1 400px; max-width: 600px; }
@@ -1282,7 +1297,7 @@
 
     if (bolSatirlari.length > 0 || temSatirlari.length > 0) {
       var kutuHtml = "<details class='tg-ac' data-a='bol'" + (acikDetay.bol === false ? "" : " open") + ">" +
-        "<summary>Bedelsiz Bölünmeler ve Hisse Başı Net Temettüler</summary>" +
+        "<summary>BEDELSİZ BÖLÜNMELER VE HİSSE BAŞI NET TEMETTÜLER</summary>" +
         "<div class='tg-ikili'>" +
           "<div class='tg-ikili-sol'>" +
             "<div class='tg-p-baslik'>Lot Düzeltmesi Uygulanan Bedelsiz Bölünmeler</div>" +
@@ -2138,7 +2153,7 @@
         bilgiYaz();
         ustYukseklik();
         sekmeAyarla(aktifSekme);
-        
+
         var el = $("durum");
         if(el) {
             el.className = "durum uyari";
