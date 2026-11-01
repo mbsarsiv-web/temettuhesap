@@ -272,46 +272,35 @@
   .tg-bolkutu { padding: 0 10px 10px; border-top: 1px solid var(--cizgi); background: #fff; }
   .tg-bolkutu .tg-ac { margin-left: 0; margin-right: 0; }
 
-  /* Bölünme ve Temettü İkili Panel */
-  .tg-ikili {
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 20px;
-    padding: 0 8px 8px 22px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  .tg-ikili > div {
-    flex: 1 0 auto;
-    min-width: max-content; /* Asla alt satıra düşmesini engeller, sığmazsa kaydırır */
-  }
-  .tg-ikili-sol {
-    border-right: 2px solid rgba(138, 106, 28, 0.2);
-    padding-right: 20px;
+  /* Bölünme ve Temettü: alt alta, taşmadan alt satıra geçen düzen */
+  .tg-p-blok { margin-top: 6px; min-width: 0; }
+  .tg-p-blok + .tg-p-blok {
+    margin-top: 12px; padding-top: 10px;
+    border-top: 2px solid rgba(138, 106, 28, 0.2);
   }
   .tg-p-baslik {
-    font-size: 11.5px;
+    font-size: 11px;
     font-weight: 800;
     color: var(--altin-koyu);
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     text-transform: uppercase;
-    white-space: nowrap;
+    line-height: 1.25;
   }
   .tg-p-satir {
-    font-size: 10.5px;
+    display: flex; align-items: flex-start; gap: 8px;
+    font-size: 11px; line-height: 1.4;
     color: var(--altin-koyu);
     border-bottom: 1px dashed rgba(138, 106, 28, 0.25);
     padding: 4px 0;
-    white-space: nowrap; /* Asla alt satıra düşmemesi için */
+    white-space: normal; word-break: break-word; overflow-wrap: anywhere;
   }
-  .tg-p-satir:last-child {
-    border-bottom: none;
+  .tg-p-satir:last-child { border-bottom: none; }
+  .tg-p-satir > b {
+    flex: none; width: 52px;
+    color: var(--yazi); font-weight: 800;
   }
-  .tg-p-satir b {
-    color: var(--yazi);
-    display: inline-block;
-    width: 48px;
-  }
+  .tg-p-satir > span { flex: 1 1 0; min-width: 0; }
+  .tg-p-satir .tg-y { white-space: nowrap; display: inline-block; margin-right: 4px; }
 
   /* Portföy: yıllık net temettü bölümü */
   .tg { display: none; padding: 10px 6px 12px; border-top: 1px solid var(--cizgi); background: #fff; }
@@ -326,21 +315,11 @@
   .tg-ac > summary::before { content: "▸"; font-size: 11px; transition: transform .15s; }
   .tg-ac[open] > summary::before { transform: rotate(90deg); }
 
-  /* Bedelsiz Bölünmeler ve Temettüler kutusunun başlığı: büyük + ortalı */
-  .tg-ac[data-a='bol'] > summary {
-    position: relative; justify-content: center; text-align: center;
-    font-size: 13px; letter-spacing: .02em; padding: 10px 28px;
-  }
-  .tg-ac[data-a='bol'] > summary::before {
-    position: absolute; left: 10px; top: 50%;
-    margin-top: -7px; line-height: 1;
-  }
-  .tg-ac[data-a='bol'][open] > summary::before { transform: rotate(90deg); }
-
   .tg-ac > div { padding: 0 8px 4px 22px; font-size: 10.5px; line-height: 1.45; color: var(--altin-koyu); }
   .tg-ac > div b { font-weight: 800; color: var(--yazi); }
   .tg-ac > .tg-not { margin: 0; padding: 0 8px 6px 22px; }
   .tg-ac > .tg-not:last-child { padding-bottom: 8px; }
+  .tg-ac > div.tg-dikey { padding: 0 8px 8px 12px; }
 
   /* Portföy: hisse bazlı yıl yıl net temettü tablosu (ısı haritalı, sabit ilk sütun) */
   .tg-tbaslik { margin: 12px 4px 6px; font-size: 12px; font-weight: 800; color: var(--altin-koyu); line-height: 1.25; }
@@ -449,6 +428,10 @@
     .tg-ac > summary { font-size: 12.5px; padding: 9px 12px; }
     .tg-ac > div { font-size: 12.5px; padding-left: 28px; }
     .tg-ac > .tg-not { font-size: 11.5px; padding-left: 28px; }
+    .tg-ac > div.tg-dikey { padding-left: 18px; }
+    .tg-p-baslik { font-size: 12.5px; }
+    .tg-p-satir { font-size: 12.5px; }
+    .tg-p-satir > b { width: 60px; }
     .tg-tbaslik { font-size: 13px; }
     .tg-tablo thead th { font-size: 12.5px; padding: 7px 10px; }
     .tg-tablo tbody td { font-size: 14px; padding: 6px 10px; }
@@ -458,9 +441,6 @@
     .tg-tablo tfoot td { font-size: 14px; padding: 7px 10px; }
     .tg-tablo tfoot td:first-child { font-size: 13px; }
     .tg-tablo tfoot td.ay { font-size: 12px; }
-
-    .tg-ac[data-a='bol'] > summary { font-size: 17px; padding: 12px 36px; }
-    .tg-ac[data-a='bol'] > summary::before { left: 14px; }
   }
   @media (min-width: 900px) {
     .ara { flex: 1 1 400px; max-width: 600px; }
@@ -1269,43 +1249,43 @@
       return r;
     });
 
-    /* Lot düzeltmesi uygulanan bedelsiz bölünmeler ve 2 Sütunlu Temettü Eşleşmesi */
+    /* Lot düzeltmesi uygulanan bedelsiz bölünmeler (alt alta, taşmadan alt satıra geçer) */
     var bolSatirlari = [];
     var altSinir = (bitis - 4) * 10000;
     tutulan.forEach(function (x) {
       var k = x.k;
       var bs = (x.d.bol || []).filter(function (b) { return b[0] >= altSinir; });
       if (bs.length) {
-          bolSatirlari.push("<div class='tg-p-satir'><b>" + k + "</b> " + bs.map(function (b) {
-            return tarihMetni(b[0]) + " %" + fmt(b[1], 2) + " (×" + fmt(1 + b[1] / 100, 2) + ")";
-          }).join(", ") + (x.d.bolK === "gas" ? " <span style='opacity:.7'>(yaklaşık)</span>" : "") + "</div>");
+        bolSatirlari.push("<div class='tg-p-satir'><b>" + k + "</b><span>" + bs.map(function (b) {
+          return "<span class='tg-y'>" + tarihMetni(b[0]) + " %" + fmt(b[1], 2) + " (×" + fmt(1 + b[1] / 100, 2) + ")</span>";
+        }).join(" · ") + (x.d.bolK === "gas" ? " <span style='opacity:.7'>(yaklaşık)</span>" : "") + "</span></div>");
       }
     });
 
     var temSatirlari = [];
-    hisseSira.forEach(function(k) {
-        var arr = [];
-        yillar.forEach(function (r) {
-            var c = hisseYil[k] && hisseYil[k][r.y];
-            if (c && c.ps > 0) {
-                arr.push(r.y + ": " + fmtFiyat(c.ps) + " TL");
-            }
-        });
-        var metin = arr.length > 0 ? arr.join(" · ") : "<span style='opacity:0.5'>Temettü yok</span>";
-        temSatirlari.push("<div class='tg-p-satir'><b>" + k + "</b> " + metin + "</div>");
+    hisseSira.forEach(function (k) {
+      var arr = [];
+      yillar.forEach(function (r) {
+        var c = hisseYil[k] && hisseYil[k][r.y];
+        if (c && c.ps > 0) {
+          arr.push("<span class='tg-y'>" + r.y + ": " + fmtFiyat(c.ps) + " TL</span>");
+        }
+      });
+      var metin = arr.length > 0 ? arr.join(" · ") : "<span style='opacity:0.5'>Temettü yok</span>";
+      temSatirlari.push("<div class='tg-p-satir'><b>" + k + "</b><span>" + metin + "</span></div>");
     });
 
     if (bolSatirlari.length > 0 || temSatirlari.length > 0) {
-      var kutuHtml = "<details class='tg-ac' data-a='bol'" + (acikDetay.bol === false ? "" : " open") + ">" +
-        "<summary>BEDELSİZ BÖLÜNMELER VE HİSSE BAŞI NET TEMETTÜLER</summary>" +
-        "<div class='tg-ikili'>" +
-          "<div class='tg-ikili-sol'>" +
+      var kutuHtml = "<details class='tg-ac' data-a='bol'" + (acikDetay.bol ? " open" : "") + ">" +
+        "<summary>Bedelsiz bölünmeler ve hisse başı net temettüler</summary>" +
+        "<div class='tg-dikey'>" +
+          "<div class='tg-p-blok'>" +
             "<div class='tg-p-baslik'>Lot Düzeltmesi Uygulanan Bedelsiz Bölünmeler</div>" +
-            (bolSatirlari.length ? bolSatirlari.join("") : "<div class='tg-p-satir' style='opacity:0.5'>Son 5 yılda bedelsiz yok</div>") +
+            (bolSatirlari.length ? bolSatirlari.join("") : "<div class='tg-p-satir' style='opacity:0.6'>Son 5 yılda bedelsiz yok</div>") +
           "</div>" +
-          "<div class='tg-ikili-sag'>" +
-            "<div class='tg-p-baslik'>HİSSE BAŞI NET TEMETTÜ TUTARI</div>" +
-            (temSatirlari.length ? temSatirlari.join("") : "") +
+          "<div class='tg-p-blok'>" +
+            "<div class='tg-p-baslik'>Hisse Başı Net Temettü Tutarı</div>" +
+            temSatirlari.join("") +
           "</div>" +
         "</div>" +
       "</details>";
@@ -2081,6 +2061,9 @@
     }, 60 * 1000);
   }
 
+  /* "Son Güncelleme" bilgisi:
+     guncelleme.json içindeki is_yatirim_guncelleme (botun İş Yatırım verisini çekip yazdığı an, UTC)
+     Türkiye saatine (Europe/Istanbul) çevrilerek gösterilir. */
   function guncelleKaynakCoz(j) {
     var t = j && (j.is_yatirim_guncelleme || j.zaman);
     var d = t ? new Date(t) : null;
@@ -2108,7 +2091,7 @@
       var eski = gun > 7;
       el.className = "guncel" + (eski ? " eski" : "");
       el.innerHTML = "Son Güncelleme: <b>" + metin + "</b>" + (eski ? " ⚠ güncel olmayabilir" : "");
-      el.title = "Temettü ve bölünme kayıtları İş Yatırım'dan en son bu tarihte çekildi" +
+      el.title = "Botun temettü ve bölünme kayıtlarını İş Yatırım'dan en son çektiği zaman (Türkiye saati)" +
         (g.son ? " · veri içindeki en yeni temettü kaydı: " + g.son : "");
       ustYukseklik();
     }).catch(function () {});
