@@ -131,16 +131,10 @@
   .durum:empty { display: none; }
   .durum.uyari { color: #9b2c2c; font-weight: 700; }
 
-  #yukleniyor, #hata {
+  #yukleniyor {
     margin: 24px 12px; padding: 16px; text-align: center;
     background: #fff; border: 1px solid var(--cizgi); border-radius: 10px;
     font-weight: 600; color: var(--yesil);
-  }
-  #hata { color: #9b2c2c; display: none; line-height: 1.5; }
-  #hata button {
-    margin-top: 10px; height: 38px; padding: 0 16px; border-radius: 8px;
-    border: 1px solid var(--cizgi); background: #fff; color: var(--yazi);
-    font-size: 14px; font-weight: 700; cursor: pointer;
   }
 
   /* ---------- Tablolar ---------- */
@@ -495,7 +489,6 @@
 </div>
 
 <div id="yukleniyor">Veriler yükleniyor…</div>
-<div id="hata"></div>
 
 <div id="alan">
   <div class="filtre" id="filtre">
@@ -2067,13 +2060,6 @@
     }, 60 * 1000);
   }
 
-  function hataGoster(mesaj) {
-    $("yukleniyor").style.display = "none";
-    var h = $("hata"); h.style.display = "block";
-    h.innerHTML = mesaj + "<br><button type='button' id='tekrar'>Tekrar dene</button>";
-    $("tekrar").addEventListener("click", function () { window.location.reload(); });
-  }
-
   function guncelleKaynakCoz(j) {
     var t = j && (j.is_yatirim_guncelleme || j.zaman);
     var d = t ? new Date(t) : null;
@@ -2118,7 +2104,6 @@
         veriyiIsle(bot, gas);
         if (liste.length === 0) throw new Error("bos");
         $("yukleniyor").style.display = "none";
-        $("hata").style.display = "none";
         $("alan").style.display = "block";
         $("alan").className = "goster";
         tablolariCiz();
@@ -2136,7 +2121,26 @@
         bulutEsitle();
       })
       .catch(function (e) {
-        hataGoster("Hisse listesi alınamadı (Temettü Analiz kaynağına ulaşılamadı).<br>İnternet bağlantınızı kontrol edip tekrar deneyin.");
+        $("yukleniyor").style.display = "none";
+        $("alan").style.display = "block";
+        $("alan").className = "goster";
+        tablolariCiz();
+        satirHaritasi();
+        filtreKur();
+        filtreUygula();
+        $("stopaj").value = String(giris.stopaj);
+        bilgiYaz();
+        ustYukseklik();
+        sekmeAyarla(aktifSekme);
+        
+        // Hata durumunda sadece üst barda uyarı göster (Ekranı kilitleme)
+        var el = $("durum");
+        if(el) {
+            el.className = "durum uyari";
+            el.textContent = "⚠ Veri kaynağına ulaşılamadı. İnternet bağlantınızı kontrol ediniz.";
+            el.style.display = "block";
+        }
+        ustYukseklik();
       });
   }
 
