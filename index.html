@@ -230,6 +230,14 @@
   }
   input.girdi:focus { outline: 2px solid var(--yazi); outline-offset: 0; }
   input.girdi { scroll-margin-top: calc(var(--ust-yuk, 80px) + 40px); scroll-margin-bottom: 96px; }
+
+  .port-girdi {
+    width: 100%; max-width: 80px; height: 26px; font-size: 14px; font-weight: 700;
+    text-align: center; border: 1px solid var(--girdi-kenar); background: var(--girdi);
+    border-radius: 4px; color: var(--yazi); margin: 0 auto;
+  }
+  .port-girdi:focus { outline: 2px solid var(--yazi); outline-offset: -1px; }
+
   button, input, select, .sekme { touch-action: manipulation; }
   .bos-sonuc { padding: 18px; color: var(--soluk); font-size: 14px; display: none; text-align: center; }
 
@@ -743,7 +751,7 @@
     var tbody = e.currentTarget;
     var t = e.target;
     if (!t || !t.closest) return;
-    if (t.closest(".c-in") || t.closest("tr.detay")) return;
+    if (t.closest(".c-in") || t.closest(".port-girdi") || t.closest("tr.detay")) return;
     var tr = t.closest("tr[data-kod]");
     if (!tr) return;
     var kod = tr.getAttribute("data-kod");
@@ -809,7 +817,6 @@
   }
   function filtreYaz() { try { localStorage.setItem(FILTRE_ANAHTAR, JSON.stringify(F)); } catch (e) {} }
 
-
   function secimleriYansit() {
     Object.keys(FILTRE_ID).forEach(function (a) {
       var sel = $(FILTRE_ID[a]);
@@ -870,8 +877,6 @@
     return c;
   }
 
-  /* Bir yıla ait temettü ödemeleri: [[tarih_int, hisse_basi_brut], ...]
-     Önce tarihli kayıtlar (d.tem); o yıl için tarihli kayıt yoksa yıllık seri (g.h) yıl ortası (30 Haziran) varsayımıyla. */
   function yilOdemeleri(d, y) {
     var r = [];
     if (d.tem) {
@@ -881,9 +886,6 @@
     return r;
   }
 
-  /* Yıllık "bölünme düzeltmeli" temettü: her ödeme, kendi tarihinden sonraki bedelsizlere bölünür.
-     Sonuç = o yıl ödenen TOPLAM temettü ÷ güncel hisse sayısı (hisse sayısı değişimlerinden bağımsız).
-     "Toplam Temettü (Yıllık Bazda)" ile aynı mantık: bedelsiz bölünme artış serisini bozmaz. */
   function yillikDuzeltmeli(d) {
     if (d.yadj) return d.yadj;
     var gy = GAS.guncelYil, Y = {};
@@ -921,7 +923,6 @@
     var kes = 0;
     for (y = bitis; y >= 1990; y--) { if (g.v[y] > 0) kes++; else break; }
 
-    /* Düzenli artış: yıllık TOPLAM temettü (bölünme düzeltmeli) üst üste kaç yıl artmış */
     var Y = yillikDuzeltmeli(d);
     var aBitis = (Y[gy] > 0) ? gy : gy - 1;
     var art = 0;
@@ -1093,6 +1094,26 @@
     return usdMetin(tl) + " · " + grMetin(tl);
   }
 
+  function portfoyAltToplamGuncelle() {
+    var T = { lot: 0, maliyet: 0, aylik: 0, adet: 0 };
+    sirali.forEach(function (k) {
+      var d = veri[k];
+      var nt = net(d);
+      var solAylik = sayi(giris.sol[k]);
+      var lot = ((solAylik > 0 && nt > 0) ? (solAylik * 12) / nt : 0) + sayi(giris.sag[k]);
+      if (!(lot > 0)) return;
+      var maliyet = lot * d.fiyat;
+      var aylik = (lot * nt) / 12;
+      T.lot += lot; T.maliyet += maliyet; T.aylik += aylik; T.adet++;
+    });
+    var padet = $("port-toplam-adet"); if(padet) padet.textContent = T.adet;
+    var plot = $("port-toplam-lot"); if(plot) plot.textContent = T.lot > 0 ? fmtLot(T.lot) : "-";
+    var pmal = $("port-toplam-maliyet"); if(pmal) pmal.textContent = fmtTL(T.maliyet);
+    var payl = $("port-toplam-aylik"); if(payl) payl.textContent = fmtTL(T.aylik);
+    var paltmal = $("port-alt-maliyet"); if(paltmal) paltmal.textContent = esdegerMetin(T.maliyet);
+    var paltayl = $("port-alt-aylik"); if(paltayl) paltayl.textContent = esdegerMetin(T.aylik);
+  }
+
   function altSatirlariYaz() {
     ["sol", "sag"].forEach(function (t) {
       $(t + "-alt-maliyet").textContent = esdegerMetin(toplamlar[t].maliyet);
@@ -1105,18 +1126,22 @@
     } else {
       var d = new Date(kur.zaman);
       var saat = d.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
-      var eski = kur.onbellek ? " <span class='soluk'>(eski)</span>" : "";
 
       k.innerHTML =
         "<span class='k-tam'><b>1 $</b> = " + fmt(kur.usdTry, 2) + " TL<br>" +
         "<b>1 GR</b> Altın = " + fmt(gramAltinTL(), 2) + " TL" +
-        "<span class='soluk ek'> (" + fmt(gramAltinTL() / kur.usdTry, 2) + " $) · " + saat + "</span>" + eski + "</span>" +
+        "<span class='soluk ek'> (" + fmt(gramAltinTL() / kur.usdTry, 2) + " $) · " + saat + "</span></span>" +
         "<span class='k-kisa'><b>$:</b> " + fmt(kur.usdTry, 2) + " TL<br>" +
-        "<b>GR:</b> " + fmt(gramAltinTL(), 0) + " TL" + eski + "</span>";
+        "<b>GR:</b> " + fmt(gramAltinTL(), 0) + " TL</span>";
       k.title = "1 $ = " + fmt(kur.usdTry, 2) + " TL · 1 GR Altın = " + fmt(gramAltinTL(), 2) + " TL (" +
-        fmt(gramAltinTL() / kur.usdTry, 2) + " $) · saat " + saat + (kur.onbellek ? " — son kayıtlı kur" : "");
+        fmt(gramAltinTL() / kur.usdTry, 2) + " $) · saat " + saat;
     }
-    portfoyYaz();
+
+    if (document.activeElement && document.activeElement.closest("#port-body")) {
+      portfoyAltToplamGuncelle();
+    } else {
+      portfoyYaz();
+    }
     ustYukseklik();
   }
 
@@ -1143,7 +1168,6 @@
     return (g < 10 ? "0" : "") + g + "." + (a < 10 ? "0" : "") + a + "." + y;
   }
 
-  /* BÖLÜNME KUTUSU (ilk tablonun altında) + HİSSE BAZLI YIL YIL NET TEMETTÜ TABLOSU (başlıklardan sıralanabilir) */
   function gecmisYaz(tutulan) {
     var el = $("port-gecmis"), bel = $("port-bolunme");
     if (!el || !bel) return;
@@ -1154,7 +1178,6 @@
     if (!GAS || tutulan.length === 0) { gizle(); return; }
     var gy = GAS.guncelYil, oran = stopajOrani();
 
-    /* Yıl detayı: v = o yıl toplam net tutar (her ödeme KENDİ tarihindeki lotla), ps = o yıl hisse başı ödenen net temettü */
     function yilDetay(y) {
       var t = 0, l = [];
       tutulan.forEach(function (x) {
@@ -1181,7 +1204,6 @@
     }
     if (!(maks > 0)) { gizle(); return; }
 
-    /* Lot düzeltmesi uygulanan bedelsiz bölünmeler (portföy tablosunun hemen altında) */
     var bolSatirlari = [];
     var altSinir = (bitis - 4) * 10000;
     tutulan.forEach(function (x) {
@@ -1201,7 +1223,6 @@
       bel.style.display = "none"; bel.innerHTML = "";
     }
 
-    /* Hisse bazlı yıl yıl net temettü tablosu */
     var html = "";
     var hisseYil = {}, hisseTop = {}, maksHucre = 0;
     yillar.forEach(function (r) {
@@ -1278,7 +1299,6 @@
     }
   }
 
-  /* Temettü trendi: seçilen hissenin son 10 yıldaki yıllık toplam temettüsü (hisse başı, bölünme düzeltmeli) mini sütun grafiği */
   function trendGrafik(d) {
     if (d.trendH !== undefined) return d.trendH;
     var html = "<span class='spark yok'>–</span>";
@@ -1307,7 +1327,7 @@
     return html;
   }
 
-  /* PORTFÖY TABLOSU (5 SÜTUN, başlıklardan sıralanabilir) */
+  /* PORTFÖY TABLOSU (Geliştirilmiş Düzenlenebilir Hücreler) */
   function portfoyYaz() {
     if (!$("port-body")) return;
     var html = [], T = { lot: 0, maliyet: 0, aylik: 0, adet: 0 };
@@ -1328,7 +1348,6 @@
       satirlar.push({ k: k, d: d, lot: lot, maliyet: maliyet, aylik: aylik });
     });
 
-    /* Başlık sıralama simgeleri */
     var ths = $("panel-port").querySelectorAll("table.t4 thead th[data-sira]");
     for (var hi = 0; hi < ths.length; hi++) {
       var kol = ths[hi].getAttribute("data-sira"), akt = portSira.k === kol;
@@ -1348,10 +1367,21 @@
       var sinif = (i % 2 === 0 ? "cift" : "") + (acik.port[k] ? " acik" : "");
       var hisseHtml = "<td class='hisse'>" + k + "<small class='sk' title='" + sektorBaslik(d) + "'>" + sektorMetni(d) + "</small></td>";
 
+      var sagGirdi = giris.sag[k] !== undefined;
+      var solGirdi = giris.sol[k] !== undefined;
+
+      var lotIcerik = sagGirdi
+        ? "<input class='girdi port-girdi' inputmode='decimal' autocomplete='off' data-t='sag' data-kod='" + k + "' value='" + giris.sag[k] + "'>"
+        : fmtLot(r.lot);
+
+      var aylikIcerik = solGirdi
+        ? "<input class='girdi port-girdi' inputmode='decimal' autocomplete='off' data-t='sol' data-kod='" + k + "' value='" + giris.sol[k] + "'>"
+        : (fmtTL(r.aylik) + "<small class='esd'>" + esdegerMetin(r.aylik) + "</small>");
+
       html.push("<tr data-kod='" + k + "' class='" + sinif + "'>" + hisseHtml +
-        "<td data-c='lot'>" + fmtLot(r.lot) + "</td>" +
+        "<td data-c='lot'>" + lotIcerik + "</td>" +
         "<td data-c='maliyet'>" + fmtTL(r.maliyet) + "<small class='esd'>" + esdegerMetin(r.maliyet) + "</small></td>" +
-        "<td>" + fmtTL(r.aylik) + "<small class='esd'>" + esdegerMetin(r.aylik) + "</small></td>" +
+        "<td data-c='aylik'>" + aylikIcerik + "</td>" +
         "<td class='trend-h'>" + trendGrafik(d) + "</td></tr>");
 
       if (acik.port[k]) html.push(detaySatiri(k, 5));
@@ -1370,7 +1400,6 @@
     gecmisYaz(tutulan);
   }
 
-  /* Portföy tablosu: başlığa tıkla → büyükten küçüğe sırala (aynı başlığa tekrar tıkla → yön değişir; HİSSE için A→Z) */
   $("panel-port").querySelector("table.t4 thead").addEventListener("click", function (e) {
     var th = e.target && e.target.closest ? e.target.closest("th[data-sira]") : null;
     if (!th) return;
@@ -1380,7 +1409,6 @@
     portfoyYaz();
   });
 
-  /* Yıllık net temettü tablosu: başlığa tıkla → büyükten küçüğe sırala */
   $("port-gecmis").addEventListener("click", function (e) {
     var th = e.target && e.target.closest ? e.target.closest("th[data-ts]") : null;
     if (!th) return;
@@ -1390,7 +1418,6 @@
     portfoyYaz();
   });
 
-  /* Açılır kutuların açık/kapalı durumunu hatırla */
   function acilirDurum(e) {
     var t = e.target;
     if (t && t.getAttribute && t.getAttribute("data-a")) acikDetay[t.getAttribute("data-a")] = !!t.open;
@@ -1678,8 +1705,6 @@
       var botBol = (typeof b.bolunmeler === "string") ? ciftCoz(b.bolunmeler) : [];
       var gasBol = (gas.gBol && gas.gBol[kod]) ? gas.gBol[kod] : [];
       if (botBol.length) {
-        /* İş Yatırım (tam tarihli) kayıtları 2018'den itibaren tutulur. Bundan ÖNCEKİ bölünmeleri
-           (uzun serili "düzenli artış" hesabı için gerekli) Temettü Analiz'den tamamla; çakışma/çift sayım yok. */
         var birlesik = botBol.slice();
         gasBol.forEach(function (x) { if (x[0] < GECMIS_BASLANGIC_T) birlesik.push(x); });
         birlesik.sort(function (a, c) { return a[0] - c[0]; });
@@ -1688,9 +1713,6 @@
       else if (gasBol.length) { veri[kod].bol = gasBol; veri[kod].bolK = "gas"; bolSayim.gas++; }
       else { veri[kod].bol = []; veri[kod].bolK = ""; }
 
-      /* TEMETTÜ SÜTUNU: son ödeme yılındaki hisse başı temettü, o yıl içinde ödeme tarihinden SONRA
-         yapılan bedelsiz bölünmelere göre güncel hisse sayısına çevrilir (her ödeme kendi tarihiyle).
-         Bölünme yoksa değer aynen kalır. */
       var d0 = veri[kod];
       var hy = parseInt((String(tarih).match(/(\d{4})/) || [])[1], 10);
       if (d0.tem && hy > 0 && d0.temettu > 0) {
@@ -2027,7 +2049,7 @@
       var gun = (Date.now() - g.tarih.getTime()) / 86400000;
       var eski = gun > 7;
       el.className = "guncel" + (eski ? " eski" : "");
-      el.innerHTML = "Temettü verisi · İş Yatırım son güncelleme: <b>" + metin + "</b>" + (eski ? " ⚠ güncel olmayabilir" : "");
+      el.innerHTML = "Son Güncelleme: <b>" + metin + "</b>" + (eski ? " ⚠ güncel olmayabilir" : "");
       el.title = "Temettü ve bölünme kayıtları İş Yatırım'dan en son bu tarihte çekildi" +
         (g.son ? " · veri içindeki en yeni temettü kaydı: " + g.son : "");
       ustYukseklik();
@@ -2154,6 +2176,7 @@
 
   function hesaplaHepsi() { hesaplaSol(); hesaplaSag(); }
 
+  /* Gelişmiş Girdi Olayı ve Canlı DOM Güncelleme */
   function girdiOlayi(e) {
     var el = e.target;
     if (!el.classList || !el.classList.contains("girdi")) return;
@@ -2163,10 +2186,42 @@
     var kod = el.getAttribute("data-kod");
     if (temiz === "") delete giris[t][kod]; else giris[t][kod] = temiz;
     depoYaz();
+
+    // Diğer asıl sekmelerdeki (sol/sag) aynalanmış inputları da senkronize tut
+    var mainInput = $(t + "-body").querySelector("input[data-kod='" + kod + "']");
+    if (mainInput && mainInput !== el) mainInput.value = temiz;
+
     if (t === "sol") hesaplaSol(); else hesaplaSag();
+
+    // Eğer girdi portföy sekmesinden yapılıyorsa (odak kaybı yaşamamak için yalnızca o satırın metinlerini canlı güncelleriz)
+    if (el.closest("#port-body")) {
+       var pr = el.closest("tr");
+       if (!pr) return;
+       var d = veri[kod];
+       var solAylik = sayi(giris.sol[kod]);
+       var sagLot = sayi(giris.sag[kod]);
+       var nt = net(d);
+       var lot = ((solAylik > 0 && nt > 0) ? (solAylik * 12) / nt : 0) + sagLot;
+       var maliyet = lot * d.fiyat;
+       var yillik = lot * nt;
+       var aylik = yillik / 12;
+
+       if (t === "sol") {
+           pr.querySelector("[data-c='lot']").innerHTML = fmtLot(lot);
+       } else {
+           var aylikTd = pr.querySelector("[data-c='aylik']");
+           if (!aylikTd.querySelector("input")) {
+               aylikTd.innerHTML = fmtTL(aylik) + "<small class='esd'>" + esdegerMetin(aylik) + "</small>";
+           }
+       }
+       pr.querySelector("[data-c='maliyet']").innerHTML = fmtTL(maliyet) + "<small class='esd'>" + esdegerMetin(maliyet) + "</small>";
+    }
   }
+
+  // Tüm tablolara girdi (input) event dinleyicilerini ekle
   $("sol-body").addEventListener("input", girdiOlayi);
   $("sag-body").addEventListener("input", girdiOlayi);
+  $("port-body").addEventListener("input", girdiOlayi);
 
   function girdiOdak(e) {
     var el = e.target;
@@ -2176,6 +2231,7 @@
   }
   $("sol-body").addEventListener("focusin", girdiOdak);
   $("sag-body").addEventListener("focusin", girdiOdak);
+  $("port-body").addEventListener("focusin", girdiOdak);
 
   function girdiEnter(e) {
     if (e.key !== "Enter") return;
@@ -2194,6 +2250,7 @@
   }
   $("sol-body").addEventListener("keydown", girdiEnter);
   $("sag-body").addEventListener("keydown", girdiEnter);
+  $("port-body").addEventListener("keydown", girdiEnter);
 
   $("stopaj").addEventListener("input", function () {
     var t = this.value.replace(/[^0-9.,]/g, "");
