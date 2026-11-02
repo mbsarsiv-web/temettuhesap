@@ -1477,12 +1477,33 @@
     return { L: L, T: T };
   }
 
+  /* Bulunulan yılda (GAS.guncelYil) GERÇEKLEŞEN net temettü toplamı.
+     Yıllık tablodaki bulunulan yıl sütunuyla birebir aynı mantık:
+     her ödeme kendi tarihindeki lotla (sonraki bedelsizler lotu böler) ve
+     2025 öncesi %10, sonrası girilen stopaj oranıyla netleştirilir.
+     Bu yıl ödeme yapmamış hisseler (ör. TTRAK) toplama dahil edilmez. */
+  function yilNetGerceklesen(L, yil) {
+    var oran = stopajOrani(), toplam = 0, adet = 0;
+    L.forEach(function (x) {
+      var d = x.d, hv = 0;
+      yilOdemeleri(d, yil).forEach(function (p) {
+        var gs = (p[0] < 20250101) ? 10 : oran;
+        var kat = 1 - (d.stopajsiz ? 0 : gs) / 100;
+        hv += (x.lot / bolCarpan(d, p[0])) * p[1] * kat;
+      });
+      if (hv > 0) { toplam += hv; adet++; }
+    });
+    return { toplam: toplam, adet: adet };
+  }
+
   function ozetYaz() {
     var el = $("port-ozet");
     if (!el) return;
     var h = portfoyHesap(), T = h.T;
     if (h.L.length === 0 || !(T.maliyet > 0)) { el.style.display = "none"; el.innerHTML = ""; return; }
-    var yillik = T.aylik * 12;
+    var yil = GAS ? GAS.guncelYil : new Date().getFullYear();
+    var gr = yilNetGerceklesen(h.L, yil);
+    var yillik = gr.toplam;
     var verim = (yillik / T.maliyet) * 100;
     var en = h.L.slice().sort(function (a, b) { return b.m - a.m; })[0];
     var pay = (en.m / T.maliyet) * 100;
@@ -1491,8 +1512,8 @@
     }
     el.innerHTML = "<div class='oz-grid'>" +
       kart("Toplam Maliyet", fmtTL(T.maliyet), esdegerMetin(T.maliyet)) +
-      kart("Yıllık Net Temettü", fmtTL(yillik), esdegerMetin(yillik)) +
-      kart("Net Temettü Verimi", "%" + fmtVerim(verim), "yıllık net ÷ maliyet") +
+      kart("Yıllık Net Temettü (" + yil + ")", fmtTL(yillik), (esdegerMetin(yillik) || (gr.adet + " hisse ödedi"))) +
+      kart("Net Temettü Verimi (" + yil + ")", "%" + fmtVerim(verim), yil + " net ÷ maliyet") +
       kart("En Büyük Pay", kacis(en.k) + " %" + fmt(pay, 1), h.L.length + " hisse") +
       "</div>";
     el.style.display = "block";
