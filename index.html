@@ -342,7 +342,7 @@
   .oz-de { font-size: 17px; font-weight: 800; color: var(--altin-koyu); line-height: 1.25; margin-top: 2px; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .oz-alt { font-size: 10.5px; font-weight: 800; color: #946c0c; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-height: 13px; }
 
-  /* Sektör dağılımı ve aylık temettü takvimi */
+  /* Sektör dağılımı */
   .tg-ek { padding: 10px 6px 12px; border-top: 1px solid var(--cizgi); background: #fff; }
   .tg-ek .tg-tbaslik { margin: 2px 4px 10px; }
   .sk-satir { display: flex; align-items: center; gap: 8px; padding: 4px 4px; font-size: 12px; color: var(--altin-koyu); }
@@ -352,20 +352,6 @@
   .sk-yz { flex: none; width: 52px; text-align: right; font-weight: 800; color: var(--altin-koyu); font-variant-numeric: tabular-nums; }
   .yg-uyari { margin: 8px 4px 0; padding: 8px 10px; background: #faeeda; border-left: 3px solid #ef9f27; border-radius: 5px; color: #633806; font-size: 12px; line-height: 1.4; font-weight: 600; }
   .yg-uyari b { font-weight: 800; }
-  .tk-grafik { display: flex; align-items: flex-end; gap: 4px; height: 110px; padding: 0 2px; border-bottom: 1px solid #d8c994; }
-  .tk-sutun { flex: 1 1 0; min-width: 0; background: #c9a64a; border-radius: 3px 3px 0 0; min-height: 2px; }
-  .tk-sutun.max { background: var(--altin); }
-  .tk-sutun.bos { background: #e3d8b8; height: 2px; }
-  .tk-harf { display: flex; gap: 4px; padding: 3px 2px 0; }
-  .tk-harf span { flex: 1 1 0; text-align: center; font-size: 10px; font-weight: 700; color: var(--soluk); }
-  .tk-ay { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; margin-top: 8px; }
-  .tk-h { text-align: center; background: #faf7ef; border-radius: 5px; padding: 3px 2px; min-width: 0; }
-  .tk-h i { display: block; font-style: normal; font-size: 10px; font-weight: 800; color: var(--soluk); }
-  .tk-h b { display: block; font-size: 11px; font-weight: 800; color: var(--yazi); font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .tk-h.max { background: #efe6cc; }
-  .tk-h.max b { color: var(--altin-koyu); }
-  .tk-ozet { margin: 8px 4px 0; font-size: 11.5px; line-height: 1.45; color: var(--altin-koyu); font-weight: 600; }
-  .tk-ozet b { font-weight: 800; color: var(--yazi); }
 
   /* Portföy: yıllık net temettü bölümü */
   .tg { display: none; padding: 10px 6px 12px; border-top: 1px solid var(--cizgi); background: #fff; }
@@ -500,13 +486,6 @@
     .sk-ad { width: 150px; }
     .sk-bar, .sk-bar i { height: 12px; }
     .yg-uyari { font-size: 13.5px; margin-left: 0; margin-right: 0; }
-    .tk-grafik { height: 150px; gap: 6px; }
-    .tk-harf { gap: 6px; }
-    .tk-harf span { font-size: 12px; }
-    .tk-ay { grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 6px; }
-    .tk-h i { font-size: 11.5px; }
-    .tk-h b { font-size: 12.5px; }
-    .tk-ozet { font-size: 13.5px; margin-left: 0; margin-right: 0; }
     .tg-pasta .tg-tbaslik { margin-left: 0; margin-right: 0; }
     .pa-kap { flex-direction: row; align-items: center; gap: 24px; }
     .pa-svg { width: 280px; max-width: 280px; }
@@ -623,7 +602,6 @@
     <div class="bos-sonuc" id="port-bos">Henüz giriş yok. Diğer sekmelerde aylık temettü veya lot girin.</div>
     <div class="tg-pasta" id="port-pasta" style="display:none"></div>
     <div class="tg-ek" id="port-sektor" style="display:none"></div>
-    <div class="tg-ek" id="port-takvim" style="display:none"></div>
     <div class="tg-bolkutu" id="port-bolunme" style="display:none"></div>
     <div class="tg" id="port-gecmis"></div>
   </div>
@@ -1477,14 +1455,11 @@
     return html;
   }
 
-  /* ---------- Portföy eklentileri: özet kartları, sektör dağılımı, aylık temettü takvimi ---------- */
+  /* ---------- Portföy eklentileri: özet kartları ve sektör dağılımı ---------- */
   var SEKTOR_RENK = ["#6b5014", "#8a6a1c", "#a8832a", "#b8902f", "#c9a64a", "#dcc27a", "#e3d8b8", "#efe3bd"];
   var SEKTOR_MAKS = 8;
   var YOGUN_HISSE = 25;
   var YOGUN_SEKTOR = 50;
-  var AY_AD = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"];
-  var AY_HARF = ["O", "Ş", "M", "N", "M", "H", "T", "A", "E", "E", "K", "A"];
-  var AY_UZUN = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
 
   function portfoyHesap() {
     var L = [], T = { maliyet: 0, aylik: 0, lot: 0 };
@@ -1515,10 +1490,10 @@
       return "<div class='oz-kart'><div class='oz-et'>" + et + "</div><div class='oz-de'>" + de + "</div><div class='oz-alt'>" + (alt || "&nbsp;") + "</div></div>";
     }
     el.innerHTML = "<div class='oz-grid'>" +
-      kart("Toplam maliyet", fmtTL(T.maliyet), esdegerMetin(T.maliyet)) +
-      kart("Yıllık net temettü", fmtTL(yillik), esdegerMetin(yillik)) +
-      kart("Net temettü verimi", "%" + fmtVerim(verim), "yıllık net ÷ maliyet") +
-      kart("En büyük pay", kacis(en.k) + " %" + fmt(pay, 1), h.L.length + " hisse") +
+      kart("Toplam Maliyet", fmtTL(T.maliyet), esdegerMetin(T.maliyet)) +
+      kart("Yıllık Net Temettü", fmtTL(yillik), esdegerMetin(yillik)) +
+      kart("Net Temettü Verimi", "%" + fmtVerim(verim), "yıllık net ÷ maliyet") +
+      kart("En Büyük Pay", kacis(en.k) + " %" + fmt(pay, 1), h.L.length + " hisse") +
       "</div>";
     el.style.display = "block";
   }
@@ -1574,64 +1549,7 @@
     el.style.display = "block";
   }
 
-  function takvimYaz() {
-    var el = $("port-takvim");
-    if (!el) return;
-    if (!GAS) { el.style.display = "none"; el.innerHTML = ""; return; }
-    var h = portfoyHesap();
-    if (h.L.length === 0) { el.style.display = "none"; el.innerHTML = ""; return; }
-    var gy = GAS.guncelYil, oran = stopajOrani();
-    var yMin = gy - 3, yMax = gy - 1;
-    var AY = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-    var dahil = 0, haric = 0;
-    h.L.forEach(function (x) {
-      var d = x.d;
-      if (!d.tem || !d.tem.length) { haric++; return; }
-      var ilkY = 9999;
-      d.tem.forEach(function (p) { var y = Math.floor(p[0] / 10000); if (y < ilkY) ilkY = y; });
-      var n = 0;
-      for (var y = yMin; y <= yMax; y++) { if (y >= ilkY) n++; }
-      if (n === 0) { haric++; return; }
-      var kat = 1 - (d.stopajsiz ? 0 : oran) / 100;
-      var bulundu = false;
-      d.tem.forEach(function (p) {
-        var yil = Math.floor(p[0] / 10000);
-        if (yil < yMin || yil > yMax) return;
-        var ay = Math.floor((p[0] % 10000) / 100);
-        if (ay < 1 || ay > 12) return;
-        AY[ay - 1] += (x.lot * (p[1] / bolCarpan(d, p[0])) * kat) / n;
-        bulundu = true;
-      });
-      if (bulundu) dahil++;
-    });
-    var toplam = 0, maks = 0, maksAy = -1;
-    AY.forEach(function (v, i) { toplam += v; if (v > maks) { maks = v; maksAy = i; } });
-    if (!(toplam > 0)) { el.style.display = "none"; el.innerHTML = ""; return; }
-
-    var grafik = "<div class='tk-grafik'>", harf = "<div class='tk-harf'>", kutular = "<div class='tk-ay'>";
-    AY.forEach(function (v, i) {
-      var yuk = v > 0 ? Math.max(4, Math.round((v / maks) * 100)) : 0;
-      var ipucu = kacis(AY_UZUN[i] + " · " + (v > 0 ? fmtTL(v) : "ödeme yok"));
-      if (v > 0) grafik += "<div class='tk-sutun" + (i === maksAy ? " max" : "") + "' style='height:" + yuk + "%' title='" + ipucu + "'></div>";
-      else grafik += "<div class='tk-sutun bos' title='" + ipucu + "'></div>";
-      harf += "<span>" + AY_HARF[i] + "</span>";
-      kutular += "<div class='tk-h" + (i === maksAy ? " max" : "") + "'><i>" + AY_AD[i] + "</i><b>" + (v > 0 ? fmt(Math.round(v), 0) : "–") + "</b></div>";
-    });
-    grafik += "</div>"; harf += "</div>"; kutular += "</div>";
-
-    var notMetin = "Son 3 tam yılın (" + yMin + "–" + yMax + ") aylık temettü ödemelerinin ortalamasıdır; güncel lot, güncel stopaj oranı (%" + fmt(oran, 2) +
-      ") ve bedelsiz bölünmeler dikkate alınır. Tutarlar TL cinsinden net tahmindir; gerçek ödeme tarihleri ve tutarları değişebilir." +
-      (haric > 0 ? " " + haric + " hisse için tarihli ödeme verisi bulunamadığından dahil edilmedi." : "");
-
-    el.innerHTML = "<div class='tg-tbaslik'>Aylık Temettü Takvimi (Net, Tahmini)</div>" +
-      grafik + harf + kutular +
-      "<div class='tk-ozet'>Tahmini yıllık net: <b>" + fmtTL(toplam) + "</b> · Aylık ortalama: <b>" + fmtTL(toplam / 12) +
-      "</b> · En yoğun ay: <b>" + AY_UZUN[maksAy] + "</b> (" + fmtTL(maks) + ")</div>" +
-      "<div class='tg-not'>" + notMetin + "</div>";
-    el.style.display = "block";
-  }
-
-  function ekleriYaz() { ozetYaz(); sektorYaz(); takvimYaz(); }
+  function ekleriYaz() { ozetYaz(); sektorYaz(); }
 
   /* ---------- Portföy dağılımı: maliyete göre pasta grafiği ---------- */
   var PASTA_RENK = [
