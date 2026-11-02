@@ -302,6 +302,32 @@
   .tg-p-satir .tg-y { white-space: nowrap; display: inline-block; margin-right: 4px; }
   .tg-p-satir .tg-y b { width: auto; font-weight: 800; color: var(--yazi); }
 
+  /* Portföy dağılımı: maliyete göre pasta grafiği */
+  .tg-pasta { padding: 10px 6px 12px; border-top: 1px solid var(--cizgi); background: #fff; }
+  .tg-pasta .tg-tbaslik { margin: 2px 4px 10px; }
+  .pa-kap { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .pa-svg { width: 100%; max-width: 250px; height: auto; flex: none; display: block; }
+  .pa-svg path, .pa-svg circle.dilim { stroke: #fff; stroke-width: 1.6; }
+  .pa-svg text { font-weight: 800; font-size: 10.5px; pointer-events: none; font-family: inherit; }
+  .pa-liste { width: 100%; min-width: 0; }
+  .pa-satir {
+    display: flex; align-items: center; gap: 8px; padding: 5px 4px;
+    border-bottom: 1px dashed rgba(138, 106, 28, 0.25);
+    font-size: 12px; line-height: 1.3; color: var(--altin-koyu);
+  }
+  .pa-renk { flex: none; width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(0,0,0,.14); }
+  .pa-ad { flex: 1 1 auto; min-width: 0; font-weight: 800; color: var(--yazi); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pa-yuzde { flex: none; width: 54px; text-align: right; font-weight: 800; color: var(--altin-koyu); font-variant-numeric: tabular-nums; }
+  .pa-tl { flex: none; min-width: 86px; text-align: right; font-weight: 700; color: var(--yazi); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .pa-toplam {
+    margin-top: 6px; padding: 6px 8px; background: #efe6cc; color: var(--altin-koyu);
+    border-top: 2px solid var(--altin); border-radius: 0 0 5px 5px;
+    display: flex; justify-content: space-between; align-items: center; gap: 8px;
+    font-size: 12px; font-weight: 800; font-variant-numeric: tabular-nums;
+  }
+  .pa-toplam small { display: block; font-size: 10.5px; font-weight: 800; color: #946c0c; text-align: right; }
+  .pa-toplam > span:last-child { text-align: right; white-space: nowrap; }
+
   /* Portföy: yıllık net temettü bölümü */
   .tg { display: none; padding: 10px 6px 12px; border-top: 1px solid var(--cizgi); background: #fff; }
   .tg-not { margin: 6px 4px 0; font-size: 10px; color: var(--soluk); line-height: 1.3; }
@@ -423,6 +449,16 @@
 
     .tg { padding: 10px 12px 12px; }
     .tg-bolkutu { padding: 0 12px 12px; }
+    .tg-pasta { padding: 12px 12px 14px; }
+    .tg-pasta .tg-tbaslik { margin-left: 0; margin-right: 0; }
+    .pa-kap { flex-direction: row; align-items: center; gap: 24px; }
+    .pa-svg { width: 280px; max-width: 280px; }
+    .pa-liste { flex: 1 1 0; }
+    .pa-svg text { font-size: 10px; }
+    .pa-satir { font-size: 14px; padding: 6px 6px; }
+    .pa-yuzde { width: 62px; }
+    .pa-tl { min-width: 110px; }
+    .pa-toplam { font-size: 14px; }
     .tg-not, .tg-tbaslik { margin-left: 0; margin-right: 0; }
     .tg-ac { margin-left: 0; margin-right: 0; }
     .tg-ac > summary { font-size: 15px; padding: 10px 12px; }
@@ -524,6 +560,7 @@
       <tbody id="port-body"></tbody>
     </table>
     <div class="bos-sonuc" id="port-bos">Henüz giriş yok. Diğer sekmelerde aylık temettü veya lot girin.</div>
+    <div class="tg-pasta" id="port-pasta" style="display:none"></div>
     <div class="tg-bolkutu" id="port-bolunme" style="display:none"></div>
     <div class="tg" id="port-gecmis"></div>
   </div>
@@ -1128,6 +1165,7 @@
     var payl = $("port-toplam-aylik"); if(payl) payl.textContent = fmtTL(T.aylik);
     var paltmal = $("port-alt-maliyet"); if(paltmal) paltmal.textContent = esdegerMetin(T.maliyet);
     var paltayl = $("port-alt-aylik"); if(paltayl) paltayl.textContent = esdegerMetin(T.aylik);
+    pastaYaz();
   }
 
   function altSatirlariYaz() {
@@ -1374,6 +1412,82 @@
     return html;
   }
 
+  /* ---------- Portföy dağılımı: maliyete göre pasta grafiği ---------- */
+  var PASTA_RENK = [
+    { c: "#6b5014", t: "#ffffff" }, { c: "#c9a64a", t: "#3a2c08" }, { c: "#8a6a1c", t: "#ffffff" },
+    { c: "#e3d8b8", t: "#3a2c08" }, { c: "#a8832a", t: "#ffffff" }, { c: "#4f3a0d", t: "#ffffff" },
+    { c: "#dcc27a", t: "#3a2c08" }, { c: "#7d5f17", t: "#ffffff" }, { c: "#efe3bd", t: "#3a2c08" },
+    { c: "#b8902f", t: "#ffffff" }
+  ];
+  var PASTA_DIGER = { c: "#cfc7ad", t: "#3a2c08" };
+  var PASTA_MAKS = 10;
+
+  function pastaYaz() {
+    var el = $("port-pasta");
+    if (!el) return;
+    var L = [], top = 0;
+    sirali.forEach(function (k) {
+      var d = veri[k];
+      var nt = net(d);
+      var sa = sayi(giris.sol[k]);
+      var lot = ((sa > 0 && nt > 0) ? (sa * 12) / nt : 0) + sayi(giris.sag[k]);
+      if (!(lot > 0)) return;
+      var m = lot * d.fiyat;
+      if (!(m > 0)) return;
+      L.push({ k: k, m: m });
+      top += m;
+    });
+    if (!(top > 0) || L.length === 0) { el.style.display = "none"; el.innerHTML = ""; return; }
+
+    L.sort(function (a, b) { return (b.m - a.m) || karsilastir(a.k, b.k); });
+    if (L.length > PASTA_MAKS) {
+      var ilk = L.slice(0, PASTA_MAKS - 1), kalan = L.slice(PASTA_MAKS - 1), dm = 0;
+      kalan.forEach(function (x) { dm += x.m; });
+      ilk.push({ k: "Diğer (" + kalan.length + ")", m: dm, diger: true });
+      L = ilk;
+    }
+
+    var CX = 100, CY = 100, R = 92, a0 = -Math.PI / 2;
+    var svg = "<svg class='pa-svg' viewBox='0 0 200 200' role='img' aria-label='Portföy maliyet dağılımı'>";
+    var liste = "";
+    L.forEach(function (x, i) {
+      var r = x.diger ? PASTA_DIGER : PASTA_RENK[i % PASTA_RENK.length];
+      var oran = x.m / top, yuzde = oran * 100;
+      var a1 = a0 + oran * Math.PI * 2;
+      var baslik = x.k + " · %" + fmt(yuzde, 1) + " · " + fmtTL(x.m);
+      if (L.length === 1) {
+        svg += "<circle class='dilim' cx='" + CX + "' cy='" + CY + "' r='" + R + "' fill='" + r.c + "'><title>" + kacis(baslik) + "</title></circle>";
+      } else {
+        var x0 = CX + R * Math.cos(a0), y0 = CY + R * Math.sin(a0);
+        var x1 = CX + R * Math.cos(a1), y1 = CY + R * Math.sin(a1);
+        var buyuk = (a1 - a0) > Math.PI ? 1 : 0;
+        svg += "<path d='M" + CX + " " + CY + " L" + x0.toFixed(2) + " " + y0.toFixed(2) +
+               " A" + R + " " + R + " 0 " + buyuk + " 1 " + x1.toFixed(2) + " " + y1.toFixed(2) +
+               " Z' fill='" + r.c + "'><title>" + kacis(baslik) + "</title></path>";
+      }
+      if (yuzde >= 5) {
+        var am = (a0 + a1) / 2, rr = R * (L.length === 1 ? 0 : 0.64);
+        var tx = CX + rr * Math.cos(am), ty = CY + rr * Math.sin(am);
+        svg += "<text x='" + tx.toFixed(2) + "' y='" + ty.toFixed(2) + "' text-anchor='middle' dominant-baseline='middle' fill='" + r.t + "'>" +
+               (L.length === 1 ? "" : "%" + fmt(yuzde, 1)) + "</text>";
+      }
+      liste += "<div class='pa-satir'><span class='pa-renk' style='background:" + r.c + "'></span>" +
+               "<span class='pa-ad'>" + kacis(x.k) + "</span>" +
+               "<span class='pa-yuzde'>%" + fmt(yuzde, 1) + "</span>" +
+               "<span class='pa-tl'>" + fmtTL(x.m) + "</span></div>";
+      a0 = a1;
+    });
+    svg += "</svg>";
+
+    var esd = esdegerMetin(top);
+    el.innerHTML = "<div class='tg-tbaslik'>Portföy Dağılımı (Maliyete Göre)</div>" +
+      "<div class='pa-kap'>" + svg +
+      "<div class='pa-liste'>" + liste +
+      "<div class='pa-toplam'><span>Toplam Maliyet</span><span>" + fmtTL(top) + (esd ? "<small>" + esd + "</small>" : "") + "</span></div>" +
+      "</div></div>";
+    el.style.display = "block";
+  }
+
   function portfoyYaz() {
     if (!$("port-body")) return;
     var html = [], T = { lot: 0, maliyet: 0, aylik: 0, adet: 0 };
@@ -1443,6 +1557,7 @@
     $("port-alt-maliyet").textContent = esdegerMetin(T.maliyet);
     $("port-alt-aylik").textContent = esdegerMetin(T.aylik);
 
+    pastaYaz();
     gecmisYaz(tutulan);
   }
 
