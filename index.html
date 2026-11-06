@@ -192,6 +192,8 @@
     border-radius: 6px;
     animation: bilgiAc .18s ease-out;
   }
+  /* İkinci satır: İlk Temettü Yılı + İlk Temettüden Beri Ort. */
+  .bilgi.iki { grid-template-columns: repeat(2, 1fr); margin-top: 4px; }
   .bilgi .b-kutu { text-align: center; padding: 1px 4px; border-right: 1px solid rgba(0,0,0,.09); min-width: 0; }
   .bilgi .b-kutu:last-child { border-right: 0; }
   .bilgi .b-etiket { font-size: 9.5px; font-weight: 700; letter-spacing: .03em; color: var(--soluk); line-height: 1.2; text-transform: uppercase; }
@@ -829,6 +831,9 @@
     d.skArama = (sektorMetni(d) + " " + (SEKTOR_TR[d.sektor] || "")).toLocaleUpperCase("tr");
   }
 
+  /* Yılın son iki hanesi (2006 -> "06") */
+  function yil2(n) { return ("0" + (n % 100)).slice(-2); }
+
   function bilgiKartHtml(kod) {
     var d = veri[kod];
     if (!d) return "";
@@ -840,10 +845,18 @@
     var ortVar = m.ort > 0;
     var kesVar = typeof m.kesintisiz === "number";
     var artVar = typeof m.artis === "number";
+    var ilkVar = m.ilkYil > 0;
+    var ilkOrtVar = m.ilkOrt > 0;
+    var ilkEtiket = "İlk Temettüden Beri Ort." +
+      (ilkVar && GAS ? " (" + yil2(m.ilkYil) + "-" + yil2(GAS.guncelYil) + ")" : "");
     return "<div class='bilgi'>" +
       kutu("Ortalama Temettü Verimi", ortVar ? "%" + fmtVerim(m.ort) : "-", !ortVar) +
       kutu("Kesintisiz Temettü Ödeme", kesVar ? m.kesintisiz + " Yıl" : "-", !kesVar || m.kesintisiz === 0) +
       kutu("Düzenli Temettü Artışı", artVar ? m.artis + " Yıl" : "-", !artVar || m.artis === 0) +
+      "</div>" +
+      "<div class='bilgi iki'>" +
+      kutu("İlk Temettü Yılı", ilkVar ? String(m.ilkYil) : "-", !ilkVar) +
+      kutu(ilkEtiket, ilkOrtVar ? "%" + fmtVerim(m.ilkOrt) : "-", !ilkOrtVar) +
       "</div>";
   }
   function detaySatiri(kod, kolon) {
@@ -1017,6 +1030,17 @@
     var kes = 0;
     for (y = bitis; y >= 1990; y--) { if (g.v[y] > 0) kes++; else break; }
 
+    /* İlk temettü yılı ve ilk temettüden bu yana ortalama verim (dönem filtresinden bağımsız) */
+    var ilkYil = 0, ilkTop = 0, ilkAdet = 0;
+    for (y = 1990; y <= gy; y++) {
+      if (g.v[y] > 0) {
+        if (!ilkYil) ilkYil = y;
+        ilkTop += g.v[y];
+        ilkAdet++;
+      }
+    }
+    var ilkOrt = ilkAdet > 0 ? ilkTop / ilkAdet : 0;
+
     var Y = yillikDuzeltmeli(d);
     var aBitis = (Y[gy] > 0) ? gy : gy - 1;
     var art = 0;
@@ -1029,7 +1053,7 @@
     var buyume = null;
     if (ilkH && sonH > ilkH) buyume = Math.pow(Y[sonH] / Y[ilkH], 1 / (sonH - ilkH)) - 1;
 
-    return { ort: ort, adet: adet, yog: yog, kesintisiz: kes, artis: art, buyume: buyume };
+    return { ort: ort, adet: adet, yog: yog, kesintisiz: kes, artis: art, buyume: buyume, ilkYil: ilkYil, ilkOrt: ilkOrt };
   }
 
   function filtredenGecer(m, d) {
