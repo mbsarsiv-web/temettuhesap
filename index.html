@@ -195,7 +195,6 @@
   .bilgi .b-kutu {
     display: flex; flex-direction: column; justify-content: space-between; align-items: center;
     text-align: center; padding: 1px 3px; border-right: 1px solid rgba(0,0,0,.09); min-width: 0;
-    container-type: inline-size;
   }
   .bilgi .b-kutu:last-child { border-right: 0; }
   .bilgi .b-etiket {
@@ -206,7 +205,6 @@
     font-size: 13px; font-weight: 800; color: var(--vurgu, #1e6b3e); line-height: 1.2;
     margin-top: 3px; font-variant-numeric: tabular-nums; white-space: nowrap;
   }
-  .bilgi .b-etiket.tek { white-space: nowrap; overflow-wrap: normal; font-size: clamp(4.5px, 4.3cqw, 10.5px); }
   .bilgi .b-deger.sifir { color: #9aa3a0; }
   .bilgi .b-adet { font-size: .62em; font-weight: 800; opacity: .75; margin-left: 1px; }
   .p-sol .bilgi { --vurgu: #1e6b3e; --zemin-k: #eaf4ed; }
@@ -482,7 +480,9 @@
     .toplam .k-adet b, .toplam .k-lot b { font-size: 21px; }
     .bilgi { padding: 7px 4px; }
     .bilgi .b-kutu { padding: 1px 6px; }
+    .bilgi .b-kutu { container-type: inline-size; }
     .bilgi .b-etiket { font-size: 10.5px; }
+    .bilgi .b-etiket.tek { white-space: nowrap; overflow-wrap: normal; font-size: clamp(8px, 4.3cqw, 10.5px); }
     .bilgi .b-deger { font-size: 19px; }
 
     .tg { padding: 10px 12px 12px; }
