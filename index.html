@@ -855,7 +855,7 @@
     var artVar = typeof m.artis === "number";
     var ilkVar = m.ilkYil > 0;
     var ilkOrtVar = m.ilkOrt > 0;
-    var ilkEtiket = "İlk Temettüden Beri Ort." +
+    var ilkEtiket = "İlk Temettüden Ort." +
       (ilkVar && GAS ? " (" + yil2(m.ilkYil) + "-" + yil2(GAS.guncelYil) + ")" : "");
     return "<div class='bilgi'>" +
       kutu("Ortalama Temettü Verimi", ortVar ? "%" + fmtVerim(m.ort) : "-", !ortVar) +
