@@ -206,6 +206,7 @@
     margin-top: 3px; font-variant-numeric: tabular-nums; white-space: nowrap;
   }
   .bilgi .b-deger.sifir { color: #9aa3a0; }
+  .bilgi .b-adet { font-size: .62em; font-weight: 800; opacity: .75; margin-left: 1px; }
   .p-sol .bilgi { --vurgu: #1e6b3e; --zemin-k: #eaf4ed; }
   .p-sag .bilgi { --vurgu: #2b5797; --zemin-k: #eaf0f8; }
   .p-port .bilgi { --vurgu: #8a6a1c; --zemin-k: #f7f1e1; }
@@ -862,7 +863,7 @@
       kutu("Kesintisiz Temettü Ödeme", kesVar ? m.kesintisiz + " Yıl" : "-", !kesVar || m.kesintisiz === 0) +
       kutu("Düzenli Temettü Artışı", artVar ? m.artis + " Yıl" : "-", !artVar || m.artis === 0) +
       kutu("İlk Temettü Yılı", ilkVar ? String(m.ilkYil) : "-", !ilkVar) +
-      kutu(ilkEtiket, ilkOrtVar ? "%" + fmtVerim(m.ilkOrt) : "-", !ilkOrtVar) +
+      kutu(ilkEtiket, ilkOrtVar ? "%" + fmtVerim(m.ilkOrt) + "<span class='b-adet' title='İlk temettüden bu yana temettü dağıtılan yıl sayısı'>/" + m.ilkAdet + "</span>" : "-", !ilkOrtVar) +
       "</div>";
   }
   function detaySatiri(kod, kolon) {
@@ -1059,7 +1060,7 @@
     var buyume = null;
     if (ilkH && sonH > ilkH) buyume = Math.pow(Y[sonH] / Y[ilkH], 1 / (sonH - ilkH)) - 1;
 
-    return { ort: ort, adet: adet, yog: yog, kesintisiz: kes, artis: art, buyume: buyume, ilkYil: ilkYil, ilkOrt: ilkOrt };
+    return { ort: ort, adet: adet, yog: yog, kesintisiz: kes, artis: art, buyume: buyume, ilkYil: ilkYil, ilkOrt: ilkOrt, ilkAdet: ilkAdet };
   }
 
   function filtredenGecer(m, d) {
