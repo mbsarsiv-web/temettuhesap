@@ -195,6 +195,7 @@
   .bilgi .b-kutu {
     display: flex; flex-direction: column; justify-content: space-between; align-items: center;
     text-align: center; padding: 1px 3px; border-right: 1px solid rgba(0,0,0,.09); min-width: 0;
+    container-type: inline-size;
   }
   .bilgi .b-kutu:last-child { border-right: 0; }
   .bilgi .b-etiket {
@@ -205,6 +206,7 @@
     font-size: 13px; font-weight: 800; color: var(--vurgu, #1e6b3e); line-height: 1.2;
     margin-top: 3px; font-variant-numeric: tabular-nums; white-space: nowrap;
   }
+  .bilgi .b-etiket.tek { white-space: nowrap; overflow-wrap: normal; font-size: clamp(4.5px, 4.3cqw, 10.5px); }
   .bilgi .b-deger.sifir { color: #9aa3a0; }
   .bilgi .b-adet { font-size: .62em; font-weight: 800; opacity: .75; margin-left: 1px; }
   .p-sol .bilgi { --vurgu: #1e6b3e; --zemin-k: #eaf4ed; }
@@ -846,12 +848,12 @@
   function bilgiKartHtml(kod) {
     var d = veri[kod];
     if (!d) return "";
-    function kutu(etiket, metin, bos) {
-      return "<div class='b-kutu'><div class='b-etiket'>" + etiket + "</div>" +
+    function kutu(etiket, metin, bos, etiketSinif) {
+      return "<div class='b-kutu'><div class='b-etiket" + (etiketSinif ? " " + etiketSinif : "") + "'>" + etiket + "</div>" +
              "<div class='b-deger" + (bos ? " sifir" : "") + "'>" + metin + "</div></div>";
     }
     var m = d.m || {};
-    var ortVar = m.ort > 0;
+    var ortVar = m.ort10 > 0;
     var kesVar = typeof m.kesintisiz === "number";
     var artVar = typeof m.artis === "number";
     var ilkVar = m.ilkYil > 0;
@@ -859,7 +861,7 @@
     var ilkEtiket = "İlk Temettüden Ort." +
       (ilkVar && GAS ? " (" + yil2(m.ilkYil) + "-" + yil2(GAS.guncelYil) + ")" : "");
     return "<div class='bilgi'>" +
-      kutu("Ortalama Temettü Verimi", ortVar ? "%" + fmtVerim(m.ort) : "-", !ortVar) +
+      kutu("Ortalama Temettü Verimi (10 Yıl)", ortVar ? "%" + fmtVerim(m.ort10) : "-", !ortVar, "tek") +
       kutu("Kesintisiz Temettü Ödeme", kesVar ? m.kesintisiz + " Yıl" : "-", !kesVar || m.kesintisiz === 0) +
       kutu("Düzenli Temettü Artışı", artVar ? m.artis + " Yıl" : "-", !artVar || m.artis === 0) +
       kutu("İlk Temettü Yılı", ilkVar ? String(m.ilkYil) : "-", !ilkVar) +
@@ -1022,6 +1024,11 @@
       if (vv > 0 && y >= minYil) { adet++; top += vv; }
     }
     var ort = adet > 0 ? top / adet : 0;
+
+    /* Son 10 yıl ortalama verim (bilgi kartında gösterilir; dönem filtresinden bağımsız) */
+    var ort10 = 0, a10 = 0, t10 = 0;
+    for (y = gy - 9; y <= gy; y++) { if (g.v[y] > 0) { a10++; t10 += g.v[y]; } }
+    if (a10 > 0) ort10 = t10 / a10;
     var yog;
     if (donem > 0) {
       yog = adet / donem;
@@ -1060,7 +1067,7 @@
     var buyume = null;
     if (ilkH && sonH > ilkH) buyume = Math.pow(Y[sonH] / Y[ilkH], 1 / (sonH - ilkH)) - 1;
 
-    return { ort: ort, adet: adet, yog: yog, kesintisiz: kes, artis: art, buyume: buyume, ilkYil: ilkYil, ilkOrt: ilkOrt, ilkAdet: ilkAdet };
+    return { ort: ort, ort10: ort10, adet: adet, yog: yog, kesintisiz: kes, artis: art, buyume: buyume, ilkYil: ilkYil, ilkOrt: ilkOrt, ilkAdet: ilkAdet };
   }
 
   function filtredenGecer(m, d) {
