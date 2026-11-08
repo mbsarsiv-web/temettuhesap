@@ -344,10 +344,12 @@ def is_yatirim_satirlari(kodlar):
     Tüm hisseleri tek seferde sorup API'yi çökertmek (HTTP 500) yerine,
     belirlenen hisseleri tek tek (fakat eşzamanlı olarak) sorgular.
     Bu sayede hem 'Bedelsiz Temettü' gibi eksik dönen satırlar kurtarılır
-    hem de sunucu şişmez. 
+    hem de sunucu şişmez.
+    Başarısız olan isteklerin sebebi (HTTP kodu / bağlantı hatası) günlüğe yazılır.
     """
     tum_satirlar = []
-    
+    hatalar = {}   # {kod: son hata metni}
+
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
         "Accept": "application/json, text/javascript, */*; q=0.01",
@@ -382,12 +384,17 @@ def is_yatirim_satirlari(kodlar):
                                 return v
                     if isinstance(data, list):
                         return data
-            except Exception:
+                    hatalar[kod] = "HTTP 200 ama liste yok"
+                else:
+                    hatalar[kod] = "HTTP %d" % r.status_code
+                    time.sleep(1)
+            except Exception as e:
+                hatalar[kod] = repr(e)[:120]
                 time.sleep(1)
         return []
 
     log(f"Is Yatirim'dan {len(kodlar)} hisse icin tek tek eksiksiz veri cekiliyor...")
-    
+
     # 15 Eşzamanlı istek ile sunucuyu yormadan hızlıca tüm verileri çeker
     with concurrent.futures.ThreadPoolExecutor(max_workers=15) as executor:
         future_to_kod = {executor.submit(fetch_hisse, kod): kod for kod in kodlar}
@@ -398,6 +405,15 @@ def is_yatirim_satirlari(kodlar):
                     tum_satirlar.extend(res)
             except Exception:
                 pass
+
+    log("Is Yatirim: %d satir alindi, %d hissede hata var." % (len(tum_satirlar), len(hatalar)))
+    if hatalar:
+        ozet = {}
+        for h in hatalar.values():
+            ozet[h] = ozet.get(h, 0) + 1
+        for h, n in sorted(ozet.items(), key=lambda x: -x[1])[:5]:
+            log("  hata turu: %s -> %d hisse" % (h, n))
+        log("  ornek hisseler:", ", ".join(sorted(hatalar.keys())[:15]))
 
     return tum_satirlar
 
@@ -645,6 +661,8 @@ def github_a_yaz(veri, dosya=DOSYA, mesaj=None):
     g = requests.get(url, headers=h, timeout=30)
     if g.status_code == 200:
         sha = g.json().get("sha", "")
+    elif g.status_code != 404:
+        log("GitHub dosya okuma HTTP %d: %s" % (g.status_code, g.text[:300]))
 
     icerik = json.dumps(veri, indent=2, ensure_ascii=False, sort_keys=True)
     govde = {
@@ -656,20 +674,21 @@ def github_a_yaz(veri, dosya=DOSYA, mesaj=None):
 
     p = requests.put(url, headers=h, json=govde, timeout=30)
     if p.status_code not in (200, 201):
-        log(p.text[:500])
+        log("GitHub yazma HTTP %d: %s" % (p.status_code, p.text[:500]))
         return False
     return True
 
 def main():
     session = requests.Session()
-    
+
     # 1. Kaynaklardan mevcut hisse kodlarını topla
     fiyatlar = fiyatlari_cek(session)
     gas, gas_bol = gas_verisi(session)
     sektorler = sektorleri_cek(session)
-    
+
     hedef_kodlar = sorted(list(set(fiyatlar.keys()) | gas))
-    
+    log("Hedef hisse sayisi:", len(hedef_kodlar))
+
     # 2. Hisseleri tek tek eşzamanlı olarak sorgula (HTTP 500'ü tamamen engeller)
     satirlar = is_yatirim_satirlari(hedef_kodlar)
     if not satirlar:
@@ -684,7 +703,7 @@ def main():
     # 4. Eksik Fiyatları Telafi Et ve Son JSON'u Hazırla
     eksik_fiyatlari_tamamla(hedef_kodlar, fiyatlar, gas)
     veri = veriyi_hazirla(ham, fiyatlar, gas, sektorler, bolunmeler)
-    
+
     log("Hazirlanan hisse sayisi:", len(veri))
     for ornek in ("FROTO", "ISMEN", "AKSA", "TUPRS"):
         if ornek in veri:
