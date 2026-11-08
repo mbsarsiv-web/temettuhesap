@@ -2,26 +2,34 @@ name: Temettu Otomasyonu
 
 on:
   schedule:
-    # GitHub cron saati UTC'dir. Turkiye UTC+3 oldugu icin 06:00 UTC = 09:00 (TSI).
-    # Haftanin gunu: 0 = Pazar  ->  her Pazar sabahi 09:00
+    # Her Pazar 06:00 UTC = Türkiye saati 09:00
     - cron: '0 6 * * 0'
   workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: temettu-otomasyonu
+  cancel-in-progress: false
 
 jobs:
   guncelle:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - name: Depoyu al
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - name: Python kur
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
 
-      - name: Kutuphaneleri kur
+      - name: Bağımlılıkları kur
         run: pip install requests
 
-      - name: Botu calistir
-        run: python temettu_bot.py
+      - name: Botu çalıştır
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN || github.token }}
+        run: python temettu_bot.py
