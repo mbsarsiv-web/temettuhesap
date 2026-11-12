@@ -810,6 +810,12 @@
   function fmtTLh(n)   { return fmt(Math.round(n), 0) + "<span class='tl'> TL</span>"; }
   function fmtVerim(n) { return n.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 
+  /* Portföy sekmesindeki aylık temettü kutusunda gösterilen "28.000 TL" metni */
+  function tlGoster(s) {
+    var n = sayi(s);
+    return n > 0 ? fmt(n, 2) + " TL" : "";
+  }
+
   function stopajOrani() {
     var n = parseFloat(String(giris.stopaj === undefined ? "15" : giris.stopaj).replace(",", "."));
     if (!isFinite(n) || n < 0) n = 0;
@@ -1733,7 +1739,7 @@
         : fmtLot(r.lot);
 
       var aylikIcerik = solGirdi
-        ? "<input class='girdi port-girdi' inputmode='decimal' autocomplete='off' data-t='sol' data-kod='" + k + "' value='" + giris.sol[k] + "'>"
+        ? "<input class='girdi port-girdi' inputmode='decimal' autocomplete='off' data-tl='1' data-t='sol' data-kod='" + k + "' value='" + kacis(tlGoster(giris.sol[k])) + "'>"
         : (fmtTL(r.aylik) + "<small class='esd'>" + esdegerMetin(r.aylik) + "</small>");
 
       html.push("<tr data-kod='" + k + "' class='" + sinif + "'>" + hisseHtml +
@@ -2594,12 +2600,24 @@
   function girdiOdak(e) {
     var el = e.target;
     if (el.classList && el.classList.contains("girdi")) {
+      /* Portföydeki "28.000 TL" gösterimli kutuya girince ham sayıyı göster */
+      if (el.getAttribute("data-tl")) {
+        el.value = giris[el.getAttribute("data-t")][el.getAttribute("data-kod")] || "";
+      }
       setTimeout(function () { try { el.select(); } catch (x) {} }, 0);
     }
   }
   $("sol-body").addEventListener("focusin", girdiOdak);
   $("sag-body").addEventListener("focusin", girdiOdak);
   $("port-body").addEventListener("focusin", girdiOdak);
+
+  /* Kutudan çıkınca değeri yeniden "28.000 TL" biçimine çevir */
+  $("port-body").addEventListener("focusout", function (e) {
+    var el = e.target;
+    if (el && el.getAttribute && el.getAttribute("data-tl")) {
+      el.value = tlGoster(giris[el.getAttribute("data-t")][el.getAttribute("data-kod")]);
+    }
+  });
 
   function girdiEnter(e) {
     if (e.key !== "Enter") return;
