@@ -2349,7 +2349,8 @@
     ["sol", "sag"].forEach(function (t) {
       var inputs = $(t + "-body").querySelectorAll("input.girdi");
       for (var i = 0; i < inputs.length; i++) {
-        inputs[i].value = giris[t][inputs[i].getAttribute("data-kod")] || "";
+        var hamDeger = giris[t][inputs[i].getAttribute("data-kod")] || "";
+        inputs[i].value = inputs[i].getAttribute("data-tl") ? tlGoster(hamDeger) : hamDeger;
       }
     });
     $("stopaj").value = giris.stopaj;
@@ -2482,7 +2483,7 @@
       sol.push("<tr data-kod='" + k + "' class='" + sinif + "'>" + ortak +
         "<td data-c='lot' data-l='LOT'>0</td>" +
         "<td data-c='maliyet' data-l='MALİYET'>0 TL</td>" +
-        "<td class='c-in' data-l='AYLIK TEMETTÜ (TL)'><input class='girdi' inputmode='decimal' autocomplete='off' placeholder='0' enterkeyhint='next' data-t='sol' data-kod='" + k + "' value='" + (giris.sol[k] || "") + "'></td></tr>");
+        "<td class='c-in' data-l='AYLIK TEMETTÜ (TL)'><input class='girdi' inputmode='decimal' autocomplete='off' placeholder='0' enterkeyhint='next' data-tl='1' data-t='sol' data-kod='" + k + "' value='" + kacis(tlGoster(giris.sol[k])) + "'></td></tr>");
 
       sag.push("<tr data-kod='" + k + "' class='" + sinif + "'>" + ortak +
         "<td class='c-in' data-l='LOT'><input class='girdi' inputmode='decimal' autocomplete='off' placeholder='0' enterkeyhint='next' data-t='sag' data-kod='" + k + "' value='" + (giris.sag[k] || "") + "'></td>" +
@@ -2565,7 +2566,7 @@
     depoYaz();
 
     var mainInput = $(t + "-body").querySelector("input[data-kod='" + kod + "']");
-    if (mainInput && mainInput !== el) mainInput.value = temiz;
+    if (mainInput && mainInput !== el) mainInput.value = mainInput.getAttribute("data-tl") ? tlGoster(temiz) : temiz;
 
     if (t === "sol") hesaplaSol(); else hesaplaSag();
 
@@ -2612,12 +2613,14 @@
   $("port-body").addEventListener("focusin", girdiOdak);
 
   /* Kutudan çıkınca değeri yeniden "28.000 TL" biçimine çevir */
-  $("port-body").addEventListener("focusout", function (e) {
+  function girdiCikis(e) {
     var el = e.target;
     if (el && el.getAttribute && el.getAttribute("data-tl")) {
       el.value = tlGoster(giris[el.getAttribute("data-t")][el.getAttribute("data-kod")]);
     }
-  });
+  }
+  $("sol-body").addEventListener("focusout", girdiCikis);
+  $("port-body").addEventListener("focusout", girdiCikis);
 
   function girdiEnter(e) {
     if (e.key !== "Enter") return;
