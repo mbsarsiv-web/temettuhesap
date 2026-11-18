@@ -318,6 +318,10 @@
   .tg-h em { font-style: normal; font-weight: 600; font-size: 11px; white-space: nowrap; font-variant-numeric: tabular-nums; }
   .tg-h.bos em { opacity: .45; font-weight: 400; }
 
+  /* Son güncellemede değişen veriler (Hesaplama Notları'nın altındaki bölüm) */
+  .tg-degisim .tg-p-satir > b { width: 66px; }
+  .tg-degisim .tg-p-satir.tek > span { flex: 1 1 100%; }
+
   /* Portföy dağılımı: maliyete göre pasta grafiği */
   .tg-pasta { padding: 10px 6px 12px; border-top: 1px solid var(--cizgi); background: #fff; }
   .tg-pasta .tg-tbaslik { margin: 2px 4px 10px; }
@@ -356,7 +360,7 @@
   .tg-ek { padding: 10px 6px 12px; border-top: 1px solid var(--cizgi); background: #fff; }
   .tg-ek .tg-tbaslik { margin: 2px 4px 10px; }
   .sk-satir { display: flex; align-items: center; gap: 8px; padding: 4px 4px; font-size: 12px; color: var(--altin-koyu); }
-  .sk-ad { flex: none; width: 96px; font-weight: 800; color: var(--yazi); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sk-ad { flex: none; width: 120px; font-weight: 800; color: var(--yazi); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .sk-bar { flex: 1 1 0; min-width: 0; height: 10px; background: #efe6cc; border-radius: 5px; overflow: hidden; }
   .sk-bar i { display: block; height: 10px; border-radius: 5px; }
   .sk-yz { flex: none; width: 52px; text-align: right; font-weight: 800; color: var(--altin-koyu); font-variant-numeric: tabular-nums; }
@@ -496,7 +500,7 @@
     .tg-ek { padding: 12px 12px 14px; }
     .tg-ek .tg-tbaslik { margin-left: 0; margin-right: 0; }
     .sk-satir { font-size: 14px; padding: 5px 6px; }
-    .sk-ad { width: 150px; }
+    .sk-ad { width: 160px; }
     .sk-bar, .sk-bar i { height: 12px; }
     .yg-uyari { font-size: 13.5px; margin-left: 0; margin-right: 0; }
     .tg-pasta .tg-tbaslik { margin-left: 0; margin-right: 0; }
@@ -517,6 +521,7 @@
     .tg-p-baslik { font-size: 12.5px; }
     .tg-p-satir { font-size: 12.5px; }
     .tg-p-satir > b { width: 60px; }
+    .tg-degisim .tg-p-satir > b { width: 74px; }
     .tg-p-satir .tg-yg { gap: 2px 10px; }
     .tg-h i { font-size: 12.5px; }
     .tg-h em { font-size: 14px; }
@@ -617,6 +622,7 @@
     <div class="tg-ek" id="port-sektor" style="display:none"></div>
     <div class="tg-bolkutu" id="port-bolunme" style="display:none"></div>
     <div class="tg" id="port-gecmis"></div>
+    <div class="tg-bolkutu" id="port-degisim" style="display:none"></div>
   </div>
   <div class="guncel" id="guncel"></div>
 </div>
@@ -688,6 +694,9 @@
   var sektorOnbellek = {};
   var canliZaman = 0;
 
+  /* GYO ve Gayrimenkul tek sektör başlığı altında toplanır */
+  var SEKTOR_GYO = "GYO / Gayrimenkul";
+
   var SEKTOR_TR = {
     "Commercial Services": "Ticari Hizmetler",
     "Communications": "İletişim",
@@ -714,8 +723,8 @@
     "Major Banks": "Bankacılık",
     "Regional Banks": "Bankacılık",
     "Financial Conglomerates": "Holding",
-    "Real Estate Investment Trusts": "GYO",
-    "Real Estate Development": "Gayrimenkul",
+    "Real Estate Investment Trusts": SEKTOR_GYO,
+    "Real Estate Development": SEKTOR_GYO,
     "Life/Health Insurance": "Sigorta",
     "Property/Casualty Insurance": "Sigorta",
     "Multi-Line Insurance": "Sigorta",
@@ -783,6 +792,8 @@
   var acikDetay = {};
   var portSira = { k: "ad", y: 1 };
   var tgSira = { k: "top", y: -1 };
+  var sonGunc = null;   /* guncelleme.json içeriği: { tarih, son, deg, onceki } */
+  var degImza = "";
 
   function $(id) { return document.getElementById(id); }
 
@@ -938,7 +949,10 @@
       if (!o) return;
       Object.keys(FILTRE_VARSAYILAN).forEach(function (a) {
         if (a === "sektor") {
-          F[a] = (o[a] !== undefined && o[a] !== null && String(o[a]) !== "") ? String(o[a]) : "0";
+          var sv = (o[a] !== undefined && o[a] !== null && String(o[a]) !== "") ? String(o[a]) : "0";
+          /* Eski kayıtlı "GYO" / "Gayrimenkul" seçimi yeni birleşik başlığa taşınır */
+          if (sv === "GYO" || sv === "Gayrimenkul") sv = SEKTOR_GYO;
+          F[a] = sv;
           return;
         }
         var gecerli = SECENEK[a].some(function (x) { return x[0] === String(o[a]); });
@@ -1471,6 +1485,107 @@
     }
   }
 
+  /* ---------- Son güncellemede değişen veriler ----------
+     Botun guncelleme.json içine yazdığı "degisiklikler" alanını (önceki ve yeni
+     temettu_veri.json karşılaştırması) "Hesaplama Notları ve Stopaj" bölümünün hemen altında,
+     aynı katlanır biçimde gösterir. Portföydeki hisseler ★ ile işaretlenir ve en üstte listelenir. */
+  function degisimYaz() {
+    var el = $("port-degisim");
+    if (!el) return;
+    if (!sonGunc) { el.style.display = "none"; el.innerHTML = ""; return; }
+
+    var tut = {};
+    portfoyHesap().L.forEach(function (x) { tut[x.k] = true; });
+    var imza = Object.keys(tut).sort().join(",") + "|" + sonGunc.tarih.getTime();
+    if (imza === degImza && el.innerHTML) return;
+    degImza = imza;
+
+    var dg = sonGunc.deg;
+    var govde = "";
+
+    function tarihSaat(d) {
+      return d.toLocaleString("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Istanbul" });
+    }
+    function grupla(dizi, metinFn) {
+      var g = {};
+      (dizi || []).forEach(function (r) {
+        var k = String(r[0]);
+        var m = metinFn(r);
+        if (!m) return;
+        if (!g[k]) g[k] = [];
+        g[k].push(m);
+      });
+      return g;
+    }
+    function bolum(baslik, g) {
+      var kodlar = Object.keys(g);
+      if (!kodlar.length) return "";
+      kodlar.sort(function (a, b) {
+        var ta = tut[a] ? 0 : 1, tb = tut[b] ? 0 : 1;
+        return ta !== tb ? ta - tb : karsilastir(a, b);
+      });
+      return "<div class='tg-p-blok'><div class='tg-p-baslik'>" + baslik + " (" + kodlar.length + " hisse)</div>" +
+        kodlar.map(function (k) {
+          return "<div class='tg-p-satir'><b>" + (tut[k] ? "★ " : "") + kacis(k) + "</b><span>" + g[k].join(" ") + "</span></div>";
+        }).join("") + "</div>";
+    }
+    function kodListesi(baslik, dizi) {
+      if (!dizi || !dizi.length) return "";
+      var sirali2 = dizi.slice().sort(function (a, b) {
+        var ta = tut[a] ? 0 : 1, tb = tut[b] ? 0 : 1;
+        return ta !== tb ? ta - tb : karsilastir(a, b);
+      });
+      return "<div class='tg-p-blok'><div class='tg-p-baslik'>" + baslik + " (" + dizi.length + ")</div>" +
+        "<div class='tg-p-satir tek'><span>" + sirali2.map(function (k) {
+          return (tut[k] ? "★ " : "") + kacis(k);
+        }).join(", ") + "</span></div></div>";
+    }
+    function y(m) { return "<span class='tg-y'>" + m + "</span>"; }
+
+    if (!dg) {
+      govde = "<div class='tg-not'>Bu güncelleme için değişiklik kaydı yok. Bot yeni sürümle bir sonraki çalıştığında değişenler burada listelenecek.</div>";
+    } else if (dg.karsilastirma_yok) {
+      govde = "<div class='tg-not'>Önceki veri okunamadığı için bu çalıştırmada karşılaştırma yapılamadı. Bir sonraki güncellemeden itibaren değişenler burada listelenecek.</div>";
+    } else {
+      var yeniTem = grupla(dg.yeni_temettu, function (r) { return y(tarihMetni(r[1]) + " · " + fmtFiyat(r[2]) + " TL"); });
+      var duzTem = grupla(dg.duzeltilen_temettu, function (r) { return y(tarihMetni(r[1]) + " · " + fmtFiyat(r[2]) + " → " + fmtFiyat(r[3]) + " TL"); });
+      var silTem = grupla(dg.silinen_temettu, function (r) { return y(tarihMetni(r[1]) + " · " + fmtFiyat(r[2]) + " TL"); });
+      var yeniBol = grupla(dg.yeni_bolunme, function (r) { return y(tarihMetni(r[1]) + " %" + fmt(r[2], 2) + " (×" + fmt(1 + r[2] / 100, 2) + ")"); });
+      var duzBol = grupla(dg.duzeltilen_bolunme, function (r) { return y(tarihMetni(r[1]) + " %" + fmt(r[2], 2) + " → %" + fmt(r[3], 2)); });
+      var silBol = grupla(dg.silinen_bolunme, function (r) { return y(tarihMetni(r[1]) + " %" + fmt(r[2], 2)); });
+      var sekDeg = grupla(dg.sektor, function (r) {
+        var es = sektorMetni({ sektor: r[1], sanayi: r[2] }) || "–";
+        var ys = sektorMetni({ sektor: r[3], sanayi: r[4] }) || "–";
+        if (es === ys) return "";
+        return y(kacis(es) + " → " + kacis(ys));
+      });
+
+      var bolumler =
+        bolum("Yeni Temettü Kayıtları (brüt, hisse başı)", yeniTem) +
+        bolum("Düzeltilen Temettü Kayıtları", duzTem) +
+        bolum("Silinen Temettü Kayıtları", silTem) +
+        bolum("Yeni Bedelsiz Bölünmeler", yeniBol) +
+        bolum("Düzeltilen Bölünme Kayıtları", duzBol) +
+        bolum("Silinen Bölünme Kayıtları", silBol) +
+        bolum("Sektör Değişimleri", sekDeg) +
+        kodListesi("Listeye Eklenen Hisseler", dg.yeni_hisse) +
+        kodListesi("Listeden Çıkan Hisseler", dg.cikan_hisse);
+
+      var ozet = "Önceki güncelleme: " + (sonGunc.onceki && !isNaN(new Date(sonGunc.onceki).getTime()) ? tarihSaat(new Date(sonGunc.onceki)) : "bilinmiyor") +
+        " · Fiyatı yenilenen hisse: " + fmt(dg.fiyat_guncellenen || 0, 0) +
+        (dg.hisse_sayisi_eski && dg.hisse_sayisi_yeni ? " · Toplam hisse: " + dg.hisse_sayisi_eski + " → " + dg.hisse_sayisi_yeni : "") +
+        " · ★ = portföyünüzdeki hisse";
+      govde = "<div class='tg-not'>" + ozet + "</div>" +
+        (bolumler || "<div class='tg-not'><b>Bu güncellemede temettü, bölünme veya sektör verisinde değişiklik olmadı.</b></div>") + bolumler.length * 0 ;
+      if (bolumler) govde = "<div class='tg-not'>" + ozet + "</div>" + bolumler;
+    }
+
+    el.innerHTML = "<details class='tg-ac' data-a='deg'" + (acikDetay.deg ? " open" : "") + ">" +
+      "<summary>Son Güncellemede Değişen Veriler (" + tarihSaat(sonGunc.tarih) + ")</summary>" +
+      "<div class='tg-dikey tg-degisim'>" + govde + "</div></details>";
+    el.style.display = "block";
+  }
+
   function trendGrafik(d) {
     if (d.trendH !== undefined) return d.trendH;
     var html = "<span class='spark yok'>–</span>";
@@ -1764,6 +1879,7 @@
     pastaYaz();
     ekleriYaz();
     gecmisYaz(tutulan);
+    degisimYaz();
   }
 
   $("panel-port").querySelector("table.t4 thead").addEventListener("click", function (e) {
@@ -1790,6 +1906,7 @@
   }
   $("port-gecmis").addEventListener("toggle", acilirDurum, true);
   $("port-bolunme").addEventListener("toggle", acilirDurum, true);
+  $("port-degisim").addEventListener("toggle", acilirDurum, true);
 
   function depoOku() {
     try {
@@ -2384,12 +2501,18 @@
 
   /* "Son Güncelleme" bilgisi:
      guncelleme.json içindeki is_yatirim_guncelleme (botun İş Yatırım verisini çekip yazdığı an, UTC)
-     Türkiye saatine (Europe/Istanbul) çevrilerek gösterilir. */
+     Türkiye saatine (Europe/Istanbul) çevrilerek gösterilir.
+     "degisiklikler" alanı (varsa) portföy sekmesindeki "Son Güncellemede Değişen Veriler" bölümünde listelenir. */
   function guncelleKaynakCoz(j) {
     var t = j && (j.is_yatirim_guncelleme || j.zaman);
     var d = t ? new Date(t) : null;
     if (!d || isNaN(d.getTime())) throw new Error("tarih yok");
-    return { tarih: d, son: (j && j.son_temettu_kaydi) || "" };
+    return {
+      tarih: d,
+      son: (j && j.son_temettu_kaydi) || "",
+      deg: (j && j.degisiklikler && typeof j.degisiklikler === "object") ? j.degisiklikler : null,
+      onceki: (j && j.onceki_guncelleme) || ""
+    };
   }
   function guncellemeGetir() {
     return jsonGetir(GUNC_YEREL).then(guncelleKaynakCoz)
@@ -2403,6 +2526,9 @@
   }
   function guncellemeYukle() {
     guncellemeGetir().then(function (g) {
+      sonGunc = g;
+      degImza = "";
+      degisimYaz();
       var el = $("guncel");
       if (!el) return;
       var metin = g.tarih.toLocaleString("tr-TR", {
