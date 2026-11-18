@@ -1545,7 +1545,7 @@
     if (!dg) {
       govde = "<div class='tg-not'>Bu güncelleme için değişiklik kaydı yok. Bot yeni sürümle bir sonraki çalıştığında değişenler burada listelenecek.</div>";
     } else if (dg.karsilastirma_yok) {
-      govde = "<div class='tg-not'>Önceki veri okunamadığı için bu çalıştırmada karşılaştırma yapılamadı. Bir sonraki güncellemeden itibaren değişenler burada listelenecek.</div>";
+      govde = "<div class='tg-not'>Önceki veri okunamadığı veya eski formatta olduğu için bu çalıştırmada karşılaştırma yapılamadı. Bir sonraki güncellemeden itibaren değişenler burada listelenecek.</div>";
     } else {
       var yeniTem = grupla(dg.yeni_temettu, function (r) { return y(tarihMetni(r[1]) + " · " + fmtFiyat(r[2]) + " TL"); });
       var duzTem = grupla(dg.duzeltilen_temettu, function (r) { return y(tarihMetni(r[1]) + " · " + fmtFiyat(r[2]) + " → " + fmtFiyat(r[3]) + " TL"); });
@@ -1576,8 +1576,7 @@
         (dg.hisse_sayisi_eski && dg.hisse_sayisi_yeni ? " · Toplam hisse: " + dg.hisse_sayisi_eski + " → " + dg.hisse_sayisi_yeni : "") +
         " · ★ = portföyünüzdeki hisse";
       govde = "<div class='tg-not'>" + ozet + "</div>" +
-        (bolumler || "<div class='tg-not'><b>Bu güncellemede temettü, bölünme veya sektör verisinde değişiklik olmadı.</b></div>") + bolumler.length * 0 ;
-      if (bolumler) govde = "<div class='tg-not'>" + ozet + "</div>" + bolumler;
+        (bolumler || "<div class='tg-not'><b>Bu güncellemede temettü, bölünme veya sektör verisinde değişiklik olmadı.</b></div>");
     }
 
     el.innerHTML = "<details class='tg-ac' data-a='deg'" + (acikDetay.deg ? " open" : "") + ">" +
