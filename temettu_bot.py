@@ -6,11 +6,12 @@ import time
 import base64
 import requests
 import concurrent.futures
+from collections import defaultdict
 
 GITHUB_TOKEN = os.environ.get("GH_TOKEN")
 REPO = "mbsarsiv-web/temettu-bot"
 DOSYA = "temettu_veri.json"
-GUNCELLEME_DOSYA = "guncelleme.json"   # İş Yatırım verisinin son çekilme zamanı (uygulama bunu gösterir)
+GUNCELLEME_DOSYA = "guncelleme.json"   # İş Yatırım verisinin son çekilme zamanı + değişiklik raporu (uygulama bunu gösterir)
 
 # NOT: Filtreleme (Yoğunluk / Dönem / Verim) bu botta YAPILMAZ.
 # Hisse listesi ve filtreler "TEMETTÜ ANALİZ" uygulamasının kaynağından, hesaplama
@@ -24,6 +25,12 @@ GUNCELLEME_DOSYA = "guncelleme.json"   # İş Yatırım verisinin son çekilme z
 #   1) İş Yatırım (tam tarihli, en güvenilir)
 #   2) Temettü Analiz (GAS) tablosundaki "Bedelsiz" sütunu (İş Yatırım'da kaydı olmayan hisseler için)
 # İki kaynak aynı hissede ASLA birleştirilmez (çift sayımı önlemek için).
+#
+# DEĞİŞİKLİK RAPORU:
+#   Bot yeni veriyi yazmadan önce GitHub'daki mevcut temettu_veri.json dosyasını okur ve yeni veriyle
+#   karşılaştırır. Fark (yeni/düzeltilen/silinen temettü ve bölünme kayıtları, sektör değişimleri,
+#   eklenen/çıkan hisseler) guncelleme.json içindeki "degisiklikler" alanına yazılır.
+#   index.html bunu portföy sekmesinde "Son Güncellemede Değişen Veriler" başlığıyla gösterir.
 
 IS_URL = "https://www.isyatirim.com.tr/_layouts/15/IsYatirim.Website/StockInfo/CompanyInfoAjax.aspx/GetSermayeArttirimlari"
 IS_SAYFA = "https://www.isyatirim.com.tr/tr-tr/analiz/hisse/Sayfalar/Temettu-Ve-Sermaye-Artirimi-Tarihcesi.aspx"
@@ -631,10 +638,137 @@ def veriyi_hazirla(ham, fiyatlar, gas, sektorler=None, bolunmeler=None):
     log("Yalnizca fiyat eklenen hisse:", sadece_fiyat)
     return sonuc
 
-def guncelleme_bilgisi(ham, veri):
+# ----------------------------------------------------------------------
+# DEĞİŞİKLİK RAPORU (önceki temettu_veri.json ile yeni veri karşılaştırması)
+# ----------------------------------------------------------------------
+def gecmis_coz(metin):
+    """'YYYYMMDD:deger,YYYYMMDD:deger' metnini [(tarih_int, deger), ...] listesine çevirir."""
+    sonuc = []
+    for parca in str(metin or "").split(","):
+        if ":" not in parca:
+            continue
+        a, b = parca.split(":", 1)
+        try:
+            sonuc.append((int(a), round(float(b), 6)))
+        except ValueError:
+            continue
+    return sonuc
+
+def cift_farki(eski, yeni):
+    """İki (tarih, deger) listesini karşılaştırır.
+    Döndürür: (yeni_kayitlar, duzeltilenler, silinenler)
+      yeni_kayitlar: [(t, v)]        - yalnızca yeni veride olan
+      duzeltilenler: [(t, eski, yeni)] - aynı tarihte değeri değişen
+      silinenler:    [(t, v)]        - yalnızca eski veride olan"""
+    e = defaultdict(list)
+    y = defaultdict(list)
+    for t, v in eski:
+        e[t].append(v)
+    for t, v in yeni:
+        y[t].append(v)
+    yeni_l, duz, sil = [], [], []
+    for t in sorted(set(e) | set(y)):
+        kalan_y = list(y.get(t, []))
+        eksik_e = []
+        for v in e.get(t, []):
+            if v in kalan_y:
+                kalan_y.remove(v)
+            else:
+                eksik_e.append(v)
+        n = min(len(eksik_e), len(kalan_y))
+        for i in range(n):
+            duz.append((t, eksik_e[i], kalan_y[i]))
+        for v in kalan_y[n:]:
+            yeni_l.append((t, v))
+        for v in eksik_e[n:]:
+            sil.append((t, v))
+    return yeni_l, duz, sil
+
+def degisiklik_raporu(eski, yeni):
+    """Önceki ve yeni temettu_veri.json içeriğini karşılaştırıp uygulamanın göstereceği raporu üretir."""
+    if not eski or not isinstance(eski, dict):
+        return {"karsilastirma_yok": True}
+
+    # Önceki dosya eski formatta ise (hiçbir hissede tarihli "temettuler" alanı yok) karşılaştırma anlamsızdır:
+    # her kayıt "yeni", her sektör "değişmiş" görünürdü. Bu çalıştırma yeni formatta yazılır, fark bir sonrakinde çıkar.
+    if not any(isinstance(v, dict) and "temettuler" in v for v in eski.values()):
+        log("Onceki veri eski formatta (temettuler alani yok), karsilastirma atlandi.")
+        return {"karsilastirma_yok": True, "eski_format": True}
+
+    r = {
+        "yeni_hisse": [],
+        "cikan_hisse": [],
+        "yeni_temettu": [],          # [kod, tarih_int, tutar]
+        "duzeltilen_temettu": [],    # [kod, tarih_int, eski, yeni]
+        "silinen_temettu": [],       # [kod, tarih_int, tutar]
+        "yeni_bolunme": [],          # [kod, tarih_int, oran_yuzde]
+        "duzeltilen_bolunme": [],    # [kod, tarih_int, eski, yeni]
+        "silinen_bolunme": [],       # [kod, tarih_int, oran_yuzde]
+        "sektor": [],                # [kod, eski_sektor, eski_sanayi, yeni_sektor, yeni_sanayi]
+        "fiyat_guncellenen": 0,
+        "hisse_sayisi_eski": len(eski),
+        "hisse_sayisi_yeni": len(yeni),
+    }
+
+    for kod in sorted(set(eski) | set(yeni)):
+        e = eski.get(kod)
+        y = yeni.get(kod)
+        if e is None:
+            r["yeni_hisse"].append(kod)
+            continue
+        if y is None:
+            r["cikan_hisse"].append(kod)
+            continue
+        if not isinstance(e, dict) or not isinstance(y, dict):
+            continue
+
+        # Fiyat (yalnızca kaç hissenin fiyatı yenilendiği sayılır)
+        try:
+            fe, fy = float(e.get("fiyat") or 0), float(y.get("fiyat") or 0)
+        except (TypeError, ValueError):
+            fe, fy = 0.0, 0.0
+        if fe > 0 and fy > 0 and abs(fe - fy) > 1e-9:
+            r["fiyat_guncellenen"] += 1
+
+        # Temettü kayıtları (eski dosyada bu alan yoksa yanlış "yeni" çıkmasın diye atlanır)
+        if "temettuler" in e:
+            yeni_l, duz, sil = cift_farki(gecmis_coz(e.get("temettuler")), gecmis_coz(y.get("temettuler")))
+            for t, v in yeni_l:
+                r["yeni_temettu"].append([kod, t, v])
+            for t, ev, yv in duz:
+                r["duzeltilen_temettu"].append([kod, t, ev, yv])
+            for t, v in sil:
+                r["silinen_temettu"].append([kod, t, v])
+
+        # Bedelsiz bölünme kayıtları
+        if "bolunmeler" in e:
+            yeni_l, duz, sil = cift_farki(gecmis_coz(e.get("bolunmeler")), gecmis_coz(y.get("bolunmeler")))
+            for t, v in yeni_l:
+                r["yeni_bolunme"].append([kod, t, v])
+            for t, ev, yv in duz:
+                r["duzeltilen_bolunme"].append([kod, t, ev, yv])
+            for t, v in sil:
+                r["silinen_bolunme"].append([kod, t, v])
+
+        # Sektör değişimi (yeni değer boşsa TradingView hatası sayılır, bildirilmez)
+        es, ei = str(e.get("sektor") or ""), str(e.get("sanayi") or "")
+        ys, yi = str(y.get("sektor") or ""), str(y.get("sanayi") or "")
+        if ys and es and (es != ys or ei != yi):
+            r["sektor"].append([kod, es, ei, ys, yi])
+
+    log("Degisiklik raporu: yeni hisse %d, cikan %d, yeni temettu %d, duzeltilen temettu %d, silinen temettu %d, "
+        "yeni bolunme %d, duzeltilen bolunme %d, silinen bolunme %d, sektor %d, fiyati yenilenen %d" % (
+            len(r["yeni_hisse"]), len(r["cikan_hisse"]), len(r["yeni_temettu"]), len(r["duzeltilen_temettu"]),
+            len(r["silinen_temettu"]), len(r["yeni_bolunme"]), len(r["duzeltilen_bolunme"]),
+            len(r["silinen_bolunme"]), len(r["sektor"]), r["fiyat_guncellenen"]))
+    return r
+
+def guncelleme_bilgisi(ham, veri, degisiklikler=None, onceki=""):
     """Uygulamanın göstereceği 'İş Yatırım verisi son güncelleme' bilgisi (guncelleme.json).
     is_yatirim_guncelleme: İş Yatırım'dan verinin çekildiği an (UTC, ISO-8601);
-    son_temettu_kaydi: çekilen veri içindeki en yeni temettü ödeme tarihi (GG.AA.YYYY)."""
+    son_temettu_kaydi: çekilen veri içindeki en yeni temettü ödeme tarihi (GG.AA.YYYY);
+    onceki_guncelleme: bir önceki çalıştırmanın zamanı;
+    degisiklikler: önceki veriyle karşılaştırma raporu."""
     son_t = 0
     for kayitlar in ham.values():
         for (t_int, _hb) in kayitlar.keys():
@@ -643,11 +777,36 @@ def guncelleme_bilgisi(ham, veri):
     son_metin = ""
     if son_t > 0:
         son_metin = "%02d.%02d.%04d" % (son_t % 100, (son_t // 100) % 100, son_t // 10000)
-    return {
+    bilgi = {
         "is_yatirim_guncelleme": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "hisse_sayisi": len(veri),
         "son_temettu_kaydi": son_metin,
     }
+    if onceki:
+        bilgi["onceki_guncelleme"] = onceki
+    if degisiklikler is not None:
+        bilgi["degisiklikler"] = degisiklikler
+    return bilgi
+
+def github_dan_oku(dosya):
+    """GitHub'daki bir JSON dosyasını okur (büyük dosyalar için raw içerik).
+    Döndürür: dict (dosya var), {} (dosya yok), None (okunamadı)."""
+    if not GITHUB_TOKEN:
+        return None
+    url = "https://api.github.com/repos/%s/contents/%s" % (REPO, dosya)
+    h = {"Authorization": "Bearer " + GITHUB_TOKEN, "Accept": "application/vnd.github.raw+json"}
+    try:
+        r = requests.get(url, headers=h, timeout=90)
+        if r.status_code == 404:
+            return {}
+        if r.status_code != 200:
+            log("GitHub eski dosya okuma HTTP %d (%s): %s" % (r.status_code, dosya, r.text[:200]))
+            return None
+        d = r.json()
+        return d if isinstance(d, dict) else None
+    except Exception as e:
+        log("GitHub eski dosya okunamadi (%s):" % dosya, repr(e))
+        return None
 
 def github_a_yaz(veri, dosya=DOSYA, mesaj=None):
     if not GITHUB_TOKEN:
@@ -713,12 +872,29 @@ def main():
         log("HATA: Hic temettu verisi uretilemedi.")
         sys.exit(1)
 
+    # 5. Yazmadan ÖNCE GitHub'daki mevcut veriyi oku ve yeni veriyle karşılaştır (değişiklik raporu)
+    eski_veri = github_dan_oku(DOSYA)
+    eski_gunc = github_dan_oku(GUNCELLEME_DOSYA)
+    onceki_zaman = ""
+    if isinstance(eski_gunc, dict):
+        onceki_zaman = str(eski_gunc.get("is_yatirim_guncelleme") or "")
+    try:
+        if eski_veri is None:
+            degisiklikler = {"karsilastirma_yok": True}
+            log("Onceki veri okunamadi, karsilastirma yapilmadi.")
+        else:
+            degisiklikler = degisiklik_raporu(eski_veri, veri)
+    except Exception as e:
+        log("UYARI: degisiklik raporu uretilemedi:", repr(e))
+        degisiklikler = {"karsilastirma_yok": True}
+
     if not github_a_yaz(veri):
         sys.exit(1)
 
-    # 5. İş Yatırım verisinin son güncelleme zamanını ayrı küçük dosyaya yaz (uygulama ekranda gösterir).
-    #    Bu adım başarısız olsa bile ana veri zaten yazıldığı için bot hata ile bitmez.
-    if not github_a_yaz(guncelleme_bilgisi(ham, veri), GUNCELLEME_DOSYA, "otomatik guncelleme: is yatirim veri zamani"):
+    # 6. İş Yatırım verisinin son güncelleme zamanını ve değişiklik raporunu ayrı küçük dosyaya yaz
+    #    (uygulama ekranda gösterir). Bu adım başarısız olsa bile ana veri zaten yazıldığı için bot hata ile bitmez.
+    if not github_a_yaz(guncelleme_bilgisi(ham, veri, degisiklikler, onceki_zaman),
+                        GUNCELLEME_DOSYA, "otomatik guncelleme: is yatirim veri zamani ve degisiklik raporu"):
         log("UYARI: guncelleme.json yazilamadi (ana veri yazildi).")
 
     log("Tamamlandi.")
