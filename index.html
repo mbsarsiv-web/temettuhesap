@@ -682,8 +682,8 @@
         <div class="th-alan" style="flex:0 1 170px;">
           <label for="th-model">Yapay Zeka Modeli</label>
           <select id="th-model">
-            <option value="gemini-2.5-flash">Gemini 2.5 Flash (Hızlı)</option>
-            <option value="gemini-2.5-pro">Gemini 2.5 Pro (Detaylı)</option>
+            <option value="gemini-3.8-flash">Gemini 3.8 Flash (Hızlı)</option>
+            <option value="gemini-3.8-pro">Gemini 3.8 Pro (Detaylı)</option>
           </select>
         </div>
       </div>
@@ -785,6 +785,7 @@
   /* TAHMİN sekmesi için tamamen izole localStorage anahtarları */
   var TAHMIN_DEPO_ANAHTAR = "temettuhesap_tahmin_v1";
   var GEMINI_KEY_ANAHTAR  = "temettuhesap_gemini_key_v1";
+  var VARSAYILAN_MODEL    = "gemini-3.8-flash";
   var tahminDepo = {};
   var acikTahmin = {};
 
@@ -1982,7 +1983,11 @@
     try {
       var k = JSON.parse(localStorage.getItem(GEMINI_KEY_ANAHTAR) || "{}");
       if (k.key && $("th-api-key")) $("th-api-key").value = k.key;
-      if (k.model && $("th-model")) $("th-model").value = k.model;
+      var sel = $("th-model");
+      if (sel) {
+        var gecerli = k.model && Array.prototype.some.call(sel.options, function (o) { return o.value === k.model; });
+        sel.value = gecerli ? k.model : VARSAYILAN_MODEL;
+      }
     } catch (e) {}
   }
 
@@ -1994,7 +1999,7 @@
     try {
       localStorage.setItem(GEMINI_KEY_ANAHTAR, JSON.stringify({
         key: ($("th-api-key").value || "").trim(),
-        model: $("th-model").value || "gemini-2.5-flash"
+        model: $("th-model").value || VARSAYILAN_MODEL
       }));
     } catch (e) {}
   }
@@ -2275,7 +2280,7 @@
 
   $("th-yukle").addEventListener("click", function () {
     var apiKey = ($("th-api-key").value || "").trim();
-    var model = $("th-model").value || "gemini-2.5-flash";
+    var model = $("th-model").value || VARSAYILAN_MODEL;
     var kod = $("th-hisse").value;
     var files = $("th-pdf").files;
 
@@ -2378,7 +2383,7 @@
     if (yenBtn) {
       var yKod = yenBtn.getAttribute("data-th-yenile");
       var apiKey = ($("th-api-key").value || "").trim();
-      var model = $("th-model").value || "gemini-2.5-flash";
+      var model = $("th-model").value || VARSAYILAN_MODEL;
       if (!apiKey) { thDurumYaz("Yeniden hesaplamak için Gemini API anahtarınızı girin.", true); return; }
       yenBtn.disabled = true;
       thDurumYaz(yKod + " tahmini yeniden hesaplanıyor…", false);
